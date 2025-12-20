@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTemporalStore } from '@/store/useEditorStore';
 import styles from './modeler.module.css';
 import {
@@ -12,18 +12,41 @@ import {
     Type,
     Grid,
     Search,
-    GitBranch
+    GitBranch,
+    Download,
+    Upload
 } from 'lucide-react';
 import { useEditorStore } from '@/store/useEditorStore';
+import { exportPackageToGit } from '@/actions/git-sync';
 
 const ModelerToolbar = () => {
     const temporalStore = useTemporalStore();
+    const { saveToServer, isSaving, inferRelations, currentPackageId } = useEditorStore();
     const [mounted, setMounted] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setMounted(true), 0);
         return () => clearTimeout(timer);
     }, []);
+
+    const handleExportToGit = useCallback(async () => {
+        if (!currentPackageId || isExporting) return;
+
+        setIsExporting(true);
+        try {
+            const result = await exportPackageToGit(currentPackageId);
+            if (result.success) {
+                alert(`Package exported successfully to: ${result.path}`);
+            } else {
+                alert(`Export failed: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`Export error: ${error}`);
+        } finally {
+            setIsExporting(false);
+        }
+    }, [currentPackageId, isExporting]);
 
     const renderButton = (icon: React.ReactNode, label: string, onClick?: () => void, disabled = false, title?: string) => (
         <button
@@ -62,8 +85,12 @@ const ModelerToolbar = () => {
 
     return (
         <div className={styles.toolbar} style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-            {renderButton(<Save size={16} />, "Save")}
-            {renderButton(<RefreshCw size={16} />, "Sync")}
+            {renderButton(<Save size={16} />, "Save", () => alert("Local snapshot saved (Ctrl+S)"))}
+            {renderButton(
+                isSaving ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />,
+                "Sync",
+                () => saveToServer()
+            )}
 
             <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
 
@@ -91,9 +118,27 @@ const ModelerToolbar = () => {
 
             {renderButton(<Grid size={16} />, "Grid")}
             {renderButton(<Search size={16} />, "Find")}
-            {renderButton(<GitBranch size={16} />, "Infer", () => useEditorStore.getState().inferRelations(), false, "Derived Relations (A->B->C => A->C)")}
+            {renderButton(<GitBranch size={16} />, "Infer", () => inferRelations(), false, "Derived Relations (A->B->C => A->C)")}
+
+            <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
+
+            {renderButton(
+                isExporting ? <Download size={16} className="animate-spin" /> : <Download size={16} />,
+                "Export",
+                handleExportToGit,
+                !currentPackageId || isExporting,
+                "Export to Git (JSON files)"
+            )}
+            {renderButton(
+                <Upload size={16} />,
+                "Import",
+                () => alert("Import from Git: Select a package directory via file browser"),
+                false,
+                "Import from Git (JSON files)"
+            )}
         </div>
     );
 };
 
 export default ModelerToolbar;
+

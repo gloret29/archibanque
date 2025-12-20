@@ -10,7 +10,7 @@ const Palette = () => {
         event.dataTransfer.effectAllowed = 'move';
     };
 
-    const layers: ArchimateLayer[] = ['strategy', 'business', 'application', 'technology', 'motivation', 'implementation'];
+    const layers: ArchimateLayer[] = ['strategy', 'business', 'application', 'technology', 'motivation', 'implementation', 'other'];
 
     return (
         <div className={styles.palette}>

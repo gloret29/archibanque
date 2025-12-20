@@ -36,3 +36,86 @@ model Group {
   
   @@map("groups")
 }
+
+// Enterprise Architecture Models
+model ModelPackage {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  folders     Folder[]
+  elements    ArchiElement[]
+  views       ArchiView[]
+  
+  @@map("model_packages")
+}
+
+model Folder {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // 'folder' | 'view-folder' | 'element-folder'
+  parentId    String?
+  parent      Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  children    Folder[] @relation("FolderToFolder")
+  
+  packageId   String
+  package     ModelPackage @relation(fields: [packageId], references: [id])
+  
+  views       ArchiView[]
+  
+  @@map("folders")
+}
+
+model ArchiElement {
+  id          String   @id @default(uuid())
+  externalId  String?  // For import/export ArchiMate ID
+  name        String
+  type        String   // Concept type (e.g., 'business-process')
+  properties  Json?    // key-value pairs
+  
+  packageId   String
+  package     ModelPackage @relation(fields: [packageId], references: [id])
+  
+  // Relations where this is source
+  outRels     ArchiRelation[] @relation("RelSource")
+  // Relations where this is target
+  inRels      ArchiRelation[] @relation("RelTarget")
+
+  @@map("archi_elements")
+}
+
+model ArchiRelation {
+  id          String   @id @default(uuid())
+  type        String   // Relation type (e.g., 'composition')
+  
+  sourceId    String
+  source      ArchiElement @relation("RelSource", fields: [sourceId], references: [id])
+  
+  targetId    String
+  target      ArchiElement @relation("RelTarget", fields: [targetId], references: [id])
+  
+  properties  Json?
+
+  @@map("archi_relations")
+}
+
+model ArchiView {
+  id          String   @id @default(uuid())
+  name        String
+  layout      Json     // React Flow nodes and edges state
+  
+  // Lock fields for check-in / check-out
+  lockedBy    String?  // User ID who has the lock
+  lockedAt    DateTime?
+  lockMessage String?  // Optional message when checking out
+  
+  packageId   String
+  package     ModelPackage @relation(fields: [packageId], references: [id])
+  
+  folderId    String?
+  folder      Folder?      @relation(fields: [folderId], references: [id])
+
+  @@map("archi_views")
+}

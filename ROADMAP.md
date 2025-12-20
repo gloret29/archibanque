@@ -70,22 +70,22 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
 - [x] **Snap-to-Grid & Alignment Tools**: Precision layout implemented (15px grid).
   *Aide à l'alignement précis des objets pour garantir une esthétique professionnelle et une lisibilité maximale.*
   *Gain de temps significatif lors de la mise en page de diagrammes denses et complexes.*
-- [ ] **Object Groups (Nesting)**: Support for containers on canvas (Next Step).
+- [x] **Object Groups (Nesting)**: Support for containers on canvas (Group added).
   *Capacité d'imbriquer des éléments les uns dans les autres pour représenter des contenants logiques ou physiques.*
   *Inférence automatique des relations de composition ou d'agrégation entre l'élément parent et ses enfants.*
-- [ ] **Model Packages**: Logical grouping of views and elements in the database.
+- [x] **Model Packages**: Logical grouping of views and elements in the database.
   *Regroupement métier des éléments du modèle pour faciliter la distribution et la réutilisation inter-projets.*
   *Structure de données robuste permettant de gérer de grands volumes d'architecture de manière modulaire.*
-- [ ] **Git Sync Service**: Deep integration with Git for object-level versioning.
+- [x] **Git Sync Service**: Deep integration with Git for object-level versioning.
   *Capacité de sauvegarder et versionner chaque objet du référentiel sous forme de fichiers texte synchronisables.*
   *Ouvre la voie à une approche "Architecture as Code" partagée et distribuée.*
-- [ ] **Check-in / Check-out**: Lock mechanisms to prevent concurrent editing conflicts.
+- [x] **Check-in / Check-out**: Lock mechanisms to prevent concurrent editing conflicts.
   *Système de verrouillage garantissant que deux architectes ne modifient pas le même objet au même moment.*
   *Assure l'intégrité du référentiel central lors des travaux de modélisation collaborative intense.*
-- [ ] **Project Sandboxing**: Create isolated branches for "To-Be" or "What-if" scenarios.
+- [x] **Project Sandboxing**: Create isolated branches for "To-Be" or "What-if" scenarios.
   *Création d'espaces de travail isolés pour explorer des architectures cibles sans impacter le "As-Is".*
   *Indispensable pour comparer différentes options stratégiques avant la prise de décision finale.*
-- [ ] **Conflict Resolution UI**: Visual diff and merge tool for architecture changes.
+- [x] **Conflict Resolution UI**: Visual diff and merge tool for architecture changes.
   *Interface graphique permettant de visualiser et de résoudre les différences entre deux versions d'un modèle.*
   *Garantit une fusion propre des contributions de différents experts de domaine dans le socle commun.*
 

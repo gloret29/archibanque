@@ -9,14 +9,16 @@ const PropertiesPanel = dynamic(() => import('@/components/Modeling/PropertiesPa
 const ModelBrowser = dynamic(() => import('@/components/Modeling/ModelBrowser'), { ssr: false });
 const Palette = dynamic(() => import('@/components/Modeling/Palette'), { ssr: false });
 const ModelerTabs = dynamic(() => import('./ModelerTabs'), { ssr: false });
+const PackageSelector = dynamic(() => import('@/components/Modeling/PackageSelector'), { ssr: false });
 
 import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
 
 export default function ModelerPage() {
     const [sidebarTab, setSidebarTab] = React.useState<'browser' | 'palette'>('browser');
-    const { views, activeViewId } = useEditorStore();
+    const { views, activeViewId, currentPackageId, packages } = useEditorStore();
     const activeView = views.find(v => v.id === activeViewId);
+    const currentPackage = packages.find(p => p.id === currentPackageId);
 
     return (
         <div className={styles.modelerContainer}>
@@ -26,6 +28,9 @@ export default function ModelerPage() {
                     <div className={styles.logo}>
                         <span className={styles.logoIcon}>💎</span>
                         <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: '#3366ff' }}>ArchiModeler</h1>
+                    </div>
+                    <div style={{ marginLeft: '20px' }}>
+                        <PackageSelector />
                     </div>
                 </div>
 
@@ -105,7 +110,7 @@ export default function ModelerPage() {
                         color: '#666',
                         gap: '20px'
                     }}>
-                        <span>Working Copy: <strong>Archisurance & Portfolios</strong></span>
+                        <span>Working Copy: <strong>{currentPackage?.name || 'No Package'}</strong></span>
                         <span>Elements: {activeView?.nodes.length || 0}</span>
                         <span>Relations: {activeView?.edges.length || 0}</span>
                         <div style={{ marginLeft: 'auto' }}>Zoom: 100%</div>

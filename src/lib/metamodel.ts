@@ -36,6 +36,9 @@ export const ARCHIMATE_METAMODEL: Record<string, ArchimateElementType> = {
     'goal': { id: 'goal', name: 'Goal', layer: 'motivation', color: '#ccccff' },
     'outcome': { id: 'outcome', name: 'Outcome', layer: 'motivation', color: '#ccccff' },
     'driver': { id: 'driver', name: 'Driver', layer: 'motivation', color: '#ccccff' },
+
+    // Other / Grouping
+    'group': { id: 'group', name: 'Group', layer: 'other', color: '#f5f5f5' },
 };
 
 export const getColorForLayer = (layer: ArchimateLayer): string => {
@@ -47,6 +50,7 @@ export const getColorForLayer = (layer: ArchimateLayer): string => {
         case 'physical': return '#ccffcc';
         case 'implementation': return '#ffe0e0';
         case 'motivation': return '#ccccff';
+        case 'other': return '#f5f5f5';
         default: return '#f0f0f0';
     }
 };
@@ -91,6 +95,9 @@ export const canConnect = (
     // Association is always allowed in ArchiMate as a fallback
     if (relationship === 'association') return true;
 
+    // Grouping can connect to anything or anything to group
+    if (sourceType === 'group' || targetType === 'group') return true;
+
     const sourceMeta = ARCHIMATE_METAMODEL[sourceType];
     const targetMeta = ARCHIMATE_METAMODEL[targetType];
 
@@ -104,6 +111,8 @@ export const canConnect = (
 
     // 2. Composition/Aggregation: Hierarchy (Downwards or within same layer)
     if (relationship === 'composition' || relationship === 'aggregation') {
+        if (sourceMeta.layer === 'other' || targetMeta.layer === 'other') return true;
+
         const layers = ['strategy', 'motivation', 'business', 'application', 'technology', 'physical', 'implementation'];
         const sourceIdx = layers.indexOf(sourceMeta.layer);
         const targetIdx = layers.indexOf(targetMeta.layer);

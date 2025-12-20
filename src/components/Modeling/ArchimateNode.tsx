@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, NodeResizer } from '@xyflow/react';
 import { ARCHIMATE_METAMODEL } from '@/lib/metamodel';
 
 const getSymbol = (type: string) => {
@@ -27,6 +27,12 @@ const getSymbol = (type: string) => {
                     <path d="M3 6h10" stroke="currentColor" strokeWidth="1" />
                 </svg>
             );
+        case 'group':
+            return (
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
+                    <path d="M2 4h4l2-2h6v10H2V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                </svg>
+            );
         default:
             return null;
     }
@@ -35,14 +41,17 @@ const getSymbol = (type: string) => {
 const ArchimateNode = ({ data, selected }: NodeProps) => {
     const typeKey = (data.type as string) || 'business-process';
     const meta = ARCHIMATE_METAMODEL[typeKey] || { name: 'Unknown', color: '#fff', id: '' };
+    const isGroup = typeKey === 'group';
 
     return (
         <div
             style={{
+                width: '100%',
+                height: '100%',
                 padding: '0',
-                borderRadius: '3px',
-                background: meta.color,
-                border: selected ? '2px solid #3366ff' : '1px solid rgba(0,0,0,0.15)',
+                borderRadius: isGroup ? '0' : '3px',
+                background: isGroup ? 'rgba(0,0,0,0.02)' : meta.color,
+                border: selected ? '2px solid #3366ff' : (isGroup ? '1px dashed rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.15)'),
                 minWidth: '130px',
                 boxShadow: selected ? '0 0 10px rgba(51, 102, 255, 0.3)' : '0 2px 4px rgba(0,0,0,0.05)',
                 fontSize: '12px',
@@ -53,7 +62,8 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 transition: 'box-shadow 0.2s ease-in-out'
             }}
         >
-            <Handle type="target" position={Position.Top} style={{ background: '#555', width: '6px', height: '6px' }} />
+            <NodeResizer minWidth={isGroup ? 200 : 130} minHeight={isGroup ? 150 : 80} isVisible={selected} lineClassName="border-blue-400" handleClassName="h-3 w-3 bg-white border-2 border-blue-400 rounded" />
+            <Handle type="target" position={Position.Top} style={{ background: '#555', width: '6px', height: '6px', opacity: isGroup ? 0 : 1 }} />
 
             {/* Header / Type area */}
             <div style={{
@@ -85,9 +95,9 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 {data.label as string}
             </div>
 
-            <Handle type="source" position={Position.Bottom} style={{ background: '#555', width: '6px', height: '6px' }} />
-            <Handle type="source" position={Position.Left} style={{ background: '#3366ff', border: '1px solid white', width: '8px', height: '8px', left: '-4px' }} />
-            <Handle type="source" position={Position.Right} style={{ background: '#3366ff', border: '1px solid white', width: '8px', height: '8px', right: '-4px' }} />
+            <Handle type="source" position={Position.Bottom} style={{ background: '#555', width: '6px', height: '6px', opacity: isGroup ? 0 : 1 }} />
+            <Handle type="source" position={Position.Left} style={{ background: '#3366ff', border: '1px solid white', width: '8px', height: '8px', left: '-4px', opacity: isGroup ? 0 : 1 }} />
+            <Handle type="source" position={Position.Right} style={{ background: '#3366ff', border: '1px solid white', width: '8px', height: '8px', right: '-4px', opacity: isGroup ? 0 : 1 }} />
         </div>
     );
 };

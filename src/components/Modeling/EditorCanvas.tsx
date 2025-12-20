@@ -11,6 +11,7 @@ import {
     ReactFlowProvider,
     Connection,
     Edge,
+    Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useEditorStore } from '@/store/useEditorStore';
@@ -66,6 +67,7 @@ function EditorCanvasInner() {
         onNodesChange, onEdgesChange,
         setEdges, addNode,
         deleteNode, deleteEdge,
+        updateNodeParent,
         selectedNode, selectedEdge
     } = useEditorStore();
 
@@ -139,6 +141,41 @@ function EditorCanvasInner() {
         [screenToFlowPosition, addNode]
     );
 
+    const onNodeDragStop = useCallback((_: React.MouseEvent, draggedNode: Node) => {
+        // 1. Get absolute position of the dragged node
+        const absolutePos = { ...draggedNode.position };
+        if (draggedNode.parentId) {
+            const parent = nodes.find(n => n.id === draggedNode.parentId);
+            if (parent) {
+                absolutePos.x += parent.position.x;
+                absolutePos.y += parent.position.y;
+            }
+        }
+
+        // 2. Find a new parent at this absolute position
+        const targetNode = nodes.find(
+            (n) =>
+                n.id !== draggedNode.id &&
+                n.parentId !== draggedNode.id && // Don't drop on own child
+                absolutePos.x >= n.position.x &&
+                absolutePos.x <= n.position.x + (n.measured?.width ?? 200) &&
+                absolutePos.y >= n.position.y &&
+                absolutePos.y <= n.position.y + (n.measured?.height ?? 100)
+        );
+
+        if (targetNode && targetNode.id !== draggedNode.parentId) {
+            // Nest inside new target
+            const relativePos = {
+                x: absolutePos.x - targetNode.position.x,
+                y: absolutePos.y - targetNode.position.y
+            };
+            updateNodeParent(draggedNode.id, targetNode.id, relativePos);
+        } else if (!targetNode && draggedNode.parentId) {
+            // Un-nest
+            updateNodeParent(draggedNode.id, null, absolutePos);
+        }
+    }, [nodes, updateNodeParent]);
+
     const onKeyDown = useCallback((event: React.KeyboardEvent) => {
         if (event.key === 'Delete' || event.key === 'Backspace') {
             if (selectedNode) {
@@ -159,6 +196,7 @@ function EditorCanvasInner() {
                 onConnect={onConnect}
                 onDrop={onDrop}
                 onDragOver={onDragOver}
+                onNodeDragStop={onNodeDragStop}
                 onKeyDown={onKeyDown}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
