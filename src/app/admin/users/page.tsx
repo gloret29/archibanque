@@ -1,15 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
-import { redirect } from 'next/navigation';
-
-const prisma = new PrismaClient();
 
 export default async function AdminUsersPage() {
     const currentUser = await getCurrentUser();
 
     // Basic authorization: check if user has 'admin' group
     if (!currentUser || !currentUser.groups.some(g => g.name === 'admin')) {
-        // In a real app, we'd show an unauthorized page
         return (
             <div style={{ padding: '2rem' }}>
                 <h1>Access Denied</h1>

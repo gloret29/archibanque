@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
 
 export interface AutheliaUser {
     email: string;
@@ -39,9 +37,6 @@ export async function getOrCreateUser(authData: AutheliaUser) {
                 groups: true,
             },
         });
-    } else {
-        // Update groups if they changed (optional, but good for sync)
-        // For now we just return the user
     }
 
     return user;
