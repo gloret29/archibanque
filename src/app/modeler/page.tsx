@@ -1,32 +1,82 @@
-import styles from './modeler.module.css';
-import EditorCanvas from '@/components/Modeling/EditorCanvas';
-import Palette from '@/components/Modeling/Palette';
-import PropertiesPanel from '@/components/Modeling/PropertiesPanel';
-import ModelerToolbar from './ModelerToolbar';
-import { getCurrentUser } from '@/lib/session';
+'use client';
 
-export default async function ModelerPage() {
-    const user = await getCurrentUser();
+import React from 'react';
+import dynamic from 'next/dynamic';
+
+const EditorCanvas = dynamic(() => import('@/components/Modeling/EditorCanvas'), { ssr: false });
+const ModelerToolbar = dynamic(() => import('./ModelerToolbar'), { ssr: false });
+const PropertiesPanel = dynamic(() => import('@/components/Modeling/PropertiesPanel'), { ssr: false });
+const Palette = dynamic(() => import('@/components/Modeling/Palette'), { ssr: false });
+const ModelerTabs = dynamic(() => import('./ModelerTabs'), { ssr: false });
+
+import styles from './modeler.module.css';
+import { useEditorStore } from '@/store/useEditorStore';
+
+export default function ModelerPage() {
+    const { views, activeViewId } = useEditorStore();
+    const activeView = views.find(v => v.id === activeViewId);
 
     return (
-        <div className={styles.container}>
+        <div className={styles.modelerContainer}>
+            {/* Main Header / Ribbon area */}
             <header className={styles.header}>
-                <div className={styles.logo}>ArchiModeler | Editor</div>
+                <div className={styles.headerLeft}>
+                    <div className={styles.logo}>
+                        <span className={styles.logoIcon}>💎</span>
+                        <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: '#3366ff' }}>ArchiModeler</h1>
+                    </div>
+                </div>
+
                 <ModelerToolbar />
-                <div className={styles.userInfo}>
-                    {user?.name || 'Guest'}
+
+                <div className={styles.headerRight}>
+                    <div className={styles.userProfile}>
+                        <span style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>Expert Mode</span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#3366ff', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px' }}>JD</div>
+                    </div>
                 </div>
             </header>
-            <div className={styles.content}>
+
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                {/* Left Sidebar: Repository / Palette */}
                 <aside className={styles.sidebar}>
-                    <h3>Elements</h3>
-                    <Palette />
+                    <div style={{ padding: '0 10px 10px 10px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ padding: '12px 4px', borderBottom: '1px solid #eee', marginBottom: '10px' }}>
+                            <h3 style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', color: '#999', letterSpacing: '0.05em' }}>Model Browser</h3>
+                        </div>
+                        <Palette />
+                    </div>
                 </aside>
-                <main className={styles.canvasArea}>
-                    <EditorCanvas />
+
+                {/* Main Content Area */}
+                <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#fff' }}>
+                    <ModelerTabs />
+
+                    <div style={{ flex: 1, position: 'relative' }}>
+                        <EditorCanvas />
+                    </div>
+
+                    {/* Status Bar */}
+                    <footer style={{
+                        height: '28px',
+                        background: '#f7f7f7',
+                        borderTop: '1px solid #e0e0e0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0 15px',
+                        fontSize: '11px',
+                        color: '#666',
+                        gap: '20px'
+                    }}>
+                        <span>Working Copy: <strong>Archisurance & Portfolios</strong></span>
+                        <span>Elements: {activeView?.nodes.length || 0}</span>
+                        <span>Relations: {activeView?.edges.length || 0}</span>
+                        <div style={{ marginLeft: 'auto' }}>Zoom: 100%</div>
+                    </footer>
                 </main>
+
+                {/* Right Sidebar: Properties */}
                 <aside className={styles.properties}>
-                    <h3>Properties</h3>
                     <PropertiesPanel />
                 </aside>
             </div>

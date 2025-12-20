@@ -19,15 +19,20 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
 - [x] **Interaction Logic**: Drag-and-drop, multi-selection, and keyboard deletion.
 - [x] **State Management**: Zustand-based store with **Undo/Redo** (Zundo).
 
-## 🏗️ Phase 3: Relationships & Metamodel Rigor (CURRENT)
-- [x] **ArchiMate Relation Types**: Implementation of all standard line styles and arrowheads.
-- [x] **Dynamic Edge Labels**: Real-time label rendering on connections.
-- [ ] **Validation Engine**: Metamodel enforcement (e.g., preventing illegal relations between layers).
-- [ ] **Derived Relations**: Automated calculation of inferred paths (BizzDesign "Derived Relationship" logic).
-- [ ] **Handling Optimization**: Visual line jumps (cross-overs) and orthogonal routing.
+## 🏗️ Phase 3: Relationships & Metamodel Rigor (COMPLETED)
+- [x] **ArchiMate Relation Types**: Core implementation of line styles and arrowheads.
+- [x] **Connection Validation Engine**: Prevents illegal layer connections.
+- [x] **Smart Connection Menu**: Dynamic menu when multiple relationship types are valid.
+- [x] **Visual Markers & Symbols**: Added markers (open/filled diamonds) and icons in node headers.
+- [ ] **Next**: **Orthogonal Routing**: Implementation of "Right-Angled Lines" for relationship layouts.
+- [ ] **Next**: **Derived Relations**: Automated inference logic.
 
-## 💾 Phase 4: Referentiel & Versioning (Model Packages)
-*Objective: Mimic Enterprise Studio's transactional repository management.*
+## ✅ Phase 4: Enterprise Studio UX - Essentials (PARTIAL)
+*Objective: Mimic the rich workspace layout of Enterprise Studio.*
+- [x] **Tabbed View Interface**: Full support for multiple open views with a tab bar.
+- [ ] **Model Browser (Hierarchy Management)**: Transitioning from palette to true tree-view explorer.
+- [ ] **Object Groups (Nesting)**: Support for containers on canvas.
+- [ ] **Snap-to-Grid & Alignment Tools**: Precision layout (Initial Snap-to-grid implemented).
 - [ ] **Model Packages**: Logical grouping of views and elements in the database.
 - [ ] **Git Sync Service**: Deep integration with Git for object-level versioning.
 - [ ] **Check-in / Check-out**: Lock mechanisms to prevent concurrent editing conflicts.

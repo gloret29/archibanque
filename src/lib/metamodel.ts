@@ -77,3 +77,51 @@ export const ARCHIMATE_RELATIONS: Record<RelationshipType, ArchimateRelationType
     flow: { id: 'flow', name: 'Flow', lineStyle: 'dashed', arrowHead: 'filled-arrow' },
     specialization: { id: 'specialization', name: 'Specialization', lineStyle: 'solid', arrowHead: 'triangle' },
 };
+
+/**
+ * ARCHIMATE VALIDATION ENGINE (Simplified)
+ * Based on ArchiMate 3.2 specification rules
+ */
+
+export const canConnect = (
+    sourceType: string,
+    targetType: string,
+    relationship: RelationshipType
+): boolean => {
+    // Association is always allowed in ArchiMate as a fallback
+    if (relationship === 'association') return true;
+
+    const sourceMeta = ARCHIMATE_METAMODEL[sourceType];
+    const targetMeta = ARCHIMATE_METAMODEL[targetType];
+
+    if (!sourceMeta || !targetMeta) return false;
+
+    // Layer-based rules (Simplified)
+    // 1. Specialization: Same type or strictly related
+    if (relationship === 'specialization') {
+        return sourceMeta.id === targetMeta.id || sourceMeta.layer === targetMeta.layer;
+    }
+
+    // 2. Composition/Aggregation: Hierarchy (Downwards or within same layer)
+    if (relationship === 'composition' || relationship === 'aggregation') {
+        const layers = ['strategy', 'motivation', 'business', 'application', 'technology', 'physical', 'implementation'];
+        const sourceIdx = layers.indexOf(sourceMeta.layer);
+        const targetIdx = layers.indexOf(targetMeta.layer);
+        return sourceIdx <= targetIdx;
+    }
+
+    // 3. Realization: Upwards (e.g., Application realizes Business)
+    if (relationship === 'realization') {
+        const layersOrder = { 'physical': 0, 'technology': 1, 'application': 2, 'business': 3, 'strategy': 4, 'motivation': 5 };
+        // @ts-expect-error: dynamic property access on layersOrder
+        return layersOrder[sourceMeta.layer] < layersOrder[targetMeta.layer] || sourceMeta.layer === targetMeta.layer;
+    }
+
+    return true; // Default to true for now to avoid blocking users
+};
+
+export const getValidRelationships = (sourceType: string, targetType: string): RelationshipType[] => {
+    return (Object.keys(ARCHIMATE_RELATIONS) as RelationshipType[]).filter(rel =>
+        canConnect(sourceType, targetType, rel)
+    );
+};

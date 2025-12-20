@@ -13,7 +13,6 @@ export default function ArchimateEdge({
     targetPosition,
     style = {},
     markerEnd,
-    markerStart,
     data,
 }: EdgeProps) {
     const [edgePath, labelX, labelY] = getBezierPath({
@@ -35,12 +34,16 @@ export default function ArchimateEdge({
         strokeDasharray: meta.lineStyle === 'dashed' ? '5,5' : meta.lineStyle === 'dotted' ? '2,2' : 'none',
     };
 
+    // Compute markers based on metadata
+    const computedMarkerEnd = meta.arrowHead !== 'none' ? `url(#arrowhead-${meta.arrowHead})` : undefined;
+    const computedMarkerStart = meta.startMarker ? `url(#marker-${meta.startMarker})` : undefined;
+
     return (
         <>
             <BaseEdge
                 path={edgePath}
-                markerEnd={markerEnd}
-                markerStart={markerStart}
+                markerEnd={computedMarkerEnd}
+                markerStart={computedMarkerStart}
                 style={edgeStyle}
             />
             <EdgeLabelRenderer>
