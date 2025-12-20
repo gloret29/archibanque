@@ -2,8 +2,8 @@ FROM node:20-bookworm
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+# Copy package files and prisma config
+COPY package.json prisma.config.ts ./
 COPY prisma ./prisma/
 
 # Install dependencies
