@@ -125,3 +125,31 @@ export const getValidRelationships = (sourceType: string, targetType: string): R
         canConnect(sourceType, targetType, rel)
     );
 };
+
+/**
+ * DERIVED RELATIONSHIPS ENGINE
+ * Based on the ArchiMate derivation rule: A -> r1 -> B -> r2 -> C => A -> r3 -> C
+ * where r3 is the weakest relationship in the chain.
+ */
+export const RELATIONSHIP_STRENGTH: Record<RelationshipType, number> = {
+    composition: 10,
+    aggregation: 9,
+    assignment: 8,
+    realization: 7,
+    serving: 6,
+    access: 5,
+    influence: 4,
+    triggering: 3,
+    flow: 2,
+    specialization: 1,
+    association: 0,
+};
+
+export const getDerivedRelationship = (rel1: RelationshipType, rel2: RelationshipType): RelationshipType => {
+    const s1 = RELATIONSHIP_STRENGTH[rel1] ?? 0;
+    const s2 = RELATIONSHIP_STRENGTH[rel2] ?? 0;
+
+    const weakerScore = Math.min(s1, s2);
+    const result = Object.entries(RELATIONSHIP_STRENGTH).find(([, score]) => score === weakerScore);
+    return (result?.[0] as RelationshipType) || 'association';
+};

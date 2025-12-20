@@ -11,8 +11,10 @@ import {
     MousePointer2,
     Type,
     Grid,
-    Search
+    Search,
+    GitBranch
 } from 'lucide-react';
+import { useEditorStore } from '@/store/useEditorStore';
 
 const ModelerToolbar = () => {
     const temporalStore = useTemporalStore();
@@ -89,6 +91,7 @@ const ModelerToolbar = () => {
 
             {renderButton(<Grid size={16} />, "Grid")}
             {renderButton(<Search size={16} />, "Find")}
+            {renderButton(<GitBranch size={16} />, "Infer", () => useEditorStore.getState().inferRelations(), false, "Derived Relations (A->B->C => A->C)")}
         </div>
     );
 };

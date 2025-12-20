@@ -13,6 +13,7 @@ import {
     applyEdgeChanges,
 } from '@xyflow/react';
 import { temporal } from 'zundo';
+import { RelationshipType, getDerivedRelationship } from '@/lib/metamodel';
 
 export interface ArchimateView {
     id: string;
@@ -61,6 +62,7 @@ interface EditorState {
     updateEdgeData: (edgeId: string, data: Record<string, unknown>) => void;
     deleteNode: (nodeId: string) => void;
     deleteEdge: (edgeId: string) => void;
+    inferRelations: () => void;
 }
 
 const initialViewId = 'view_1';
@@ -248,6 +250,47 @@ export const useEditorStore = create<EditorState>()(
                 views: updatedViews,
                 selectedEdge: selectedEdge?.id === edgeId ? null : selectedEdge
             });
+        },
+
+        inferRelations: () => {
+            const { views, activeViewId } = get();
+            const activeView = views.find(v => v.id === activeViewId);
+            if (!activeView) return;
+
+            const newEdges: Edge[] = [...activeView.edges];
+            const nodes = activeView.nodes;
+
+            // Simple triple-based derivation: A -> B -> C => A -> C
+            for (const edge1 of activeView.edges) {
+                for (const edge2 of activeView.edges) {
+                    if (edge1.target === edge2.source && edge1.source !== edge2.target) {
+                        const rel1 = edge1.data?.type as RelationshipType;
+                        const rel2 = edge2.data?.type as RelationshipType;
+
+                        if (rel1 && rel2) {
+                            const derivedType = getDerivedRelationship(rel1, rel2);
+                            const existing = newEdges.find(e => e.source === edge1.source && e.target === edge2.target);
+
+                            if (!existing && edge1.source !== edge2.target) {
+                                newEdges.push({
+                                    id: `derived_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                                    source: edge1.source,
+                                    target: edge2.target,
+                                    type: 'archimate',
+                                    animated: true,
+                                    data: { type: derivedType, isDerived: true },
+                                    style: { stroke: '#3366ff', opacity: 0.6 }
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (newEdges.length > activeView.edges.length) {
+                const updatedViews = views.map(v => v.id === activeViewId ? { ...v, edges: newEdges } : v);
+                set({ views: updatedViews });
+            }
         },
     })))
 

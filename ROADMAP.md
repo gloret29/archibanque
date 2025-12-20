@@ -24,8 +24,8 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
 - [x] **Connection Validation Engine**: Prevents illegal layer connections.
 - [x] **Smart Connection Menu**: Dynamic menu when multiple relationship types are valid.
 - [x] **Visual Markers & Symbols**: Added markers (open/filled diamonds) and icons in node headers.
-- [ ] **Next**: **Orthogonal Routing**: Implementation of "Right-Angled Lines" for relationship layouts.
-- [ ] **Next**: **Derived Relations**: Automated inference logic.
+- [x] **Orthogonal Routing**: Implementation of "Right-Angled Lines" (SmoothStep) for relationship layouts.
+- [x] **Derived Relations**: Automated inference logic (A->B->C => A->C).
 
 ## ✅ Phase 4: Enterprise Studio UX - Essentials (COMPLETED)
 *Objective: Mimic the rich workspace layout of Enterprise Studio.*

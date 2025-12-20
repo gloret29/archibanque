@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BaseEdge, EdgeProps, getBezierPath, EdgeLabelRenderer } from '@xyflow/react';
+import { BaseEdge, EdgeProps, getSmoothStepPath, EdgeLabelRenderer } from '@xyflow/react';
 import { ARCHIMATE_RELATIONS, RelationshipType } from '@/lib/metamodel';
 
 export default function ArchimateEdge({
@@ -14,13 +14,14 @@ export default function ArchimateEdge({
     style = {},
     data,
 }: EdgeProps) {
-    const [edgePath, labelX, labelY] = getBezierPath({
+    const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX,
         sourceY,
         sourcePosition,
         targetX,
         targetY,
         targetPosition,
+        borderRadius: 10,
     });
 
     const relationType = (data?.type as RelationshipType) || 'association';
