@@ -1,0 +1,50 @@
+.palette {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+    padding-bottom: 2rem;
+}
+
+.layerSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.layerTitle {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #999;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+
+.elementList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.paletteItem {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    cursor: grab;
+    transition: all 0.2s;
+    user-select: none;
+    font-weight: 500;
+    color: #333;
+}
+
+.paletteItem:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.paletteItem:active {
+    cursor: grabbing;
+}
