@@ -1,61 +1,68 @@
-# ArchiModeler Roadmap 🚀
+# ArchiModeler Roadmap 🚀 (BizzDesign Alignment)
 
-ArchiModeler is a high-performance Enterprise Architecture (EA) tool designed for collaboration, modeling as code, and framework compliance (TOGAF, ArchiMate 3.2, BIAN).
+ArchiModeler is evolving into a comprehensive Enterprise Architecture (EA) platform, mimicking the core capabilities of industry leaders like BizzDesign.
 
 ---
 
 ## ✅ Phase 1: Infrastructure & Authentication (COMPLETED)
 - [x] Initial Next.js 15 & PostgreSQL setup.
-- [x] Docker & Portainer deployment script (`deploy_portainer.ps1`).
+- [x] Docker & Portainer deployment script.
 - [x] Database Schema for RBAC (Users, Roles, Groups).
-- [x] Authelia Integration (JIT Provisioning via Headers).
-- [x] CI/CD ready deployment to remote instance.
+- [x] Authelia Integration (JIT Provisioning).
 
-## ✅ Phase 2: Core Modeler UI (COMPLETED)
-- [x] React Flow integration for the diagramming engine.
-- [x] ArchiMate 3.2 Palette implementation (Strategy, Business, Application, Tech).
-- [x] Drag-and-Drop functionality from Palette to Canvas.
-- [x] Custom ArchiMate Node components with layer-based styling.
-- [x] Node selection and deletion logic (Keyboard & UI).
-- [x] Multi-node selection and basic canvas interactions (undo/redo).
+## ✅ Phase 2: Core Modeler UI - "Enterprise Studio Minimal" (COMPLETED)
+- [x] React Flow engine integration.
+- [x] ArchiMate 3.2 Basic Palette & custom node styling.
+- [x] Drag-and-Drop from Palette to Canvas.
+- [x] Basic properties panel & node deletion.
+- [x] Multi-node selection & movement.
+- [x] Undo/Redo history (Zundo).
 
 ## 🏗️ Phase 3: Relationships & Metamodel Logic (CURRENT)
-- [x] Implementation of ArchiMate relationship types (Composition, Aggregation, Assignment, Realization, etc.).
-- [ ] Connection validation rules (Enforce ArchiMate spec for valid relationships).
-- [x] Visual edge styling based on relationship type (dotted lines, arrowheads, etc.).
-- [x] Handle connection logic: custom ArchiMate edges and property switching.
+- [x] Implementation of ArchiMate relationship types (Composition, Aggregation, etc.).
+- [x] Visual edge styling (Dashed lines, arrowheads).
+- [ ] **Next**: **Connection Validation Engine** (Enforce ArchiMate spec for valid relationships).
+- [ ] **Next**: **Derived Relationships Calculation** (Automated inference based on BizzDesign's "Golden Path").
 
-## 💾 Phase 4: Persistence & Model as Code (Git)
-- [ ] JSON Model store in PostgreSQL.
-- [ ] Git Integration for version control.
-- [ ] "Model-as-Code" paradigm: models stored as specialized JSON/YAML in Git.
-- [ ] Branch management (Draft vs. Main/Production models).
-- [ ] Export functionality (Open Exchange Format - XML).
+## 💾 Phase 4: Lifecycle & Versioning (Persistence)
+*Objective: Mimic Enterprise Studio's Check-in/Check-out and Project Sandboxing.*
+- [ ] **Model Packages**: Store full models as logical packages in PostgreSQL.
+- [ ] **Git as Backend Service**: Use Git for versioning, diffing, and branching.
+- [ ] **Project Sandboxing**: Create "To-Be" branches without affecting the "Main" (Golden Copy) model.
+- [ ] **Merges & Conflict Resolution**: Basic UI for merging a "To-Be" project back into the main repository.
 
-## 📝 Phase 5: Properties & Metadata
-- [ ] Dynamic Properties Panel based on selected element type.
-- [ ] Support for custom attributes and tagging.
-- [ ] Rich text documentation fields for every model object.
-- [ ] Cross-reference tracking: see where an object is used across all diagrams.
+## 👁️ Phase 5: Horizzon-like Portal & High-End Viz
+*Objective: Democratize access and provide strategic dashboards.*
+- [ ] **Read-only Consumption Mode**: Optimized view for non-architects.
+- [ ] **Color Views & Label Views**: Dynamic coloring of elements based on attributes (e.g., Lifecycle status, Cost).
+- [ ] **Strategic Heatmaps**: Capability maps dimensioned by performance/strategic importance.
+- [ ] **Social Features**: Commenting/Threading on specific objects or views.
 
-## 👁️ Phase 6: Portal & Publication
-- [ ] Read-only "Portal" module for broad organization access.
-- [ ] Model browser and global search.
-- [ ] Diagram exports (SVG, High-res PNG, PDF).
-- [ ] Automated change logs and version comparison view.
+## ⚙️ Phase 6: Multi-Standard & Drill-down
+*Objective: Unify EA with Process and Data modeling.*
+- [ ] **BPMN 2.0 Integration**: Drill-down from an ArchiMate Business Process to a detailed BPMN diagram.
+- [ ] **Entity-Relationship (ERD)**: Data modeling module linked to ArchiMate Data Objects.
+- [ ] **Drill-down Contextual Navigation**: Seamless transition between different abstraction layers.
 
-## 🏆 Phase 7: Advanced Frameworks & Analytics
-- [ ] BIAN (Banking Industry Architecture Network) template integration.
-- [ ] TOGAF Metamodel extensions.
-- [ ] Gap Analysis tools and Matrix views.
-- [ ] Impact analysis visualization.
+## 🛡️ Phase 7: Governance & Workflows
+*Objective: Implement the "Model Governance" add-in logic.*
+- [ ] **Workflow Engine**: Submit changes for review; approve/reject before merging into the main model.
+- [ ] **Cataloging Rules**: Automated linting/validation of naming conventions and naming uniqueness.
+- [ ] **Lifecycle States**: Track objects as Draft, Approved, Archived.
+
+## 🔌 Phase 8: Integrations & Connectors
+*Objective: Bridge ArchiModeler with the rest of the IT ecosystem.*
+- [ ] **ITSM Bridge (ServiceNow)**: Map ArchiMate Application Components to ServiceNow CSDM.
+- [ ] **Asset Intelligence (Flexera/Technopedia)**: Automated EOL/EOS date imports.
+- [ ] **Modern BI Integration**: Expose model data for external analytics tools.
+
+## ✨ Phase 9: AI Assistance (SmartPack)
+- [ ] **Diagram Importer**: Convert images/captures into live ArchiMate nodes using Vercel AI SDK.
+- [ ] **Impact Analysis Bot**: AI-driven analysis of "What happens if we remove this Application?".
 
 ---
 
-## 🛠️ Technical Stack
-- **Frontend**: Next.js 15, React 19, Tailwind CSS.
-- **Modeling**: @xyflow/react (React Flow).
-- **State**: Zustand.
-- **Backend/DB**: Prisma 6, PostgreSQL.
-- **DevOps**: Docker, Portainer, SWAG/Authelia.
-- **Storage**: Git (Planned).
+## 🛠️ Stack Alignment
+- **Conception**: Enterprise Studio (Our React-based Modeler).
+- **Consommation**: Horizzon (Our Portal Mode).
+- **Referentiel**: Model Packages (PostgreSQL + Git).
