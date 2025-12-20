@@ -7,8 +7,11 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json* ./
 
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ecaf0343d15d040a3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+
 # Install dependencies
-RUN npm ci
+RUN npm install --frozen-lockfile || npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder
