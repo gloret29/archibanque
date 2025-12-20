@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -7,11 +7,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json* ./
 
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ecaf0343d15d040a3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-
 # Install dependencies
-RUN npm install --frozen-lockfile || npm install
+RUN npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder
