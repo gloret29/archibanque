@@ -20,10 +20,10 @@ ArchiModeler is a high-performance Enterprise Architecture (EA) tool designed fo
 - [x] Multi-node selection and basic canvas interactions (undo/redo).
 
 ## 🏗️ Phase 3: Relationships & Metamodel Logic (CURRENT)
-- [ ] Implementation of ArchiMate relationship types (Composition, Aggregation, Assignment, Realization, etc.).
+- [x] Implementation of ArchiMate relationship types (Composition, Aggregation, Assignment, Realization, etc.).
 - [ ] Connection validation rules (Enforce ArchiMate spec for valid relationships).
-- [ ] Visual edge styling based on relationship type (dotted lines, arrowheads, etc.).
-- [ ] Handle connection logic: clicking handles to create specific relations.
+- [x] Visual edge styling based on relationship type (dotted lines, arrowheads, etc.).
+- [x] Handle connection logic: custom ArchiMate edges and property switching.
 
 ## 💾 Phase 4: Persistence & Model as Code (Git)
 - [ ] JSON Model store in PostgreSQL.

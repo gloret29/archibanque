@@ -50,3 +50,30 @@ export const getColorForLayer = (layer: ArchimateLayer): string => {
         default: return '#f0f0f0';
     }
 };
+
+export type RelationshipType =
+    | 'composition' | 'aggregation' | 'assignment' | 'realization'
+    | 'serving' | 'access' | 'influence' | 'association'
+    | 'triggering' | 'flow' | 'specialization';
+
+export interface ArchimateRelationType {
+    id: RelationshipType;
+    name: string;
+    lineStyle: 'solid' | 'dashed' | 'dotted';
+    arrowHead: 'none' | 'arrow' | 'triangle' | 'filled-arrow' | 'filled-triangle';
+    startMarker?: 'diamond' | 'open-diamond' | 'circle';
+}
+
+export const ARCHIMATE_RELATIONS: Record<RelationshipType, ArchimateRelationType> = {
+    composition: { id: 'composition', name: 'Composition', lineStyle: 'solid', arrowHead: 'none', startMarker: 'diamond' },
+    aggregation: { id: 'aggregation', name: 'Aggregation', lineStyle: 'solid', arrowHead: 'none', startMarker: 'open-diamond' },
+    assignment: { id: 'assignment', name: 'Assignment', lineStyle: 'solid', arrowHead: 'arrow', startMarker: 'circle' },
+    realization: { id: 'realization', name: 'Realization', lineStyle: 'dashed', arrowHead: 'triangle' },
+    serving: { id: 'serving', name: 'Serving', lineStyle: 'solid', arrowHead: 'arrow' },
+    access: { id: 'access', name: 'Access', lineStyle: 'dotted', arrowHead: 'arrow' },
+    influence: { id: 'influence', name: 'Influence', lineStyle: 'dashed', arrowHead: 'arrow' },
+    association: { id: 'association', name: 'Association', lineStyle: 'solid', arrowHead: 'none' },
+    triggering: { id: 'triggering', name: 'Triggering', lineStyle: 'solid', arrowHead: 'filled-arrow' },
+    flow: { id: 'flow', name: 'Flow', lineStyle: 'dashed', arrowHead: 'filled-arrow' },
+    specialization: { id: 'specialization', name: 'Specialization', lineStyle: 'solid', arrowHead: 'triangle' },
+};
