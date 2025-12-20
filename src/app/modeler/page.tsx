@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const EditorCanvas = dynamic(() => import('@/components/Modeling/EditorCanvas'), { ssr: false });
@@ -15,10 +15,40 @@ import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
 
 export default function ModelerPage() {
-    const [sidebarTab, setSidebarTab] = React.useState<'browser' | 'palette'>('browser');
-    const { views, activeViewId, currentPackageId, packages } = useEditorStore();
-    const activeView = views.find(v => v.id === activeViewId);
-    const currentPackage = packages.find(p => p.id === currentPackageId);
+    const [mounted, setMounted] = useState(false);
+    const [sidebarTab, setSidebarTab] = useState<'browser' | 'palette'>('browser');
+
+    // Handle hydration
+    useEffect(() => {
+        const timer = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Only access store after mounting to avoid hydration issues
+    const storeState = useEditorStore();
+    const { views, activeViewId, currentPackageId, packages } = storeState;
+
+    const activeView = mounted ? views.find(v => v.id === activeViewId) : null;
+    const currentPackage = mounted ? packages.find(p => p.id === currentPackageId) : null;
+
+    // Show loading skeleton during hydration
+    if (!mounted) {
+        return (
+            <div className={styles.modelerContainer}>
+                <header className={styles.header}>
+                    <div className={styles.headerLeft}>
+                        <div className={styles.logo}>
+                            <span className={styles.logoIcon}>💎</span>
+                            <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: '#3366ff' }}>ArchiModeler</h1>
+                        </div>
+                    </div>
+                </header>
+                <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ fontSize: '14px', color: '#999' }}>Loading...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.modelerContainer}>
@@ -125,3 +155,4 @@ export default function ModelerPage() {
         </div>
     );
 }
+
