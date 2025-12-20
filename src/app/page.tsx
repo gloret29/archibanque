@@ -28,7 +28,7 @@ export default async function Home() {
             <h2>Modeling Module</h2>
             <p>Develop objects and views using the full Archimate 3.2 palette.</p>
             <div className={styles.cardActions}>
-              <button className={styles.primaryButton}>Open Editor</button>
+              <a href="/modeler" className={styles.primaryButton}>Open Editor</a>
             </div>
           </div>
 
