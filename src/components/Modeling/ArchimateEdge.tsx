@@ -12,7 +12,6 @@ export default function ArchimateEdge({
     sourcePosition,
     targetPosition,
     style = {},
-    markerEnd,
     data,
 }: EdgeProps) {
     const [edgePath, labelX, labelY] = getBezierPath({

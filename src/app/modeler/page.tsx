@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 const EditorCanvas = dynamic(() => import('@/components/Modeling/EditorCanvas'), { ssr: false });
 const ModelerToolbar = dynamic(() => import('./ModelerToolbar'), { ssr: false });
 const PropertiesPanel = dynamic(() => import('@/components/Modeling/PropertiesPanel'), { ssr: false });
+const ModelBrowser = dynamic(() => import('@/components/Modeling/ModelBrowser'), { ssr: false });
 const Palette = dynamic(() => import('@/components/Modeling/Palette'), { ssr: false });
 const ModelerTabs = dynamic(() => import('./ModelerTabs'), { ssr: false });
 
@@ -13,6 +14,7 @@ import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
 
 export default function ModelerPage() {
+    const [sidebarTab, setSidebarTab] = React.useState<'browser' | 'palette'>('browser');
     const { views, activeViewId } = useEditorStore();
     const activeView = views.find(v => v.id === activeViewId);
 
@@ -39,12 +41,47 @@ export default function ModelerPage() {
 
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
                 {/* Left Sidebar: Repository / Palette */}
-                <aside className={styles.sidebar}>
-                    <div style={{ padding: '0 10px 10px 10px', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ padding: '12px 4px', borderBottom: '1px solid #eee', marginBottom: '10px' }}>
-                            <h3 style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', color: '#999', letterSpacing: '0.05em' }}>Model Browser</h3>
+                <aside className={styles.sidebar} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <div style={{ padding: '12px 14px', borderBottom: '1px solid #eee' }}>
+                            <h3 style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', color: '#999', letterSpacing: '0.05em' }}>
+                                {sidebarTab === 'browser' ? 'Model Browser' : 'ArchiMate Palette'}
+                            </h3>
                         </div>
-                        <Palette />
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px' }}>
+                            {sidebarTab === 'browser' ? <ModelBrowser /> : <Palette />}
+                        </div>
+                    </div>
+
+                    {/* Sidebar Tabs (at bottom) */}
+                    <div style={{ height: '32px', display: 'flex', borderTop: '1px solid #e0e0e0', background: '#f7f7f7' }}>
+                        <button
+                            onClick={() => setSidebarTab('browser')}
+                            style={{
+                                flex: 1,
+                                border: 'none',
+                                background: sidebarTab === 'browser' ? '#fff' : 'transparent',
+                                fontSize: '11px',
+                                fontWeight: sidebarTab === 'browser' ? 700 : 400,
+                                cursor: 'pointer',
+                                borderRight: '1px solid #e0e0e0'
+                            }}
+                        >
+                            Model Browser
+                        </button>
+                        <button
+                            onClick={() => setSidebarTab('palette')}
+                            style={{
+                                flex: 1,
+                                border: 'none',
+                                background: sidebarTab === 'palette' ? '#fff' : 'transparent',
+                                fontSize: '11px',
+                                fontWeight: sidebarTab === 'palette' ? 700 : 400,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Palette
+                        </button>
                     </div>
                 </aside>
 

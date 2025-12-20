@@ -27,12 +27,12 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
 - [ ] **Next**: **Orthogonal Routing**: Implementation of "Right-Angled Lines" for relationship layouts.
 - [ ] **Next**: **Derived Relations**: Automated inference logic.
 
-## ✅ Phase 4: Enterprise Studio UX - Essentials (PARTIAL)
+## ✅ Phase 4: Enterprise Studio UX - Essentials (COMPLETED)
 *Objective: Mimic the rich workspace layout of Enterprise Studio.*
 - [x] **Tabbed View Interface**: Full support for multiple open views with a tab bar.
-- [ ] **Model Browser (Hierarchy Management)**: Transitioning from palette to true tree-view explorer.
-- [ ] **Object Groups (Nesting)**: Support for containers on canvas.
-- [ ] **Snap-to-Grid & Alignment Tools**: Precision layout (Initial Snap-to-grid implemented).
+- [x] **Model Browser (Hierarchy Management)**: Repository tree-view with folders and views.
+- [x] **Snap-to-Grid & Alignment Tools**: Precision layout implemented (15px grid).
+- [ ] **Object Groups (Nesting)**: Support for containers on canvas (Next Step).
 - [ ] **Model Packages**: Logical grouping of views and elements in the database.
 - [ ] **Git Sync Service**: Deep integration with Git for object-level versioning.
 - [ ] **Check-in / Check-out**: Lock mechanisms to prevent concurrent editing conflicts.

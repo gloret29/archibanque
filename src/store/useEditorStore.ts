@@ -21,8 +21,19 @@ export interface ArchimateView {
     edges: Edge[];
 }
 
+export interface ArchimateFolder {
+    id: string;
+    name: string;
+    parentId: string | null;
+    type: 'folder' | 'view-folder' | 'element-folder';
+}
+
 interface EditorState {
+    // Repository
+    folders: ArchimateFolder[];
     views: ArchimateView[];
+
+    // UI State
     activeViewId: string;
     selectedNode: Node | null;
     selectedEdge: Edge | null;
@@ -31,6 +42,9 @@ interface EditorState {
     setActiveView: (viewId: string) => void;
     addView: (name: string) => void;
     deleteView: (viewId: string) => void;
+    addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => void;
+    deleteFolder: (folderId: string) => void;
+    renameFolder: (folderId: string, name: string) => void;
 
     // Canvas actions (applied to active view)
     onNodesChange: OnNodesChange;
@@ -57,8 +71,14 @@ const initialView: ArchimateView = {
     edges: [],
 };
 
+const initialFolders: ArchimateFolder[] = [
+    { id: 'f_root', name: 'Archisurance', parentId: null, type: 'folder' },
+    { id: 'f_views', name: 'Architecture views', parentId: 'f_root', type: 'view-folder' },
+];
+
 export const useEditorStore = create<EditorState>()(
     temporal((set, get) => ({
+        folders: initialFolders,
         views: [initialView],
         activeViewId: initialViewId,
         selectedNode: null,
@@ -83,6 +103,26 @@ export const useEditorStore = create<EditorState>()(
             set({ views, activeViewId: activeId });
         },
 
+        addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => {
+            const newFolder: ArchimateFolder = {
+                id: `folder_${Date.now()}`,
+                name,
+                parentId,
+                type
+            };
+            set({ folders: [...get().folders, newFolder] });
+        },
+
+        deleteFolder: (folderId: string) => {
+            set({ folders: get().folders.filter(f => f.id !== folderId) });
+        },
+
+        renameFolder: (folderId: string, name: string) => {
+            set({
+                folders: get().folders.map(f => f.id === folderId ? { ...f, name } : f)
+            });
+        },
+
         onNodesChange: (changes: NodeChange[]) => {
             const { views, activeViewId } = get();
             const activeView = views.find(v => v.id === activeViewId);
@@ -91,11 +131,14 @@ export const useEditorStore = create<EditorState>()(
             const updatedNodes = applyNodeChanges(changes, activeView.nodes);
             const updatedViews = views.map(v => v.id === activeViewId ? { ...v, nodes: updatedNodes } : v);
 
-            set({ views: updatedViews });
-
-            const selected = updatedNodes.find(n => n.selected) || null;
-            set({ selectedNode: selected });
-            if (selected) set({ selectedEdge: null });
+            set(state => {
+                const selected = updatedNodes.find(n => n.selected) || null;
+                return {
+                    views: updatedViews,
+                    selectedNode: selected,
+                    selectedEdge: selected ? null : state.selectedEdge
+                };
+            });
         },
 
         onEdgesChange: (changes: EdgeChange[]) => {
@@ -106,11 +149,14 @@ export const useEditorStore = create<EditorState>()(
             const updatedEdges = applyEdgeChanges(changes, activeView.edges);
             const updatedViews = views.map(v => v.id === activeViewId ? { ...v, edges: updatedEdges } : v);
 
-            set({ views: updatedViews });
-
-            const selected = updatedEdges.find(e => e.selected) || null;
-            set({ selectedEdge: selected });
-            if (selected) set({ selectedNode: null });
+            set(state => {
+                const selected = updatedEdges.find(e => e.selected) || null;
+                return {
+                    views: updatedViews,
+                    selectedEdge: selected,
+                    selectedNode: selected ? null : state.selectedNode
+                };
+            });
         },
 
         onConnect: (connection: Connection) => {
