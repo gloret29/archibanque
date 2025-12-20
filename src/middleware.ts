@@ -3,7 +3,6 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
     const remoteUser = request.headers.get('remote-user');
-    const remoteEmail = request.headers.get('remote-email');
 
     // If we are in production and these headers are missing, we might want to redirect or error
     // But for now, let's just log and continue

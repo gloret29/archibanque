@@ -101,4 +101,95 @@
     background-color: #f8f9fa;
     border-left: 1px solid #dee2e6;
     padding: 1rem;
+    overflow-y: auto;
+}
+
+.propertiesContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.propHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.5rem;
+}
+
+.propHeader h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.deleteButton {
+    background-color: #ff4757;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.deleteButton:hover {
+    background-color: #e84118;
+}
+
+.propGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.propGroup label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.propInput {
+    padding: 6px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.propCode {
+    background: #e9ecef;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+.layerBadge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    text-transform: capitalize;
+}
+
+.metadataSection {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.metadataSection h5 {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    color: #999;
+}
+
+.metadataSection p {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 2px 0;
 }

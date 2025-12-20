@@ -20,7 +20,7 @@ const nodeTypes = {
 
 function EditorCanvasInner() {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
-    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } = useEditorStore();
+    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, deleteNode, selectedNode } = useEditorStore();
     const { screenToFlowPosition } = useReactFlow();
 
     const onDragOver = useCallback((event: React.DragEvent) => {
@@ -56,6 +56,12 @@ function EditorCanvasInner() {
         [screenToFlowPosition, addNode]
     );
 
+    const onKeyDown = useCallback((event: React.KeyboardEvent) => {
+        if ((event.key === 'Delete' || event.key === 'Backspace') && selectedNode) {
+            deleteNode(selectedNode.id);
+        }
+    }, [selectedNode, deleteNode]);
+
     return (
         <div ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
             <ReactFlow
@@ -66,6 +72,7 @@ function EditorCanvasInner() {
                 onConnect={onConnect}
                 onDrop={onDrop}
                 onDragOver={onDragOver}
+                onKeyDown={onKeyDown}
                 nodeTypes={nodeTypes}
                 fitView
             >

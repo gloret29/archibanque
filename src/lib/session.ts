@@ -4,7 +4,6 @@ import { getOrCreateUser } from './auth';
 export async function getCurrentUser() {
     const headerList = await headers();
 
-    const remoteUser = headerList.get('remote-user');
     const remoteEmail = headerList.get('remote-email');
     const remoteGroups = headerList.get('remote-groups') || '';
     const remoteName = headerList.get('remote-name') || '';

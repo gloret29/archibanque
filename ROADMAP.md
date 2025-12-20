@@ -11,15 +11,15 @@ ArchiModeler is a high-performance Enterprise Architecture (EA) tool designed fo
 - [x] Authelia Integration (JIT Provisioning via Headers).
 - [x] CI/CD ready deployment to remote instance.
 
-## 🏗️ Phase 2: Core Modeler UI (CURRENT)
+## ✅ Phase 2: Core Modeler UI (COMPLETED)
 - [x] React Flow integration for the diagramming engine.
 - [x] ArchiMate 3.2 Palette implementation (Strategy, Business, Application, Tech).
 - [x] Drag-and-Drop functionality from Palette to Canvas.
 - [x] Custom ArchiMate Node components with layer-based styling.
-- [ ] **Next**: Node selection and deletion logic.
-- [ ] **Next**: Multi-node selection and basic canvas interactions (undo/redo).
+- [x] Node selection and deletion logic (Keyboard & UI).
+- [x] Multi-node selection and basic canvas interactions (undo/redo).
 
-## 🔀 Phase 3: Relationships & Metamodel Logic
+## 🏗️ Phase 3: Relationships & Metamodel Logic (CURRENT)
 - [ ] Implementation of ArchiMate relationship types (Composition, Aggregation, Assignment, Realization, etc.).
 - [ ] Connection validation rules (Enforce ArchiMate spec for valid relationships).
 - [ ] Visual edge styling based on relationship type (dotted lines, arrowheads, etc.).
