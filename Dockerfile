@@ -1,13 +1,15 @@
-FROM node:20-alpine
+FROM node:20-bookworm
 
 WORKDIR /app
 
-# Install dependencies
-RUN apk add --no-cache libc6-compat
-
+# Copy package files
 COPY package.json ./
+COPY prisma ./prisma/
+
+# Install dependencies
 RUN npm install
 
+# Copy source code
 COPY . .
 
 # Generate Prisma Client
