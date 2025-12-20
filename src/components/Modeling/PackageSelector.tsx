@@ -10,6 +10,7 @@ interface PackageSelectorProps {
 }
 
 const PackageSelector = ({ className }: PackageSelectorProps) => {
+    const [mounted, setMounted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [newName, setNewName] = useState('');
@@ -27,8 +28,15 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
 
     const currentPackage = packages.find(p => p.id === currentPackageId);
 
+    // Handle hydration
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // Load packages on mount
     useEffect(() => {
+        if (!mounted) return;
+
         const loadPackages = async () => {
             try {
                 const serverPackages = await getModelPackages();
@@ -47,7 +55,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
             }
         };
         loadPackages();
-    }, [setPackages]);
+    }, [mounted, setPackages]);
 
     const handleSelectPackage = useCallback(async (packageId: string) => {
         setIsLoading(true);
