@@ -1,12 +1,31 @@
 :root {
+  /* Archimate Standard Colors (Pastels) */
+  --archimate-business: #ffffb5;
+  --archimate-application: #b5ffff;
+  --archimate-technology: #c9ffc9;
+  --archimate-physical: #c9ffc9;
+  --archimate-strategy: #f5d0a9;
+  --archimate-motivation: #ccccff;
+  --archimate-implementation: #ffcccc;
+  --archimate-other: #ffffff;
+
+  /* App Theme */
   --background: #ffffff;
   --foreground: #171717;
+  --border: #e5e5e5;
+  --primary: #0070f3;
+  --primary-foreground: #ffffff;
+  
+  /* Layout */
+  --header-height: 60px;
+  --sidebar-width: 280px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --border: #333333;
   }
 }
 
@@ -14,6 +33,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  height: 100%;
 }
 
 body {
@@ -35,8 +55,24 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Utilities */
+.archimate-box {
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  min-height: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #000; /* Always black text specifically for boxes */
 }
+
+.type-business { background-color: var(--archimate-business); }
+.type-application { background-color: var(--archimate-application); }
+.type-technology { background-color: var(--archimate-technology); }
+.type-strategy { background-color: var(--archimate-strategy); }
+.type-motivation { background-color: var(--archimate-motivation); }
+.type-implementation { background-color: var(--archimate-implementation); }
