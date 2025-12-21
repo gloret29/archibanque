@@ -155,6 +155,21 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Synchronisation parfaite entre le diagramme visuel et le modèle de données.*
   *L'utilisateur peut éditer les propriétés d'une relation directement depuis le dessin, sans passer par l'arborescence.*
 
+## ✅ Phase 5.9: DataBlocks Integration in Properties Panel (COMPLETED - Dec 2024)
+*Objective: Enable users to view and edit custom DataBlock attributes directly in the properties sidebar.*
+- [x] **DataBlocks Display in Properties Panel**: Automatic display of eligible DataBlocks based on object type.
+  *Le panneau de propriétés affiche automatiquement les DataBlocks éligibles pour l'objet sélectionné (élément ou relation).*
+  *Filtrage intelligent basé sur les types cibles configurés dans l'administration.*
+- [x] **DataBlock Attributes Editing**: Full support for all attribute types (string, number, date, enum) with dedicated form controls.
+  *Formulaires adaptés pour chaque type d'attribut : champs texte, nombres, dates, et listes déroulantes pour les énumérations.*
+  *Interface utilisateur intuitive avec validation et feedback visuel.*
+- [x] **Properties Persistence**: DataBlock values stored in JSON properties field with nested structure.
+  *Valeurs stockées dans le champ `properties` des éléments/relations sous forme de structure JSON imbriquée : `properties[blockId][attributeKey] = value`.*
+  *Sauvegarde automatique via le système d'auto-save existant pour garantir la persistance immédiate.*
+- [x] **Type System Enhancement**: Extended properties type from `Record<string, string>` to `Record<string, unknown>` to support complex nested structures.
+  *Évolution du système de types pour supporter des structures JSON complexes tout en maintenant la compatibilité avec la base de données Prisma.*
+  *Support complet des relations avec ajout de `updateRelationProperties` dans le store.*
+
 ## 🧅 Phase 6: Advanced Visualization & "Onion" Diagrams
 *Objective: Transform static diagrams into interactive heatmaps.*
 - [ ] **Color Views**: Dynamic coloring of nodes based on attributes (e.g., Cost > $10k = Red).
