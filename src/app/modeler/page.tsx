@@ -16,11 +16,15 @@ const ResizablePanel = dynamic(() => import('@/components/UI/ResizablePanel'), {
 import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { useInitializeFromDB } from '@/hooks/useInitializeFromDB';
 import { CloudCheck, CloudUpload, Loader2 } from 'lucide-react';
 
 export default function ModelerPage() {
     const [mounted, setMounted] = useState(false);
     const [paletteHeight, setPaletteHeight] = useState(280);
+
+    // Initialize data from DB (settings and dataBlocks)
+    useInitializeFromDB();
 
     // Initialize Auto-save
     const { isSaving } = useAutoSave(2000);

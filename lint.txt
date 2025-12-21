@@ -1,0 +1,110 @@
+﻿
+> archimodeler@0.1.0 lint
+> eslint
+
+
+C:\Users\gaell\Documents\AGDevs\src\app\admin\page.tsx
+   3:49  warning  'useEffect' is defined but never used          @typescript-eslint/no-unused-vars
+  25:12  warning  'isSaving' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\gaell\Documents\AGDevs\src\app\modeler\page.tsx
+  19:22  warning  'CloudUpload' is defined but never used                @typescript-eslint/no-unused-vars
+  23:27  warning  'setPaletteHeight' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\gaell\Documents\AGDevs\src\components\Admin\DataBlockManager.tsx
+  4:26  warning  'DataBlock' is defined but never used  @typescript-eslint/no-unused-vars
+  7:36  warning  'Check' is defined but never used      @typescript-eslint/no-unused-vars
+  8:32  warning  'Settings' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\gaell\Documents\AGDevs\src\components\Modeling\EditorCanvas.tsx
+  84:9  warning  'relations' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\gaell\Documents\AGDevs\src\components\Modeling\ModelBrowser.tsx
+   12:5   warning  'Plus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   15:5   warning  'MoreHorizontal' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  279:9   warning  'setActiveView' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  341:36  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `moveRelation`, but the source dependencies were [draggedItem, moveFolder, moveView, moveElement]. Inferred different dependency than source.
+
+C:\Users\gaell\Documents\AGDevs\src\components\Modeling\ModelBrowser.tsx:341:36
+  339 |     }, []);
+  340 |
+> 341 |     const handleDrop = useCallback((targetFolderId: string) => {
+      |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 342 |         if (!draggedItem) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 343 |
+      ÔÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 354 |         setDraggedItem(null);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 355 |     }, [draggedItem, moveFolder, moveView, moveElement]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  356 |
+  357 |     const handleAction = useCallback((action: string) => {
+  358 |         const { type, targetId, parentId } = contextMenu;                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/preserve-manual-memoization
+  355:8   warning  React Hook useCallback has a missing dependency: 'moveRelation'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
+  357:38  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `deleteRelation`, but the source dependencies were [contextMenu, addFolder, addView, folders, deleteFolder, deleteView, deleteElement, closeContextMenu]. Inferred different dependency than source.
+
+C:\Users\gaell\Documents\AGDevs\src\components\Modeling\ModelBrowser.tsx:357:38
+  355 |     }, [draggedItem, moveFolder, moveView, moveElement]);
+  356 |
+> 357 |     const handleAction = useCallback((action: string) => {
+      |                                      ^^^^^^^^^^^^^^^^^^^^^
+> 358 |         const { type, targetId, parentId } = contextMenu;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 359 |         closeContextMenu();
+      ÔÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 379 |         }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 380 |     }, [contextMenu, addFolder, addView, folders, deleteFolder, deleteView, deleteElement, closeContextMenu]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  381 |
+  382 |     const handleCreateElement = useCallback((elementType: string) => {
+  383 |         const { targetId } = contextMenu;                                                                                                                                                                                                                             react-hooks/preserve-manual-memoization
+  358:33  warning  'parentId' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  380:8   warning  React Hook useCallback has a missing dependency: 'deleteRelation'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+  390:38  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `renameRelation`, but the source dependencies were [editingItem, renameFolder, renameView, renameElement]. Inferred different dependency than source.
+
+C:\Users\gaell\Documents\AGDevs\src\components\Modeling\ModelBrowser.tsx:390:38
+  388 |     }, [contextMenu, addElement, closeContextMenu]);
+  389 |
+> 390 |     const handleRename = useCallback(() => {
+      |                                      ^^^^^^^
+> 391 |         if (!editingItem) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 392 |         const { type, id, name } = editingItem;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 393 |         if (type === 'folder') renameFolder(id, name);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 394 |         else if (type === 'view') renameView(id, name);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 395 |         else if (type === 'element') renameElement(id, name);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 396 |         else if (type === 'relation') renameRelation(id, name);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 397 |         setEditingItem(null);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 398 |     }, [editingItem, renameFolder, renameView, renameElement]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  399 |
+  400 |     return (
+  401 |         <div className={styles.modelBrowser} onClick={closeContextMenu}>  react-hooks/preserve-manual-memoization
+  398:8   warning  React Hook useCallback has a missing dependency: 'renameRelation'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+
+C:\Users\gaell\Documents\AGDevs\src\components\Modeling\PropertiesPanel.tsx
+    6:8   warning  'styles' is defined but never used                                                                                                                                      @typescript-eslint/no-unused-vars
+   16:5   warning  'Palette' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+   83:11  warning  'isVisualNode' is assigned a value but never used                                                                                                                       @typescript-eslint/no-unused-vars
+  105:8   warning  React Hook React.useEffect has missing dependencies: 'repoElement', 'repoRelation', 'repoView', and 'selectedNode'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  157:19  error    Unexpected any. Specify a different type                                                                                                                                @typescript-eslint/no-explicit-any
+  349:89  error    Unexpected any. Specify a different type                                                                                                                                @typescript-eslint/no-explicit-any
+
+Ô£û 24 problems (5 errors, 19 warnings)
+

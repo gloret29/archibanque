@@ -1,0 +1,153 @@
+{
+  "id": "view_1",
+  "name": "Main View",
+  "nodes": [
+    {
+      "id": "node_1766313103343",
+      "data": {
+        "type": "system-software",
+        "label": "QuickSign",
+        "elementId": "elem_1766312494512_89jmgpv66"
+      },
+      "type": "archimate",
+      "dragging": false,
+      "measured": {
+        "width": 111,
+        "height": 60
+      },
+      "position": {
+        "x": 315,
+        "y": 120
+      },
+      "selected": false
+    },
+    {
+      "id": "node_1766313104130",
+      "data": {
+        "type": "system-software",
+        "label": "QuickSign",
+        "elementId": "elem_1766312494512_89jmgpv66"
+      },
+      "type": "archimate",
+      "dragging": false,
+      "measured": {
+        "width": 111,
+        "height": 60
+      },
+      "position": {
+        "x": 105,
+        "y": 120
+      },
+      "selected": false
+    },
+    {
+      "id": "node_1766313126874",
+      "data": {
+        "type": "resource",
+        "label": "GED",
+        "elementId": "elem_1766313124969_87lebq7u4",
+        "description": ""
+      },
+      "type": "archimate",
+      "dragging": false,
+      "measured": {
+        "width": 100,
+        "height": 60
+      },
+      "position": {
+        "x": 375,
+        "y": -240
+      },
+      "selected": false
+    },
+    {
+      "id": "node_1766313430827",
+      "data": {
+        "type": "application-component",
+        "label": "New Application Component",
+        "elementId": "elem_1766313430827_56ipzv5g4"
+      },
+      "type": "archimate",
+      "dragging": false,
+      "measured": {
+        "width": 185,
+        "height": 60
+      },
+      "position": {
+        "x": -30,
+        "y": -210
+      },
+      "selected": false
+    },
+    {
+      "id": "node_1766319864098",
+      "data": {
+        "type": "group",
+        "label": "0056",
+        "elementId": "elem_1766319864098_497l9pejc"
+      },
+      "type": "archimate",
+      "dragging": false,
+      "measured": {
+        "width": 100,
+        "height": 60
+      },
+      "position": {
+        "x": -240,
+        "y": -315
+      },
+      "selected": false
+    },
+    {
+      "id": "node_1766320314583",
+      "data": {
+        "type": "application-collaboration",
+        "label": "Carto",
+        "elementId": "elem_1766320314583_jycv9nr3t"
+      },
+      "type": "archimate",
+      "dragging": false,
+      "measured": {
+        "width": 166,
+        "height": 60
+      },
+      "position": {
+        "x": -270,
+        "y": -150
+      },
+      "selected": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1766313240628",
+      "data": {
+        "type": "assignment"
+      },
+      "type": "archimate",
+      "source": "node_1766313126874",
+      "target": "node_1766313104130",
+      "selected": false
+    },
+    {
+      "id": "edge_1766313244514",
+      "data": {
+        "type": "access"
+      },
+      "type": "archimate",
+      "source": "node_1766313126874",
+      "target": "node_1766313103343",
+      "selected": false
+    },
+    {
+      "id": "edge_1766315775532",
+      "data": {
+        "type": "access"
+      },
+      "type": "archimate",
+      "source": "node_1766313430827",
+      "target": "node_1766313104130",
+      "selected": false
+    }
+  ]
+}

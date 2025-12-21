@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useEditorStore } from '@/store/useEditorStore';
+import React, { useState, useMemo } from 'react';
+import { useEditorStore, DataBlock, DataBlockAttribute, AttributeType } from '@/store/useEditorStore';
 import { ARCHIMATE_METAMODEL, ARCHIMATE_RELATIONS, RelationshipType } from '@/lib/metamodel';
 import styles from '@/app/modeler/modeler.module.css';
 import {
@@ -13,7 +13,8 @@ import {
     AlignRight,
     Type,
     Maximize2,
-    Palette
+    Palette,
+    Database
 } from 'lucide-react';
 
 // Font options
@@ -42,7 +43,9 @@ const PropertiesPanel = () => {
         updateElementDescription, updateElementDocumentation,
         updateViewDescription, updateViewDocumentation,
         updateRelationDescription, updateRelationDocumentation,
-        renameElement, renameView, renameRelation
+        updateElementProperties, updateRelationProperties,
+        renameElement, renameView, renameRelation,
+        dataBlocks
     } = useEditorStore();
 
     // Determine the subject of editing
@@ -81,6 +84,59 @@ const PropertiesPanel = () => {
 
     // Helper to check if we are editing a visual node (for Style tab)
     const isVisualNode = !!selectedNode;
+
+    // Find eligible DataBlocks for the current object type
+    const eligibleDataBlocks = useMemo(() => {
+        if (!repoElement && !repoRelation) return [];
+        
+        const objectType = repoElement ? repoElement.type : (repoRelation ? repoRelation.type : null);
+        if (!objectType) {
+            console.log('[DataBlocks] No object type found');
+            return [];
+        }
+
+        console.log('[DataBlocks] Checking for type:', objectType);
+        console.log('[DataBlocks] Available dataBlocks:', dataBlocks.length);
+        console.log('[DataBlocks] DataBlocks details:', dataBlocks.map(b => ({ id: b.id, name: b.name, targetTypes: b.targetTypes })));
+
+        const eligible = dataBlocks.filter(block => {
+            const isEligible = block.targetTypes.includes(objectType);
+            console.log(`[DataBlocks] Block "${block.name}" (targetTypes: ${block.targetTypes.join(', ')}) for type "${objectType}": ${isEligible}`);
+            return isEligible;
+        });
+
+        console.log('[DataBlocks] Eligible blocks found:', eligible.length);
+        return eligible;
+    }, [repoElement?.type, repoRelation?.type, dataBlocks]);
+
+    // Get current properties for DataBlocks
+    const getDataBlockValues = (block: DataBlock): Record<string, string> => {
+        const repoObject = repoElement || repoRelation;
+        if (!repoObject || !repoObject.properties) return {};
+        
+        const blockData = repoObject.properties[block.id] as Record<string, string> | undefined;
+        return blockData || {};
+    };
+
+    // Update DataBlock attribute value
+    const updateDataBlockValue = (block: DataBlock, attributeKey: string, value: string) => {
+        const repoObject = repoElement || repoRelation;
+        if (!repoObject) return;
+
+        const currentValues = getDataBlockValues(block);
+        const updatedValues = { ...currentValues, [attributeKey]: value };
+        
+        const newProperties = {
+            ...(repoObject.properties || {}),
+            [block.id]: updatedValues
+        };
+
+        if (repoElement) {
+            updateElementProperties(repoElement.id, newProperties);
+        } else if (repoRelation) {
+            updateRelationProperties(repoRelation.id, newProperties);
+        }
+    };
 
     // Sync local state based on what is selected
     React.useEffect(() => {
@@ -330,6 +386,111 @@ const PropertiesPanel = () => {
                                             resize: 'vertical'
                                         }}
                                     />
+                                </div>
+                            )}
+
+                            {/* DataBlocks Section - Only for Repository Elements/Relations */}
+                            {eligibleDataBlocks.length > 0 && (repoElement || repoRelation) && (
+                                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #eee' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+                                        <Database size={14} style={{ color: '#666' }} />
+                                        <h5 style={{ fontSize: '11px', fontWeight: 600, color: '#666', margin: 0, textTransform: 'uppercase' }}>
+                                            Custom Attributes
+                                        </h5>
+                                    </div>
+                                    
+                                    {eligibleDataBlocks.map(block => {
+                                        const blockValues = getDataBlockValues(block);
+                                        return (
+                                            <div key={block.id} style={{ marginBottom: '20px', padding: '12px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #e0e0e0' }}>
+                                                <div style={{ fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '12px' }}>
+                                                    {block.name}
+                                                </div>
+                                                
+                                                {block.attributes.map(attr => {
+                                                    const currentValue = blockValues[attr.key] || '';
+                                                    
+                                                    return (
+                                                        <div key={attr.id} style={{ marginBottom: '12px' }}>
+                                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#555', marginBottom: '4px' }}>
+                                                                {attr.name}
+                                                            </label>
+                                                            
+                                                            {attr.type === 'string' && (
+                                                                <input
+                                                                    type="text"
+                                                                    value={currentValue}
+                                                                    onChange={(e) => updateDataBlockValue(block, attr.key, e.target.value)}
+                                                                    placeholder={`Enter ${attr.name.toLowerCase()}...`}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '6px 8px',
+                                                                        border: '1px solid #ddd',
+                                                                        borderRadius: '4px',
+                                                                        fontSize: '12px',
+                                                                        background: '#fff'
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            
+                                                            {attr.type === 'number' && (
+                                                                <input
+                                                                    type="number"
+                                                                    value={currentValue}
+                                                                    onChange={(e) => updateDataBlockValue(block, attr.key, e.target.value)}
+                                                                    placeholder={`Enter ${attr.name.toLowerCase()}...`}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '6px 8px',
+                                                                        border: '1px solid #ddd',
+                                                                        borderRadius: '4px',
+                                                                        fontSize: '12px',
+                                                                        background: '#fff'
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            
+                                                            {attr.type === 'date' && (
+                                                                <input
+                                                                    type="date"
+                                                                    value={currentValue}
+                                                                    onChange={(e) => updateDataBlockValue(block, attr.key, e.target.value)}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '6px 8px',
+                                                                        border: '1px solid #ddd',
+                                                                        borderRadius: '4px',
+                                                                        fontSize: '12px',
+                                                                        background: '#fff'
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            
+                                                            {attr.type === 'enum' && (
+                                                                <select
+                                                                    value={currentValue}
+                                                                    onChange={(e) => updateDataBlockValue(block, attr.key, e.target.value)}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '6px 8px',
+                                                                        border: '1px solid #ddd',
+                                                                        borderRadius: '4px',
+                                                                        fontSize: '12px',
+                                                                        background: '#fff'
+                                                                    }}
+                                                                >
+                                                                    <option value="">-- Select {attr.name} --</option>
+                                                                    {attr.enumValues?.map(val => (
+                                                                        <option key={val} value={val}>{val}</option>
+                                                                    ))}
+                                                                </select>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
 

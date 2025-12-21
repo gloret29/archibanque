@@ -1,0 +1,19 @@
+[
+  {
+    "id": "f_root",
+    "name": "Archisurance",
+    "type": "folder"
+  },
+  {
+    "id": "f_views",
+    "name": "Architecture views",
+    "type": "view-folder",
+    "parentId": "f_root"
+  },
+  {
+    "id": "folder_1766312475640",
+    "name": "SBB",
+    "type": "folder",
+    "parentId": "f_views"
+  }
+]

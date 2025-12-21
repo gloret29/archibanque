@@ -148,7 +148,7 @@ export async function saveRepositoryState(
         folderId: string | null;
         description?: string;
         documentation?: string;
-        properties?: Record<string, string>;
+        properties?: Record<string, unknown>;
         createdAt?: Date;
         modifiedAt?: Date;
         author?: string;
@@ -162,6 +162,7 @@ export async function saveRepositoryState(
         name?: string;
         description?: string;
         documentation?: string;
+        properties?: Record<string, unknown>;
         createdAt?: Date;
         modifiedAt?: Date;
         author?: string;

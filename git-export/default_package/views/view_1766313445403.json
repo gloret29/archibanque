@@ -1,0 +1,55 @@
+{
+  "id": "view_1766313445403",
+  "name": "View 4",
+  "nodes": [
+    {
+      "id": "node_1766313448286",
+      "data": {
+        "type": "driver",
+        "label": "New Driver",
+        "elementId": "elem_1766313448286_gi0lraxis"
+      },
+      "type": "archimate",
+      "measured": {
+        "width": 100,
+        "height": 60
+      },
+      "position": {
+        "x": 150,
+        "y": -165
+      },
+      "selected": false
+    },
+    {
+      "id": "node_1766314860572",
+      "data": {
+        "type": "business-service",
+        "label": "New Business Service",
+        "elementId": "elem_1766312332055_wa1azlw6m"
+      },
+      "type": "archimate",
+      "measured": {
+        "width": 149,
+        "height": 60
+      },
+      "position": {
+        "x": 165,
+        "y": -330
+      },
+      "selected": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1766315698560",
+      "data": {
+        "type": "association"
+      },
+      "type": "archimate",
+      "source": "node_1766314860572",
+      "target": "node_1766313448286",
+      "selected": false
+    }
+  ],
+  "folderId": "f_views"
+}

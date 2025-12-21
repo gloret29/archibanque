@@ -1,0 +1,30 @@
+[
+  {
+    "id": "rel_1766313244514_tzrbq7s3a",
+    "type": "access",
+    "sourceId": "elem_1766313124969_87lebq7u4",
+    "targetId": "elem_1766312494512_89jmgpv66",
+    "properties": null
+  },
+  {
+    "id": "rel_1766313240629_251m4nfs3",
+    "type": "assignment",
+    "sourceId": "elem_1766313124969_87lebq7u4",
+    "targetId": "elem_1766312494512_89jmgpv66",
+    "properties": null
+  },
+  {
+    "id": "rel_1766315775533_koclenwr8",
+    "type": "access",
+    "sourceId": "elem_1766313430827_56ipzv5g4",
+    "targetId": "elem_1766312494512_89jmgpv66",
+    "properties": null
+  },
+  {
+    "id": "rel_1766315698561_c8qsxc23k",
+    "type": "association",
+    "sourceId": "elem_1766312332055_wa1azlw6m",
+    "targetId": "elem_1766313448286_gi0lraxis",
+    "properties": null
+  }
+]

@@ -1,0 +1,309 @@
+{
+  "id": "default_package",
+  "name": "Default Project",
+  "exportedAt": "2025-12-21T12:33:19.820Z",
+  "version": "1.0.0",
+  "elements": [
+    {
+      "id": "elem_1766313124969_87lebq7u4",
+      "name": "GED",
+      "type": "resource",
+      "properties": {}
+    },
+    {
+      "id": "elem_1766313430827_56ipzv5g4",
+      "name": "New Application Component",
+      "type": "application-component",
+      "properties": {}
+    },
+    {
+      "id": "elem_1766312332055_wa1azlw6m",
+      "name": "New Business Service",
+      "type": "business-service",
+      "properties": {}
+    },
+    {
+      "id": "elem_1766313448286_gi0lraxis",
+      "name": "New Driver",
+      "type": "driver",
+      "properties": {}
+    },
+    {
+      "id": "elem_1766319864098_497l9pejc",
+      "name": "0056",
+      "type": "group",
+      "properties": {}
+    },
+    {
+      "id": "elem_1766312494512_89jmgpv66",
+      "name": "QuickSign",
+      "type": "system-software",
+      "properties": {}
+    },
+    {
+      "id": "elem_1766320314583_jycv9nr3t",
+      "name": "Carto",
+      "type": "application-collaboration",
+      "properties": {}
+    }
+  ],
+  "relations": [
+    {
+      "id": "rel_1766313244514_tzrbq7s3a",
+      "type": "access",
+      "sourceId": "elem_1766313124969_87lebq7u4",
+      "targetId": "elem_1766312494512_89jmgpv66",
+      "properties": null
+    },
+    {
+      "id": "rel_1766313240629_251m4nfs3",
+      "type": "assignment",
+      "sourceId": "elem_1766313124969_87lebq7u4",
+      "targetId": "elem_1766312494512_89jmgpv66",
+      "properties": null
+    },
+    {
+      "id": "rel_1766315775533_koclenwr8",
+      "type": "access",
+      "sourceId": "elem_1766313430827_56ipzv5g4",
+      "targetId": "elem_1766312494512_89jmgpv66",
+      "properties": null
+    },
+    {
+      "id": "rel_1766315698561_c8qsxc23k",
+      "type": "association",
+      "sourceId": "elem_1766312332055_wa1azlw6m",
+      "targetId": "elem_1766313448286_gi0lraxis",
+      "properties": null
+    }
+  ],
+  "views": [
+    {
+      "id": "view_1766313445403",
+      "name": "View 4",
+      "nodes": [
+        {
+          "id": "node_1766313448286",
+          "data": {
+            "type": "driver",
+            "label": "New Driver",
+            "elementId": "elem_1766313448286_gi0lraxis"
+          },
+          "type": "archimate",
+          "measured": {
+            "width": 100,
+            "height": 60
+          },
+          "position": {
+            "x": 150,
+            "y": -165
+          },
+          "selected": false
+        },
+        {
+          "id": "node_1766314860572",
+          "data": {
+            "type": "business-service",
+            "label": "New Business Service",
+            "elementId": "elem_1766312332055_wa1azlw6m"
+          },
+          "type": "archimate",
+          "measured": {
+            "width": 149,
+            "height": 60
+          },
+          "position": {
+            "x": 165,
+            "y": -330
+          },
+          "selected": false
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_1766315698560",
+          "data": {
+            "type": "association"
+          },
+          "type": "archimate",
+          "source": "node_1766314860572",
+          "target": "node_1766313448286",
+          "selected": false
+        }
+      ],
+      "folderId": "f_views"
+    },
+    {
+      "id": "view_1",
+      "name": "Main View",
+      "nodes": [
+        {
+          "id": "node_1766313103343",
+          "data": {
+            "type": "system-software",
+            "label": "QuickSign",
+            "elementId": "elem_1766312494512_89jmgpv66"
+          },
+          "type": "archimate",
+          "dragging": false,
+          "measured": {
+            "width": 111,
+            "height": 60
+          },
+          "position": {
+            "x": 315,
+            "y": 120
+          },
+          "selected": false
+        },
+        {
+          "id": "node_1766313104130",
+          "data": {
+            "type": "system-software",
+            "label": "QuickSign",
+            "elementId": "elem_1766312494512_89jmgpv66"
+          },
+          "type": "archimate",
+          "dragging": false,
+          "measured": {
+            "width": 111,
+            "height": 60
+          },
+          "position": {
+            "x": 105,
+            "y": 120
+          },
+          "selected": false
+        },
+        {
+          "id": "node_1766313126874",
+          "data": {
+            "type": "resource",
+            "label": "GED",
+            "elementId": "elem_1766313124969_87lebq7u4",
+            "description": ""
+          },
+          "type": "archimate",
+          "dragging": false,
+          "measured": {
+            "width": 100,
+            "height": 60
+          },
+          "position": {
+            "x": 375,
+            "y": -240
+          },
+          "selected": false
+        },
+        {
+          "id": "node_1766313430827",
+          "data": {
+            "type": "application-component",
+            "label": "New Application Component",
+            "elementId": "elem_1766313430827_56ipzv5g4"
+          },
+          "type": "archimate",
+          "dragging": false,
+          "measured": {
+            "width": 185,
+            "height": 60
+          },
+          "position": {
+            "x": -30,
+            "y": -210
+          },
+          "selected": false
+        },
+        {
+          "id": "node_1766319864098",
+          "data": {
+            "type": "group",
+            "label": "0056",
+            "elementId": "elem_1766319864098_497l9pejc"
+          },
+          "type": "archimate",
+          "dragging": false,
+          "measured": {
+            "width": 100,
+            "height": 60
+          },
+          "position": {
+            "x": -240,
+            "y": -315
+          },
+          "selected": false
+        },
+        {
+          "id": "node_1766320314583",
+          "data": {
+            "type": "application-collaboration",
+            "label": "Carto",
+            "elementId": "elem_1766320314583_jycv9nr3t"
+          },
+          "type": "archimate",
+          "dragging": false,
+          "measured": {
+            "width": 166,
+            "height": 60
+          },
+          "position": {
+            "x": -270,
+            "y": -150
+          },
+          "selected": false
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_1766313240628",
+          "data": {
+            "type": "assignment"
+          },
+          "type": "archimate",
+          "source": "node_1766313126874",
+          "target": "node_1766313104130",
+          "selected": false
+        },
+        {
+          "id": "edge_1766313244514",
+          "data": {
+            "type": "access"
+          },
+          "type": "archimate",
+          "source": "node_1766313126874",
+          "target": "node_1766313103343",
+          "selected": false
+        },
+        {
+          "id": "edge_1766315775532",
+          "data": {
+            "type": "access"
+          },
+          "type": "archimate",
+          "source": "node_1766313430827",
+          "target": "node_1766313104130",
+          "selected": false
+        }
+      ]
+    }
+  ],
+  "folders": [
+    {
+      "id": "f_root",
+      "name": "Archisurance",
+      "type": "folder"
+    },
+    {
+      "id": "f_views",
+      "name": "Architecture views",
+      "type": "view-folder",
+      "parentId": "f_root"
+    },
+    {
+      "id": "folder_1766312475640",
+      "name": "SBB",
+      "type": "folder",
+      "parentId": "f_views"
+    }
+  ]
+}

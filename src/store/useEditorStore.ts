@@ -54,7 +54,7 @@ export interface ModelElement {
     folderId: string | null;
     description?: string; // RW - Short description
     documentation?: string; // RW - Detailed documentation
-    properties?: Record<string, string>;
+    properties?: Record<string, unknown>; // JSON object for storing custom properties including DataBlocks
     // Read-only metadata (system-generated)
     createdAt?: Date; // RO - Creation timestamp
     modifiedAt?: Date; // RO - Last modification timestamp
@@ -70,6 +70,7 @@ export interface ModelRelation {
     folderId: string | null;
     description?: string;
     documentation?: string;
+    properties?: Record<string, unknown>; // JSON object for storing custom properties including DataBlocks
     createdAt?: Date;
     modifiedAt?: Date;
     author?: string;
@@ -146,7 +147,7 @@ interface EditorState {
     deleteElement: (elementId: string) => void;
     renameElement: (elementId: string, name: string) => void;
     moveElement: (elementId: string, folderId: string | null) => void;
-    updateElementProperties: (elementId: string, properties: Record<string, string>) => void;
+    updateElementProperties: (elementId: string, properties: Record<string, unknown>) => void;
     updateElementDescription: (elementId: string, description: string) => void;
     updateElementDocumentation: (elementId: string, documentation: string) => void;
 
@@ -155,6 +156,7 @@ interface EditorState {
     deleteRelation: (relationId: string) => void;
     renameRelation: (relationId: string, name: string) => void;
     moveRelation: (relationId: string, folderId: string | null) => void;
+    updateRelationProperties: (relationId: string, properties: Record<string, unknown>) => void;
     updateRelationDescription: (relationId: string, description: string) => void;
     updateRelationDocumentation: (relationId: string, documentation: string) => void;
 
@@ -500,10 +502,10 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         });
     },
 
-    updateElementProperties: (elementId: string, properties: Record<string, string>) => {
+    updateElementProperties: (elementId: string, properties: Record<string, unknown>) => {
         set({
             elements: get().elements.map(e => e.id === elementId
-                ? { ...e, properties: { ...e.properties, ...properties }, modifiedAt: new Date() }
+                ? { ...e, properties: { ...(e.properties || {}), ...properties }, modifiedAt: new Date() }
                 : e
             )
         });
@@ -560,6 +562,15 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     updateRelationDescription: (relationId: string, description: string) => {
         set({
             relations: get().relations.map(r => r.id === relationId ? { ...r, description, modifiedAt: new Date() } : r)
+        });
+    },
+
+    updateRelationProperties: (relationId: string, properties: Record<string, unknown>) => {
+        set({
+            relations: get().relations.map(r => r.id === relationId
+                ? { ...r, properties: { ...(r.properties || {}), ...properties }, modifiedAt: new Date() }
+                : r
+            )
         });
     },
 
