@@ -17,7 +17,8 @@ export async function getModelPackages() {
         include: {
             folders: true,
             views: true,
-            elements: true
+            elements: true,
+            relations: true
         },
         orderBy: { updatedAt: 'desc' }
     });
@@ -29,7 +30,8 @@ export async function getPackageById(packageId: string) {
         include: {
             folders: true,
             views: true,
-            elements: true
+            elements: true,
+            relations: true
         }
     });
 }
@@ -67,13 +69,17 @@ export async function loadPackageData(packageId: string) {
             },
             views: {
                 orderBy: { name: 'asc' }
-            }
+            },
+            elements: {
+                orderBy: { name: 'asc' }
+            },
+            relations: true
         }
     });
 
     if (!pkg) return null;
 
-    // Transform folders to match store format
+    // Transform folders
     const folders = pkg.folders.map(f => ({
         id: f.id,
         name: f.name,
@@ -81,7 +87,7 @@ export async function loadPackageData(packageId: string) {
         type: f.type as 'folder' | 'view-folder' | 'element-folder'
     }));
 
-    // Transform views to match store format
+    // Transform views
     const views = pkg.views.map(v => {
         const layout = v.layout as { nodes?: unknown[], edges?: unknown[] } | null;
         return {
@@ -93,46 +99,139 @@ export async function loadPackageData(packageId: string) {
         };
     });
 
-    return { package: pkg, folders, views };
-}
+    // Transform elements with all properties
+    const elements = pkg.elements.map(e => ({
+        id: e.id,
+        name: e.name,
+        type: e.type,
+        folderId: e.folderId,
+        description: e.description || '',
+        documentation: e.documentation || '',
+        properties: (e.properties as Record<string, string>) || {},
+        createdAt: e.createdAt,
+        modifiedAt: e.modifiedAt,
+        author: e.author || undefined
+    }));
 
-export async function saveArchiView(viewId: string, name: string, packageId: string, layout: Prisma.InputJsonValue, folderId?: string) {
-    return await prisma.archiView.upsert({
-        where: { id: viewId },
-        update: { name, layout, folderId },
-        create: { id: viewId, name, packageId, layout, folderId }
-    });
+    // Transform relations (now with folderId and packageId)
+    const relations = pkg.relations.map(r => ({
+        id: r.id,
+        type: r.type,
+        name: r.name || '',
+        sourceId: r.sourceId,
+        targetId: r.targetId,
+        folderId: r.folderId
+    }));
+
+    return { package: pkg, folders, views, elements, relations };
 }
 
 export async function saveRepositoryState(
     packageId: string,
     folders: { id: string, name: string, type: string, parentId: string | null }[],
-    views: { id: string, name: string, nodes: unknown[], edges: unknown[], folderId?: string }[]
+    views: { id: string, name: string, nodes: unknown[], edges: unknown[], folderId?: string }[],
+    elements: {
+        id: string;
+        name: string;
+        type: string;
+        folderId: string | null;
+        description?: string;
+        documentation?: string;
+        properties?: Record<string, string>;
+        createdAt?: Date;
+        modifiedAt?: Date;
+        author?: string;
+    }[] = [],
+    relations: { id: string, type: string, sourceId: string, targetId: string, folderId: string | null }[] = []
 ) {
-    // 0. Ensure Package Exists
-    await prisma.modelPackage.upsert({
-        where: { id: packageId },
-        update: { updatedAt: new Date() },
-        create: { id: packageId, name: 'Default Project' }
+    console.log(`💾 Starting transactional save for package ${packageId}...`);
+
+    await prisma.$transaction(async (tx) => {
+        // 1. Ensure Package Exists
+        await tx.modelPackage.upsert({
+            where: { id: packageId },
+            update: { updatedAt: new Date() },
+            create: { id: packageId, name: 'Default Project' }
+        });
+
+        // 2. Sync Folders
+        for (const f of folders) {
+            await tx.folder.upsert({
+                where: { id: f.id },
+                update: { name: f.name, type: f.type, parentId: f.parentId },
+                create: { id: f.id, name: f.name, type: f.type, parentId: f.parentId, packageId }
+            });
+        }
+
+        // 3. Sync Elements
+        for (const e of elements) {
+            await tx.archiElement.upsert({
+                where: { id: e.id },
+                update: {
+                    name: e.name,
+                    type: e.type,
+                    folderId: e.folderId,
+                    description: e.description,
+                    documentation: e.documentation,
+                    modifiedAt: e.modifiedAt || new Date(),
+                    properties: (e.properties || {}) as Prisma.InputJsonValue
+                },
+                create: {
+                    id: e.id,
+                    name: e.name,
+                    type: e.type,
+                    packageId,
+                    folderId: e.folderId,
+                    description: e.description,
+                    documentation: e.documentation,
+                    createdAt: e.createdAt || new Date(),
+                    modifiedAt: e.modifiedAt || new Date(),
+                    author: e.author,
+                    properties: (e.properties || {}) as Prisma.InputJsonValue
+                }
+            });
+        }
+
+        // 4. Sync Relations
+        for (const r of relations) {
+            await tx.archiRelation.upsert({
+                where: { id: r.id },
+                update: {
+                    type: r.type,
+                    folderId: r.folderId
+                },
+                create: {
+                    id: r.id,
+                    type: r.type,
+                    sourceId: r.sourceId,
+                    targetId: r.targetId,
+                    packageId,
+                    folderId: r.folderId
+                }
+            });
+        }
+
+        // 5. Sync Views
+        for (const v of views) {
+            await tx.archiView.upsert({
+                where: { id: v.id },
+                update: {
+                    name: v.name,
+                    layout: { nodes: v.nodes, edges: v.edges } as Prisma.InputJsonValue,
+                    folderId: v.folderId
+                },
+                create: {
+                    id: v.id,
+                    name: v.name,
+                    packageId,
+                    layout: { nodes: v.nodes, edges: v.edges } as Prisma.InputJsonValue,
+                    folderId: v.folderId
+                }
+            });
+        }
     });
 
-    // 1. Sync Folders
-    for (const f of folders) {
-        await prisma.folder.upsert({
-            where: { id: f.id },
-            update: { name: f.name, type: f.type, parentId: f.parentId },
-            create: { id: f.id, name: f.name, type: f.type, parentId: f.parentId, packageId }
-        });
-    }
-
-    // 2. Sync Views
-    for (const v of views) {
-        await prisma.archiView.upsert({
-            where: { id: v.id },
-            update: { name: v.name, layout: { nodes: v.nodes, edges: v.edges } as Prisma.InputJsonValue, folderId: v.folderId },
-            create: { id: v.id, name: v.name, packageId, layout: { nodes: v.nodes, edges: v.edges } as Prisma.InputJsonValue, folderId: v.folderId }
-        });
-    }
-
     revalidatePath('/modeler');
+    console.log(`✅ Transactional save complete for ${packageId}`);
 }
+

@@ -12,12 +12,13 @@ import {
     Connection,
     Edge,
     Node,
+    addEdge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useEditorStore } from '@/store/useEditorStore';
 import ArchimateNode from './ArchimateNode';
 import ArchimateEdge from './ArchimateEdge';
-import { getValidRelationships, ARCHIMATE_RELATIONS, RelationshipType } from '@/lib/metamodel';
+import { getValidRelationships, ARCHIMATE_RELATIONS, RelationshipType, ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
 
 const ArchimateMarkers = () => (
     <svg style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }}>
@@ -57,37 +58,69 @@ const edgeTypes = {
     archimate: ArchimateEdge,
 };
 
+// Context menu state type
+interface CanvasContextMenu {
+    x: number;
+    y: number;
+    flowPosition: { x: number; y: number };
+}
+
 function EditorCanvasInner() {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const [connMenu, setConnMenu] = useState<{ x: number, y: number, params: Connection, options: RelationshipType[] } | null>(null);
+    const [contextMenu, setContextMenu] = useState<CanvasContextMenu | null>(null);
+    const [selectedLayer, setSelectedLayer] = useState<ArchimateLayer | null>(null);
 
     // Get active view data
     const {
         views, activeViewId,
         onNodesChange, onEdgesChange,
-        setEdges, addNode,
+        setEdges, addNode, addElement,
         deleteNode, deleteEdge,
         updateNodeParent,
-        selectedNode, selectedEdge
+        selectedNode, selectedEdge,
+        enabledElementTypes,
+        addRelation,
+        relations,
+        elements
     } = useEditorStore();
 
     const activeView = useMemo(() => views.find(v => v.id === activeViewId), [views, activeViewId]);
     const nodes = useMemo(() => activeView?.nodes || [], [activeView]);
     const edges = useMemo(() => activeView?.edges || [], [activeView]);
 
+    // Get folder ID from active view for placing new elements
+    const activeViewFolderId = activeView?.folderId || null;
+
     const { screenToFlowPosition } = useReactFlow();
 
     const createEdge = useCallback((params: Connection, type: RelationshipType) => {
+        const sourceNode = nodes.find(n => n.id === params.source);
+        const targetNode = nodes.find(n => n.id === params.target);
+
+        // Create visual edge
         const newEdge: Edge = {
-            ...params,
             id: `edge_${Date.now()}`,
+            source: params.source!,
+            target: params.target!,
             type: 'archimate',
             data: { type },
             selected: true,
         };
-        setEdges([...edges, newEdge]);
+        setEdges(addEdge(newEdge, edges));
+
+        // Create model relation if both nodes are linked to repository elements
+        if (sourceNode?.data?.elementId && targetNode?.data?.elementId) {
+            addRelation(
+                type,
+                sourceNode.data.elementId as string,
+                targetNode.data.elementId as string,
+                activeViewFolderId
+            );
+        }
+
         setConnMenu(null);
-    }, [edges, setEdges]);
+    }, [edges, setEdges, nodes, addRelation, activeViewFolderId]);
 
     const onConnect = useCallback((params: Connection) => {
         const sourceNode = nodes.find(n => n.id === params.source);
@@ -121,24 +154,52 @@ function EditorCanvasInner() {
     const onDrop = useCallback(
         (event: React.DragEvent) => {
             event.preventDefault();
-            const type = event.dataTransfer.getData('application/reactflow');
-            if (!type) return;
+
+            const paletteType = event.dataTransfer.getData('application/reactflow');
+            const modelBrowserElementId = event.dataTransfer.getData('application/archi-element');
+
+            if (!paletteType && !modelBrowserElementId) return;
 
             const position = screenToFlowPosition({
                 x: event.clientX,
                 y: event.clientY,
             });
 
+            let label = "";
+            let type = "";
+            let elementId = "";
+
+            if (modelBrowserElementId) {
+                // Dragging from Model Browser (Existing Element)
+                const existingElement = elements.find(e => e.id === modelBrowserElementId);
+                if (!existingElement) return;
+
+                label = existingElement.name;
+                type = existingElement.type;
+                elementId = existingElement.id;
+            } else {
+                // Dragging from Palette (New Element)
+                type = paletteType;
+                label = `New ${type.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')}`;
+                const newElement = addElement(label, type, activeViewFolderId);
+                elementId = newElement.id;
+            }
+
+            // Create Canvas Node linked to Element
             const newNode = {
                 id: `node_${Date.now()}`,
                 type: 'archimate',
                 position,
-                data: { label: `New ${type.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')}`, type: type },
+                data: {
+                    label,
+                    type,
+                    elementId // Link to repository
+                },
             };
 
             addNode(newNode);
         },
-        [screenToFlowPosition, addNode]
+        [screenToFlowPosition, addNode, addElement, activeViewFolderId, elements]
     );
 
     const onNodeDragStop = useCallback((_: React.MouseEvent, draggedNode: Node) => {
@@ -184,10 +245,64 @@ function EditorCanvasInner() {
                 deleteEdge(selectedEdge.id);
             }
         }
+        // Close context menu on Escape
+        if (event.key === 'Escape') {
+            setContextMenu(null);
+            setSelectedLayer(null);
+        }
     }, [selectedNode, selectedEdge, deleteNode, deleteEdge]);
 
+    // Right-click context menu handler
+    const onContextMenu = useCallback((event: React.MouseEvent) => {
+        event.preventDefault();
+        const flowPosition = screenToFlowPosition({
+            x: event.clientX,
+            y: event.clientY,
+        });
+        setContextMenu({ x: event.clientX, y: event.clientY, flowPosition });
+        setSelectedLayer(null);
+    }, [screenToFlowPosition]);
+
+    // Create element from context menu - adds to both canvas and repository
+    const createElementFromMenu = useCallback((type: string) => {
+        if (!contextMenu) return;
+
+        const meta = ARCHIMATE_METAMODEL[type];
+        const label = `New ${meta?.name || type}`;
+
+        // 1. Add to repository (same folder as active view)
+        const newElement = addElement(label, type, activeViewFolderId);
+
+        // 2. Add node to canvas
+        const newNode = {
+            id: `node_${Date.now()}`,
+            type: 'archimate',
+            position: contextMenu.flowPosition,
+            data: {
+                label,
+                type,
+                elementId: newElement.id // Link to repository
+            },
+        };
+        addNode(newNode);
+
+        // Close menu
+        setContextMenu(null);
+        setSelectedLayer(null);
+    }, [contextMenu, addElement, addNode, activeViewFolderId]);
+
+    // Group elements by layer for context menu (filtered by enabled types)
+    const elementsByLayer = useMemo(() => {
+        const layers: ArchimateLayer[] = ['strategy', 'business', 'application', 'technology', 'physical', 'motivation', 'implementation', 'other'];
+        return layers.map(layer => ({
+            layer,
+            items: Object.values(ARCHIMATE_METAMODEL)
+                .filter(item => item.layer === layer && enabledElementTypes.includes(item.id))
+        })).filter(group => group.items.length > 0);
+    }, [enabledElementTypes]);
+
     return (
-        <div ref={reactFlowWrapper} style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div ref={reactFlowWrapper} style={{ width: '100%', height: '100%', position: 'relative' }} onClick={() => { setContextMenu(null); setSelectedLayer(null); }}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -198,6 +313,7 @@ function EditorCanvasInner() {
                 onDragOver={onDragOver}
                 onNodeDragStop={onNodeDragStop}
                 onKeyDown={onKeyDown}
+                onContextMenu={onContextMenu}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 fitView
@@ -263,6 +379,97 @@ function EditorCanvasInner() {
                     </div>
                 )}
             </ReactFlow>
+
+            {/* Context Menu for creating ArchiMate elements */}
+            {contextMenu && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        left: contextMenu.x,
+                        top: contextMenu.y,
+                        zIndex: 1001,
+                        background: 'white',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                        minWidth: '180px',
+                        padding: '4px'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div style={{ fontSize: '10px', fontWeight: 600, color: '#888', padding: '6px 12px', borderBottom: '1px solid #eee', marginBottom: '4px' }}>
+                        CREATE ELEMENT
+                    </div>
+                    {elementsByLayer.map(group => (
+                        <div key={group.layer} style={{ position: 'relative' }}>
+                            <button
+                                onMouseEnter={() => setSelectedLayer(group.layer)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    border: 'none',
+                                    background: selectedLayer === group.layer ? '#f5f5f5' : 'transparent',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    borderRadius: '4px',
+                                    textTransform: 'capitalize'
+                                }}
+                            >
+                                {group.layer}
+                                <span style={{ color: '#aaa' }}>▶</span>
+                            </button>
+
+                            {/* Submenu for layer elements */}
+                            {selectedLayer === group.layer && (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        left: '100%',
+                                        top: 0,
+                                        marginLeft: '4px',
+                                        background: 'white',
+                                        border: '1px solid #e0e0e0',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                                        minWidth: '200px',
+                                        maxHeight: '300px',
+                                        overflowY: 'auto',
+                                        padding: '4px'
+                                    }}
+                                >
+                                    {group.items.map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => createElementFromMenu(item.id)}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                width: '100%',
+                                                padding: '6px 10px',
+                                                border: 'none',
+                                                background: 'transparent',
+                                                fontSize: '11px',
+                                                cursor: 'pointer',
+                                                borderRadius: '4px',
+                                                textAlign: 'left',
+                                            }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                        >
+                                            <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: item.color }} />
+                                            {item.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

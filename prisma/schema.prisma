@@ -48,6 +48,7 @@ model ModelPackage {
   folders     Folder[]
   elements    ArchiElement[]
   views       ArchiView[]
+  relations   ArchiRelation[]
   
   @@map("model_packages")
 }
@@ -64,24 +65,36 @@ model Folder {
   package     ModelPackage @relation(fields: [packageId], references: [id])
   
   views       ArchiView[]
+  elements    ArchiElement[]
+  relations   ArchiRelation[]
   
   @@map("folders")
 }
 
 model ArchiElement {
-  id          String   @id @default(uuid())
-  externalId  String?  // For import/export ArchiMate ID
-  name        String
-  type        String   // Concept type (e.g., 'business-process')
-  properties  Json?    // key-value pairs
+  id            String   @id @default(uuid())
+  externalId    String?  // For import/export ArchiMate ID
+  name          String
+  type          String   // Concept type (e.g., 'business-process')
+  description   String?  // RW - Short description
+  documentation String?  // RW - Detailed documentation
+  properties    Json?    // key-value pairs
   
-  packageId   String
-  package     ModelPackage @relation(fields: [packageId], references: [id])
+  // Read-only metadata (system-generated)
+  createdAt     DateTime @default(now())  // RO - Creation timestamp
+  modifiedAt    DateTime @default(now()) @updatedAt       // RO - Last modification timestamp
+  author        String?                   // RO - Creator user ID
   
+  packageId     String
+  package       ModelPackage @relation(fields: [packageId], references: [id])
+  
+  folderId      String?
+  folder        Folder?      @relation(fields: [folderId], references: [id])
+
   // Relations where this is source
-  outRels     ArchiRelation[] @relation("RelSource")
+  outRels       ArchiRelation[] @relation("RelSource")
   // Relations where this is target
-  inRels      ArchiRelation[] @relation("RelTarget")
+  inRels        ArchiRelation[] @relation("RelTarget")
 
   @@map("archi_elements")
 }
@@ -89,6 +102,7 @@ model ArchiElement {
 model ArchiRelation {
   id          String   @id @default(uuid())
   type        String   // Relation type (e.g., 'composition')
+  name        String?
   
   sourceId    String
   source      ArchiElement @relation("RelSource", fields: [sourceId], references: [id])
@@ -96,6 +110,12 @@ model ArchiRelation {
   targetId    String
   target      ArchiElement @relation("RelTarget", fields: [targetId], references: [id])
   
+  packageId   String
+  package     ModelPackage @relation(fields: [packageId], references: [id])
+
+  folderId    String?
+  folder      Folder?      @relation(fields: [folderId], references: [id])
+
   properties  Json?
 
   @@map("archi_relations")
@@ -119,3 +139,40 @@ model ArchiView {
 
   @@map("archi_views")
 }
+
+// Custom Data Blocks for extending elements with custom attributes
+model DataBlock {
+  id          String   @id @default(uuid())
+  name        String
+  targetTypes String[] // Array of element/relation type IDs this block applies to
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  attributes  DataBlockAttribute[]
+  
+  @@map("data_blocks")
+}
+
+model DataBlockAttribute {
+  id          String   @id @default(uuid())
+  name        String   // Display name
+  key         String   // Internal key (e.g., risk_level)
+  type        String   // 'string' | 'number' | 'date' | 'enum'
+  enumValues  String[] // Only for 'enum' type
+  sortOrder   Int      @default(0)
+  
+  blockId     String
+  block       DataBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  @@map("data_block_attributes")
+}
+
+// Global Application Settings
+model AppSettings {
+  id                  String   @id @default("global")
+  enabledElementTypes String[] // Array of enabled element type IDs
+  updatedAt           DateTime @updatedAt
+  
+  @@map("app_settings")
+}
+

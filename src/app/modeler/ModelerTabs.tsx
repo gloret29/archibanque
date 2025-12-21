@@ -10,9 +10,12 @@ import { checkOutView, checkInView } from '@/actions/view-lock';
 const CURRENT_USER_ID = 'demo-user';
 
 const ModelerTabs = () => {
-    const { views, activeViewId, setActiveView, addView, deleteView } = useEditorStore();
+    const { views, openViewIds, activeViewId, setActiveView, addView, closeView } = useEditorStore();
     const [lockedViews, setLockedViews] = useState<Record<string, { lockedBy: string; lockedAt?: Date }>>({});
     const [isLocking, setIsLocking] = useState(false);
+
+    // Get the open views (filter views by openViewIds)
+    const openViews = views.filter(v => openViewIds.includes(v.id));
 
     const handleCheckOut = useCallback(async (viewId: string) => {
         setIsLocking(true);
@@ -62,7 +65,7 @@ const ModelerTabs = () => {
     return (
         <div className={styles.tabBar}>
             <div className={styles.tabsList}>
-                {views.map(view => {
+                {openViews.map(view => {
                     const lockStatus = getViewLockStatus(view.id);
                     const isActive = view.id === activeViewId;
 
@@ -115,21 +118,20 @@ const ModelerTabs = () => {
                                 </button>
                             )}
 
-                            {views.length > 1 && (
-                                <button
-                                    className={styles.closeTab}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (lockStatus) {
-                                            alert('Cannot close a locked view. Check it in first.');
-                                            return;
-                                        }
-                                        deleteView(view.id);
-                                    }}
-                                >
-                                    ×
-                                </button>
-                            )}
+                            {/* Close button - closes tab but keeps view in repository */}
+                            <button
+                                className={styles.closeTab}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (lockStatus) {
+                                        alert('Cannot close a locked view. Check it in first.');
+                                        return;
+                                    }
+                                    closeView(view.id);
+                                }}
+                            >
+                                ×
+                            </button>
                         </div>
                     );
                 })}

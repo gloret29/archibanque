@@ -89,7 +89,63 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Interface graphique permettant de visualiser et de résoudre les différences entre deux versions d'un modèle.*
   *Garantit une fusion propre des contributions de différents experts de domaine dans le socle commun.*
 
-## � Phase 5: Advanced Visualization & "Onion" Diagrams
+## ✅ Phase 4.5: Enhanced Workspace & Repository Management (COMPLETED - Dec 2024)
+*Objective: Professional-grade repository navigation and element creation.*
+- [x] **Split Sidebar Layout**: Model Browser and ArchiMate Palette visible simultaneously.
+  *Affichage simultané du navigateur de modèle et de la palette pour une modélisation plus rapide.*
+  *Élimine les allers-retours entre les onglets lors de la création intensive de diagrammes.*
+- [x] **Enhanced Model Browser**:
+  - [x] **Unlimited Folder Depth**: Support for creating deeply nested folder hierarchies.
+    *Structure arborescente illimitée pour organiser le modèle selon la complexité de l'entreprise.*
+  - [x] **Drag-and-Drop Reorganization**: Move folders, views, and elements by dragging.
+    *Réorganisation intuitive du référentiel par simple glisser-déposer des éléments.*
+  - [x] **Context Menu Actions**: Right-click to rename, delete, or create new items.
+    *Actions rapides accessibles d'un clic droit pour gérer les objets du référentiel.*
+  - [x] **Repository Elements**: Elements exist independently in repository, linked to views.
+    *Séparation propre entre les concepts du référentiel et leur apparition sur les vues.*
+- [x] **Canvas Context Menu**: Right-click to create ArchiMate elements directly on diagram.
+  *Création rapide d'objets ArchiMate par clic droit sur le canevas avec menu par couche.*
+  *Les éléments créés sont automatiquement ajoutés au même dossier que la vue active.*
+- [x] **View/Element Rename**: Inline editing for quick renaming of any repository item.
+  *Modification instantanée des noms sans dialogue modal pour fluidifier le travail.*
+- [x] **Hydration Fix**: Resolved React 19 / Next.js 15 SSR issues with Zustand stores.
+  *Correction technique permettant le fonctionnement stable de l'application avec les dernières versions.*
+
+## ✅ Phase 5: Administration & Metamodel Compliance (COMPLETED - Dec 2024)
+*Objective: Full ArchiMate standard support and administration controls.*
+- [x] **Full ArchiMate 3.2 Metamodel**: Implementation of all elements across 7 layers.
+  *Support complet de tous les concepts ArchiMate (Strategy, Physical, Implementation, etc.).*
+  *Conformité stricte avec le standard pour garantir l'interopérabilité et la richesse sémantique.*
+- [x] **Administration Module**: Dedicated interface to manage element visibility.
+  *Nouvel espace administrateur permettant d'activer ou désactiver globalement des types d'objets.*
+  *Permet de simplifier la palette pour des audiences spécifiques ou de restreindre l'usage à un sous-ensemble standardisé.*
+- [x] **Dynamic UI Filtering**: Real-time updates of Palette and Context Menus.
+  *Filtrage instantané des outils disponibles dans toute l'interface (Palette, Menus Clic-droit, Navigateur).*
+  *Assure que les utilisateurs ne voient que les objets autorisés par la configuration du projet.*
+
+## ✅ Phase 5.5: Full PostgreSQL Persistence & DataBlocks (COMPLETED - Dec 2024)
+*Objective: Complete database persistence for all architecture data.*
+- [x] **Full Repository Persistence**: Elements, Relations, Views, Folders saved to PostgreSQL.
+  *Sauvegarde complète de tous les objets du référentiel (éléments, relations, vues, dossiers) dans la base PostgreSQL.*
+  *Garantit que le travail des architectes n'est jamais perdu et peut être récupéré à tout moment.*
+- [x] **DataBlocks System**: Custom attribute definitions for extending ArchiMate objects.
+  *Système de blocs de données permettant de créer des attributs personnalisés pour enrichir les concepts ArchiMate.*
+  *Supporte les types String, Number, Date et Enum (avec liste de valeurs configurables).*
+- [x] **Settings Persistence**: Global application settings (element visibility) stored in database.
+  *Sauvegarde des paramètres d'administration (visibilité des éléments) directement en base de données.*
+  *Configuration partagée entre tous les utilisateurs de l'instance.*
+- [x] **API Layer**: RESTful endpoints for DataBlocks and Settings CRUD operations.
+  *API complète pour la gestion des DataBlocks et des Settings via des endpoints REST standards.*
+  *Permet l'intégration future avec des outils externes et l'automatisation.*
+- [x] **Auto-load on Startup**: Automatic data loading from database when app initializes.
+  *Chargement automatique des données du référentiel, des DataBlocks et des Settings au démarrage de l'application.*
+  *Expérience utilisateur fluide sans action manuelle requise pour retrouver son travail.*
+- [x] **Tailwind CSS v3**: Proper styling framework integration for Admin UI.
+  *Installation et configuration de Tailwind CSS v3 pour un design moderne et cohérent de l'interface d'administration.*
+  *Design premium avec animations, effets de survol et feedback visuel professionnel.*
+
+
+## 🧅 Phase 6: Advanced Visualization & "Onion" Diagrams
 *Objective: Transform static diagrams into interactive heatmaps.*
 - [ ] **Color Views**: Dynamic coloring of nodes based on attributes (e.g., Cost > $10k = Red).
   *Mise en évidence automatique des objets en fonction de critères de performance, de coût ou de risque.*
@@ -104,7 +160,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Génération d'exports graphiques de qualité professionnelle pour l'inclusion dans des présentations ou documents PDF.*
   *Assure que les architectures dessinées sont diffusables proprement à tous les échelons de l'entreprise.*
 
-## 👁️ Phase 6: "Horizzon" Portal - Collaborative Consumption
+## 👁️ Phase 7: "Horizzon" Portal - Collaborative Consumption
 *Objective: Democratize architecture access for non-expert users.*
 - [ ] **Read-only Web Portal**: Streamlined interface for stakeholders (Consumers).
   *Interface simplifiée permettant à n'importe quel employé de consulter l'architecture sans risque de la modifier.*
@@ -119,7 +175,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Stockage des explications, des raisons des choix techniques et des connaissances historiques du SI.*
   *Évite la perte de savoir lors des départs de collaborateurs clés en le centralisant dans l'outil.*
 
-## ⚙️ Phase 7: Business Architecture & Excellence (BPMN/DMN)
+## ⚙️ Phase 8: Business Architecture & Excellence (BPMN/DMN)
 *Objective: Drill-down from EA to operational process detail.*
 - [ ] **BPMN 2.0 Module**: Native process modeling within the same repository.
   *Support complet du standard BPMN 2.0 pour dessiner des diagrammes de processus métier ultra-détaillés.*
@@ -134,7 +190,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Capacité d'importer des logs d'exécution réels pour comparer le processus modélisé au processus exécuté.*
   *Identifie les goulots d'étranglement et les dérives opérationnelles par rapport à l'architecture cible.*
 
-## 🛡️ Phase 8: Strategic Portfolio Management (SPM/APM)
+## 🛡️ Phase 9: Strategic Portfolio Management (SPM/APM)
 *Objective: Data-driven decision making for IT investment.*
 - [ ] **Capability-Based Planning**: Hierarchical capability maps with performance metrics.
   *Visualisation synthétique des capacités de l'entreprise liées à leur niveau de maturité et leur importance.*
@@ -149,7 +205,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Visualisation de la répartition des budgets SI par rapport aux objectifs stratégiques de l'entreprise.*
   *Assure que chaque euro dépensé contribue directement à la valeur ajoutée métier attendue.*
 
-## 📋 Phase 9: Model Governance & Data Quality
+## 📋 Phase 10: Model Governance & Data Quality
 *Objective: The "Model Governance" add-in experience.*
 - [ ] **Cataloging Rules**: Automated naming convention checks and uniqueness constraints.
   *Moteur de règles vérifiant la qualité des noms et évitant la création de doublons dans le référentiel.*
@@ -164,7 +220,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Interface regroupant toutes les demandes de validation en attente pour un contributeur donné.*
   *Optimise le temps des architectes seniors en fluidifiant le processus de passage en revue.*
 
-## 🔌 Phase 10: Enterprise Ecosystem (Integrations)
+## 🔌 Phase 11: Enterprise Ecosystem (Integrations)
 *Objective: Connect the "Golden Thread" to the rest of the IT stack.*
 - [ ] **ServiceNow Connector**: Bidirectional sync with ServiceNow CSDM (Applications, Servers).
   *Réconciliation automatique entre le référentiel d'architecture et la base de données opérationnelle (CMDB).*
@@ -179,7 +235,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Exposition programmatique de toutes les données du modèle pour créer des outils personnalisés.*
   *Permet d'alimenter des tableaux de bord Power BI ou de connecter des outils tiers spécifiques.*
 
-## 🍃 Phase 11: Sustainability & Risk (Green EA / FAIR)
+## 🍃 Phase 12: Sustainability & Risk (Green EA / FAIR)
 *Objective: Future-proofing the architecture for ESG and Security.*
 - [ ] **Carbon Footprint Modeling**: Import energy consumption data per server/app.
   *Attribution de scores d'émission de gaz à effet de serre à chaque composant de l'infrastructure IT.*
@@ -191,7 +247,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Calcul scientifique du risque cyber basé sur des probabilités et des impacts financiers réels.*
   *Transforme les inquiétudes techniques en données chiffrées actionnables pour les comités de direction.*
 
-## ✨ Phase 12: AI-Assisted Architecture (SmartPack)
+## ✨ Phase 13: AI-Assisted Architecture (SmartPack)
 *Objective: Accelerate modeling with Generative AI.*
 - [ ] **Diagram Importer**: OCR/Vision to convert static images into live ArchiMate nodes.
   *Capture intelligente de photos de tableaux blancs ou de vieux diagrammes Visio pour les digitaliser.*

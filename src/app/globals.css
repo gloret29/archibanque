@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Archimate Standard Colors (Pastels) */
   --archimate-business: #ffffb5;
@@ -15,7 +19,7 @@
   --border: #e5e5e5;
   --primary: #0070f3;
   --primary-foreground: #ffffff;
-  
+
   /* Layout */
   --header-height: 60px;
   --sidebar-width: 280px;
@@ -67,12 +71,29 @@ a {
   min-height: 50px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #000; /* Always black text specifically for boxes */
+  color: #000;
 }
 
-.type-business { background-color: var(--archimate-business); }
-.type-application { background-color: var(--archimate-application); }
-.type-technology { background-color: var(--archimate-technology); }
-.type-strategy { background-color: var(--archimate-strategy); }
-.type-motivation { background-color: var(--archimate-motivation); }
-.type-implementation { background-color: var(--archimate-implementation); }
+.type-business {
+  background-color: var(--archimate-business);
+}
+
+.type-application {
+  background-color: var(--archimate-application);
+}
+
+.type-technology {
+  background-color: var(--archimate-technology);
+}
+
+.type-strategy {
+  background-color: var(--archimate-strategy);
+}
+
+.type-motivation {
+  background-color: var(--archimate-motivation);
+}
+
+.type-implementation {
+  background-color: var(--archimate-implementation);
+}

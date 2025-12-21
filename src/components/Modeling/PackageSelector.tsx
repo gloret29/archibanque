@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useEditorStore, ModelPackage, ArchimateFolder, ArchimateView } from '@/store/useEditorStore';
+import { useEditorStore, ModelPackage, ArchimateFolder, ArchimateView, ModelElement, ModelRelation } from '@/store/useEditorStore';
 import { getModelPackages, createModelPackage, loadPackageData } from '@/actions/repository';
 import { Package, Plus, ChevronDown, Loader2 } from 'lucide-react';
 
@@ -17,6 +17,13 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
     const [newDescription, setNewDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Handle hydration - set mounted first
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Only access store after mounting to avoid hydration issues with Zundo
+    const storeState = useEditorStore();
     const {
         packages,
         currentPackageId,
@@ -24,20 +31,15 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
         setCurrentPackage,
         addPackage,
         loadFromServer
-    } = useEditorStore();
+    } = storeState;
 
-    const currentPackage = packages.find(p => p.id === currentPackageId);
+    const currentPackage = mounted ? packages.find(p => p.id === currentPackageId) : null;
 
-    // Handle hydration
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    // Load packages on mount
+    // Load packages on mount and auto-load first package data
     useEffect(() => {
         if (!mounted) return;
 
-        const loadPackages = async () => {
+        const loadPackagesAndData = async () => {
             try {
                 const serverPackages = await getModelPackages();
                 if (serverPackages.length > 0) {
@@ -49,13 +51,32 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                         updatedAt: p.updatedAt
                     }));
                     setPackages(mapped);
+
+                    // Auto-load first package if no current package is set
+                    const packageToLoad = mapped[0];
+                    if (packageToLoad) {
+                        setIsLoading(true);
+                        const data = await loadPackageData(packageToLoad.id);
+                        if (data) {
+                            setCurrentPackage(packageToLoad.id);
+                            loadFromServer(
+                                packageToLoad.id,
+                                data.folders as ArchimateFolder[],
+                                data.views as ArchimateView[],
+                                data.elements as ModelElement[],
+                                data.relations as ModelRelation[]
+                            );
+                        }
+                        setIsLoading(false);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load packages:', err);
+                setIsLoading(false);
             }
         };
-        loadPackages();
-    }, [mounted, setPackages]);
+        loadPackagesAndData();
+    }, [mounted, setPackages, setCurrentPackage, loadFromServer]);
 
     const handleSelectPackage = useCallback(async (packageId: string) => {
         setIsLoading(true);
@@ -67,7 +88,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                 loadFromServer(
                     packageId,
                     data.folders as ArchimateFolder[],
-                    data.views as ArchimateView[]
+                    data.views as ArchimateView[],
+                    data.elements as ModelElement[],
+                    data.relations as ModelRelation[]
                 );
             }
         } catch (err) {
@@ -90,7 +113,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                 id: pkg.id
             }]);
             setCurrentPackage(pkg.id);
-            loadFromServer(pkg.id, [], []);
+            loadFromServer(pkg.id, [], [], [], []);
             setNewName('');
             setNewDescription('');
             setIsCreateOpen(false);
