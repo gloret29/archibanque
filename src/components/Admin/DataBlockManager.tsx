@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useEditorStore, DataBlock, DataBlockAttribute, AttributeType } from '@/store/useEditorStore';
 import { syncDataBlocks } from '@/actions/datablocks';
 import { ARCHIMATE_METAMODEL, ARCHIMATE_RELATIONS, ArchimateLayer } from '@/lib/metamodel';
