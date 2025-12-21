@@ -56,9 +56,28 @@ const PropertiesPanel = () => {
         ? views.find(v => v.id === selectedObject.id)
         : (!selectedObject && !selectedNode && !selectedEdge && activeViewId ? views.find(v => v.id === activeViewId) : null);
 
-    const repoRelation = selectedObject?.type === 'relation'
+    let repoRelation = selectedObject?.type === 'relation'
         ? relations.find(r => r.id === selectedObject.id)
-        : null; // TODO: Link edge to relation
+        : null;
+
+    // Fallback: Try to find implicit relation from selectedEdge if not explicitly linked
+    if (!repoRelation && selectedEdge && activeViewId) {
+        const activeView = views.find(v => v.id === activeViewId);
+        if (activeView) {
+            const sourceNode = activeView.nodes.find(n => n.id === selectedEdge.source);
+            const targetNode = activeView.nodes.find(n => n.id === selectedEdge.target);
+            const type = selectedEdge.data?.type as string;
+
+            if (sourceNode?.data?.elementId && targetNode?.data?.elementId && type) {
+                // Find matching relation in repository
+                repoRelation = relations.find(r =>
+                    r.sourceId === sourceNode.data.elementId &&
+                    r.targetId === targetNode.data.elementId &&
+                    r.type === type
+                ) || null;
+            }
+        }
+    }
 
     // Helper to check if we are editing a visual node (for Style tab)
     const isVisualNode = !!selectedNode;

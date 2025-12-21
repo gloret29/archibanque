@@ -145,6 +145,16 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Design premium avec animations, effets de survol et feedback visuel professionnel.*
 
 
+
+## ✅ Phase 5.8: Properties Panel & UX Enhancements (COMPLETED - Dec 2024)
+*Objective: Unify metadata experience across all object types.*
+- [x] **Relation & View Metadata**: Full support for Description, Documentation, and Timestamps (Created/Modified) for Relations and Views.
+  *Affichage et édition complets des propriétés pour les relations et les vues, au même titre que les éléments.*
+  *Traçabilité assurée grâce aux métadonnées automatiques (date de création, modification, auteur).*
+- [x] **Diagram-to-Repository Link**: Selecting a relation on the canvas selects the repository object.
+  *Synchronisation parfaite entre le diagramme visuel et le modèle de données.*
+  *L'utilisateur peut éditer les propriétés d'une relation directement depuis le dessin, sans passer par l'arborescence.*
+
 ## 🧅 Phase 6: Advanced Visualization & "Onion" Diagrams
 *Objective: Transform static diagrams into interactive heatmaps.*
 - [ ] **Color Views**: Dynamic coloring of nodes based on attributes (e.g., Cost > $10k = Red).

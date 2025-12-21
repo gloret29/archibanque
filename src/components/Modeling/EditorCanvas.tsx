@@ -98,26 +98,29 @@ function EditorCanvasInner() {
         const sourceNode = nodes.find(n => n.id === params.source);
         const targetNode = nodes.find(n => n.id === params.target);
 
+        let relationId: string | undefined;
+
+        // Create model relation if both nodes are linked to repository elements
+        if (sourceNode?.data?.elementId && targetNode?.data?.elementId) {
+            const rel = addRelation(
+                type,
+                sourceNode.data.elementId as string,
+                targetNode.data.elementId as string,
+                activeViewFolderId
+            );
+            relationId = rel.id;
+        }
+
         // Create visual edge
         const newEdge: Edge = {
             id: `edge_${Date.now()}`,
             source: params.source!,
             target: params.target!,
             type: 'archimate',
-            data: { type },
+            data: { type, relationId },
             selected: true,
         };
         setEdges(addEdge(newEdge, edges));
-
-        // Create model relation if both nodes are linked to repository elements
-        if (sourceNode?.data?.elementId && targetNode?.data?.elementId) {
-            addRelation(
-                type,
-                sourceNode.data.elementId as string,
-                targetNode.data.elementId as string,
-                activeViewFolderId
-            );
-        }
 
         setConnMenu(null);
     }, [edges, setEdges, nodes, addRelation, activeViewFolderId]);

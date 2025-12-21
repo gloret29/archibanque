@@ -701,10 +701,25 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
 
         set(state => {
             const selected = updatedEdges.find(e => e.selected) || null;
+
+            // Sync selectedObject with edge selection
+            let newSelectedObject = state.selectedObject;
+            if (selected) {
+                if (selected.data?.relationId) {
+                    newSelectedObject = { type: 'relation', id: selected.data.relationId as string };
+                } else {
+                    newSelectedObject = null;
+                }
+            } else if (!state.selectedNode) {
+                // If neither node nor edge is selected, clear selection
+                newSelectedObject = null;
+            }
+
             return {
                 views: updatedViews,
                 selectedEdge: selected,
-                selectedNode: selected ? null : state.selectedNode
+                selectedNode: selected ? null : state.selectedNode,
+                selectedObject: newSelectedObject
             };
         });
     },

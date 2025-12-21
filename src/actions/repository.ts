@@ -198,15 +198,25 @@ export async function saveRepositoryState(
                 where: { id: r.id },
                 update: {
                     type: r.type,
-                    folderId: r.folderId
+                    name: r.name,
+                    folderId: r.folderId,
+                    description: r.description,
+                    documentation: r.documentation,
+                    modifiedAt: r.modifiedAt || new Date()
                 },
                 create: {
                     id: r.id,
                     type: r.type,
+                    name: r.name,
                     sourceId: r.sourceId,
                     targetId: r.targetId,
                     packageId,
-                    folderId: r.folderId
+                    folderId: r.folderId,
+                    description: r.description,
+                    documentation: r.documentation,
+                    createdAt: r.createdAt || new Date(),
+                    modifiedAt: r.modifiedAt || new Date(),
+                    author: r.author
                 }
             });
         }
@@ -218,14 +228,22 @@ export async function saveRepositoryState(
                 update: {
                     name: v.name,
                     layout: { nodes: v.nodes, edges: v.edges } as Prisma.InputJsonValue,
-                    folderId: v.folderId
+                    folderId: v.folderId,
+                    description: v.description,
+                    documentation: v.documentation,
+                    modifiedAt: v.modifiedAt || new Date()
                 },
                 create: {
                     id: v.id,
                     name: v.name,
                     packageId,
                     layout: { nodes: v.nodes, edges: v.edges } as Prisma.InputJsonValue,
-                    folderId: v.folderId
+                    folderId: v.folderId,
+                    description: v.description,
+                    documentation: v.documentation,
+                    createdAt: v.createdAt || new Date(),
+                    modifiedAt: v.modifiedAt || new Date(),
+                    author: v.author
                 }
             });
         }
