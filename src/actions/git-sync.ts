@@ -226,15 +226,14 @@ export async function importPackageFromGit(packageDir: string): Promise<{ succes
                 update: {
                     type: relation.type,
                     sourceId: relation.sourceId,
-                    targetId: relation.targetId,
-                    properties: relation.properties as object
+                    targetId: relation.targetId
                 },
                 create: {
                     id: relation.id,
                     type: relation.type,
                     sourceId: relation.sourceId,
                     targetId: relation.targetId,
-                    properties: relation.properties as object
+                    packageId: pkg.id
                 }
             });
         }
