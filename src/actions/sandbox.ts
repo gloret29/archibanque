@@ -106,7 +106,7 @@ export async function createSandbox(
                             type: rel.type,
                             sourceId: newSourceId,
                             targetId: newTargetId,
-                            properties: rel.properties as object || undefined
+                            packageId: sandbox.id
                         }
                     });
                 }
