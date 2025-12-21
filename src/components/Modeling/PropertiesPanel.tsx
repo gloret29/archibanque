@@ -39,9 +39,10 @@ const PropertiesPanel = () => {
         deleteNode, deleteEdge,
         updateNodeData, updateEdgeData,
         elements, views, relations, activeViewId,
-        updateElementDescription,
-        updateElementDocumentation,
-        renameElement, renameView
+        updateElementDescription, updateElementDocumentation,
+        updateViewDescription, updateViewDocumentation,
+        updateRelationDescription, updateRelationDocumentation,
+        renameElement, renameView, renameRelation
     } = useEditorStore();
 
     // Determine the subject of editing
@@ -70,21 +71,27 @@ const PropertiesPanel = () => {
             setLocalDocumentation(repoElement.documentation || '');
         } else if (repoView) {
             setLocalName(repoView.name || '');
-            setLocalDescription(''); // View description not yet in store?
-            setLocalDocumentation('');
+            setLocalDescription(repoView.description || '');
+            setLocalDocumentation(repoView.documentation || '');
+        } else if (repoRelation) {
+            setLocalName(repoRelation.name || '');
+            setLocalDescription(repoRelation.description || '');
+            setLocalDocumentation(repoRelation.documentation || '');
         } else if (selectedNode) {
             // Node without repo element (e.g. Note)
             setLocalName((selectedNode.data.label as string) || '');
             setLocalDescription((selectedNode.data.description as string) || '');
             setLocalDocumentation('');
         }
-    }, [repoElement?.id, repoElement?.modifiedAt, repoView?.id, selectedNode?.id]);
+    }, [repoElement?.id, repoElement?.modifiedAt, repoView?.id, repoView?.modifiedAt, repoRelation?.id, repoRelation?.modifiedAt, selectedNode?.id]);
 
     const handleNameSubmit = () => {
         if (repoElement && localName !== repoElement.name) {
             renameElement(repoElement.id, localName);
         } else if (repoView && localName !== repoView.name) {
             renameView(repoView.id, localName);
+        } else if (repoRelation && localName !== repoRelation.name) {
+            renameRelation(repoRelation.id, localName);
         } else if (selectedNode && !repoElement && localName !== selectedNode.data.label) {
             updateNodeData(selectedNode.id, { label: localName });
         }
@@ -93,6 +100,10 @@ const PropertiesPanel = () => {
     const handleDescriptionSubmit = () => {
         if (repoElement && localDescription !== repoElement.description) {
             updateElementDescription(repoElement.id, localDescription);
+        } else if (repoView && localDescription !== repoView.description) {
+            updateViewDescription(repoView.id, localDescription);
+        } else if (repoRelation && localDescription !== repoRelation.description) {
+            updateRelationDescription(repoRelation.id, localDescription);
         } else if (selectedNode && !repoElement && localDescription !== selectedNode.data.description) {
             updateNodeData(selectedNode.id, { description: localDescription });
         }
@@ -101,6 +112,10 @@ const PropertiesPanel = () => {
     const handleDocumentationSubmit = () => {
         if (repoElement && localDocumentation !== repoElement.documentation) {
             updateElementDocumentation(repoElement.id, localDocumentation);
+        } else if (repoView && localDocumentation !== repoView.documentation) {
+            updateViewDocumentation(repoView.id, localDocumentation);
+        } else if (repoRelation && localDocumentation !== repoRelation.documentation) {
+            updateRelationDocumentation(repoRelation.id, localDocumentation);
         }
     };
 
@@ -114,15 +129,32 @@ const PropertiesPanel = () => {
         );
     }
 
-    const editingObject = repoElement || repoView || selectedNode;
+    const editingObject = repoElement || repoView || repoRelation || selectedNode;
 
     if (editingObject) {
         // Determine type and display info
-        const nodeType = repoElement ? repoElement.type : (selectedNode?.data?.type as string || 'view');
-        const isView = !!repoView || (editingObject === selectedNode && !repoElement && !ARCHIMATE_METAMODEL[nodeType]); // Simplified check
+        let nodeType = '';
+        let displayType = 'Element';
+        let meta: any = null;
 
-        const meta = ARCHIMATE_METAMODEL[nodeType];
-        const displayType = isView ? 'Architecture View' : (meta?.name || 'Element');
+        if (repoElement) {
+            nodeType = repoElement.type;
+            meta = ARCHIMATE_METAMODEL[nodeType];
+            displayType = meta?.name || 'Element';
+        } else if (repoView) {
+            nodeType = 'archimate-view';
+            displayType = 'Architecture View';
+        } else if (repoRelation) {
+            nodeType = repoRelation.type;
+            meta = ARCHIMATE_RELATIONS[nodeType as RelationshipType];
+            displayType = meta?.name || 'Relationship';
+        } else if (selectedNode) {
+            nodeType = selectedNode.data.type as string;
+            meta = ARCHIMATE_METAMODEL[nodeType];
+            displayType = meta?.name || 'Element';
+        }
+
+        const repoObject = repoElement || repoView || repoRelation;
 
         // Style properties with defaults (only if visual node)
         const nodeStyles = selectedNode ? {
@@ -167,6 +199,7 @@ const PropertiesPanel = () => {
                             Delete
                         </button>
                     )}
+                    {/* Allow deleting relation if selected from browser? Maybe later. */}
                 </div>
 
                 {/* Tab Switcher */}
@@ -235,32 +268,30 @@ const PropertiesPanel = () => {
                                 />
                             </div>
 
-                            {/* Description - Available for Element and Note/Node */}
-                            {!isView && (
-                                <div style={{ marginBottom: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
-                                        Description
-                                    </label>
-                                    <textarea
-                                        value={localDescription}
-                                        onChange={(e) => setLocalDescription(e.target.value)}
-                                        onBlur={handleDescriptionSubmit}
-                                        placeholder="Add a description..."
-                                        style={{
-                                            width: '100%',
-                                            padding: '8px 10px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '6px',
-                                            fontSize: '12px',
-                                            minHeight: '80px',
-                                            resize: 'vertical'
-                                        }}
-                                    />
-                                </div>
-                            )}
+                            {/* Description - Universal */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    Description
+                                </label>
+                                <textarea
+                                    value={localDescription}
+                                    onChange={(e) => setLocalDescription(e.target.value)}
+                                    onBlur={handleDescriptionSubmit}
+                                    placeholder="Add a description..."
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px 10px',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        minHeight: '80px',
+                                        resize: 'vertical'
+                                    }}
+                                />
+                            </div>
 
-                            {/* Documentation (RW) - Only for Model Elements */}
-                            {repoElement && (
+                            {/* Documentation (RW) - Only for Repository Objects */}
+                            {repoObject && (
                                 <div style={{ marginBottom: '16px' }}>
                                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
                                         Documentation
@@ -284,7 +315,7 @@ const PropertiesPanel = () => {
                             )}
 
                             {/* Metadata Section (RO) - Only for Repository Objects */}
-                            {repoElement && (
+                            {repoObject && (
                                 <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #eee' }}>
                                     <h5 style={{ fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '12px', textTransform: 'uppercase' }}>
                                         Metadata (Read Only)
@@ -292,29 +323,30 @@ const PropertiesPanel = () => {
 
                                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 16px', fontSize: '11px' }}>
                                         <span style={{ color: '#888' }}>ID:</span>
-                                        <code style={{ fontFamily: 'monospace', color: '#444' }}>{repoElement.id}</code>
+                                        <code style={{ fontFamily: 'monospace', color: '#444' }}>{repoObject.id}</code>
 
+                                        {/* For view, type is not really stored in type field usually, or handled above */}
                                         <span style={{ color: '#888' }}>Type:</span>
-                                        <span style={{ color: '#444' }}>{repoElement.type}</span>
+                                        <span style={{ color: '#444' }}>{(repoObject as any).type || nodeType}</span>
 
                                         <span style={{ color: '#888' }}>Created:</span>
                                         <span style={{ color: '#444' }}>
-                                            {repoElement.createdAt ? new Date(repoElement.createdAt).toLocaleString() : '-'}
+                                            {repoObject.createdAt ? new Date(repoObject.createdAt).toLocaleString() : '-'}
                                         </span>
 
                                         <span style={{ color: '#888' }}>Modified:</span>
                                         <span style={{ color: '#444' }}>
-                                            {repoElement.modifiedAt ? new Date(repoElement.modifiedAt).toLocaleString() : '-'}
+                                            {repoObject.modifiedAt ? new Date(repoObject.modifiedAt).toLocaleString() : '-'}
                                         </span>
 
                                         <span style={{ color: '#888' }}>Author:</span>
-                                        <span style={{ color: '#444' }}>{repoElement.author || '-'}</span>
+                                        <span style={{ color: '#444' }}>{repoObject.author || '-'}</span>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Layer Badge - For elements/nodes with metamodel */}
-                            {meta && (
+                            {/* Layer Badge - For elements with metamodel */}
+                            {meta && meta.layer && (
                                 <div style={{ marginBottom: '16px' }}>
                                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
                                         Layer

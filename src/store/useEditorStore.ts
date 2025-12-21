@@ -23,6 +23,11 @@ export interface ArchimateView {
     nodes: Node[];
     edges: Edge[];
     folderId?: string;
+    description?: string;
+    documentation?: string;
+    createdAt?: Date;
+    modifiedAt?: Date;
+    author?: string;
 }
 
 export interface ArchimateFolder {
@@ -44,8 +49,8 @@ export interface ModelPackage {
 export interface ModelElement {
     id: string;
     name: string;
-    type: string; // ArchiMate type (e.g., 'business-actor', 'application-component')
-    folderId: string | null; // Parent folder in repository tree
+    type: string;
+    folderId: string | null;
     description?: string; // RW - Short description
     documentation?: string; // RW - Detailed documentation
     properties?: Record<string, string>;
@@ -62,6 +67,11 @@ export interface ModelRelation {
     sourceId: string;
     targetId: string;
     folderId: string | null;
+    description?: string;
+    documentation?: string;
+    createdAt?: Date;
+    modifiedAt?: Date;
+    author?: string;
 }
 
 export type AttributeType = 'string' | 'number' | 'date' | 'enum';
@@ -123,6 +133,8 @@ interface EditorState {
     deleteView: (viewId: string) => void; // Delete from repository
     renameView: (viewId: string, name: string) => void;
     moveView: (viewId: string, folderId: string | null) => void;
+    updateViewDescription: (viewId: string, description: string) => void;
+    updateViewDocumentation: (viewId: string, documentation: string) => void;
     addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => void;
     deleteFolder: (folderId: string) => void;
     renameFolder: (folderId: string, name: string) => void;
@@ -142,6 +154,8 @@ interface EditorState {
     deleteRelation: (relationId: string) => void;
     renameRelation: (relationId: string, name: string) => void;
     moveRelation: (relationId: string, folderId: string | null) => void;
+    updateRelationDescription: (relationId: string, description: string) => void;
+    updateRelationDocumentation: (relationId: string, documentation: string) => void;
 
     // DataBlock Actions
     addDataBlock: (name: string) => DataBlock;
@@ -396,13 +410,25 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
 
     renameView: (viewId: string, name: string) => {
         set({
-            views: get().views.map(v => v.id === viewId ? { ...v, name } : v)
+            views: get().views.map(v => v.id === viewId ? { ...v, name, modifiedAt: new Date() } : v)
         });
     },
 
     moveView: (viewId: string, folderId: string | null) => {
         set({
             views: get().views.map(v => v.id === viewId ? { ...v, folderId: folderId || undefined } : v)
+        });
+    },
+
+    updateViewDescription: (viewId: string, description: string) => {
+        set({
+            views: get().views.map(v => v.id === viewId ? { ...v, description, modifiedAt: new Date() } : v)
+        });
+    },
+
+    updateViewDocumentation: (viewId: string, documentation: string) => {
+        set({
+            views: get().views.map(v => v.id === viewId ? { ...v, documentation, modifiedAt: new Date() } : v)
         });
     },
 
@@ -548,13 +574,25 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
 
     renameRelation: (relationId: string, name: string) => {
         set({
-            relations: get().relations.map(r => r.id === relationId ? { ...r, name } : r)
+            relations: get().relations.map(r => r.id === relationId ? { ...r, name, modifiedAt: new Date() } : r)
         });
     },
 
     moveRelation: (relationId: string, folderId: string | null) => {
         set({
             relations: get().relations.map(r => r.id === relationId ? { ...r, folderId } : r)
+        });
+    },
+
+    updateRelationDescription: (relationId: string, description: string) => {
+        set({
+            relations: get().relations.map(r => r.id === relationId ? { ...r, description, modifiedAt: new Date() } : r)
+        });
+    },
+
+    updateRelationDocumentation: (relationId: string, documentation: string) => {
+        set({
+            relations: get().relations.map(r => r.id === relationId ? { ...r, documentation, modifiedAt: new Date() } : r)
         });
     },
 
