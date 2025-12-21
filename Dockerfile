@@ -2,6 +2,7 @@
 FROM node:20-bookworm AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
 RUN npm install
 
 # Stage 2: Build the application
