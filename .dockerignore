@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.env
+*.md
+LICENSE
+.dockerignore
+.gitignore
+.npmrc
+*.local
+out
+build
+dist
+.vscode
+.idea
+.agent
+.gemini

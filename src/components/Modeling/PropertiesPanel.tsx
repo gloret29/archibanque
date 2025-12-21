@@ -15,8 +15,11 @@ import {
     Type,
     Maximize2,
     Palette,
-    Database
+    Database,
+    Eye
 } from 'lucide-react';
+import ViewVisualizationPanel from './ViewVisualizationPanel';
+import OnionDiagramLayout from './OnionDiagramLayout';
 
 // Font options
 const FONT_FAMILIES = [
@@ -31,7 +34,7 @@ const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32];
 
 const PropertiesPanel = () => {
     const { theme } = useTheme();
-    const [activeSection, setActiveSection] = useState<'properties' | 'style'>('properties');
+    const [activeSection, setActiveSection] = useState<'properties' | 'style' | 'visualization'>('properties');
 
     const [localName, setLocalName] = useState('');
     const [localDescription, setLocalDescription] = useState('');
@@ -104,7 +107,7 @@ const PropertiesPanel = () => {
     // Find eligible DataBlocks for the current object type
     const eligibleDataBlocks = useMemo(() => {
         if (!repoElement && !repoRelation) return [];
-        
+
         const objectType = repoElement ? repoElement.type : (repoRelation ? repoRelation.type : null);
         if (!objectType) {
             console.log('[DataBlocks] No object type found');
@@ -129,7 +132,7 @@ const PropertiesPanel = () => {
     const getDataBlockValues = (block: DataBlock): Record<string, string> => {
         const repoObject = repoElement || repoRelation;
         if (!repoObject || !repoObject.properties) return {};
-        
+
         const blockData = repoObject.properties[block.id] as Record<string, string> | undefined;
         return blockData || {};
     };
@@ -141,7 +144,7 @@ const PropertiesPanel = () => {
 
         const currentValues = getDataBlockValues(block);
         const updatedValues = { ...currentValues, [attributeKey]: value };
-        
+
         const newProperties = {
             ...(repoObject.properties || {}),
             [block.id]: updatedValues
@@ -332,6 +335,26 @@ const PropertiesPanel = () => {
                             Style
                         </button>
                     )}
+                    {repoView && (
+                        <button
+                            onClick={() => setActiveSection('visualization')}
+                            style={{
+                                flex: 1,
+                                padding: '10px',
+                                border: 'none',
+                                background: activeSection === 'visualization' ? themeColors.background : themeColors.backgroundSecondary,
+                                borderBottom: activeSection === 'visualization' ? `2px solid var(--primary, #3366ff)` : '2px solid transparent',
+                                fontSize: '12px',
+                                fontWeight: activeSection === 'visualization' ? 600 : 400,
+                                cursor: 'pointer',
+                                color: themeColors.text,
+                                transition: 'background-color 0.2s, border-color 0.2s, color 0.2s',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                            }}
+                        >
+                            <Eye size={12} /> Visualization
+                        </button>
+                    )}
                 </div>
 
                 {/* Content */}
@@ -428,7 +451,7 @@ const PropertiesPanel = () => {
                                             Custom Attributes
                                         </h5>
                                     </div>
-                                    
+
                                     {eligibleDataBlocks.map(block => {
                                         const blockValues = getDataBlockValues(block);
                                         return (
@@ -436,16 +459,16 @@ const PropertiesPanel = () => {
                                                 <div style={{ fontSize: '12px', fontWeight: 600, color: themeColors.text, marginBottom: '12px' }}>
                                                     {block.name}
                                                 </div>
-                                                
+
                                                 {block.attributes.map(attr => {
                                                     const currentValue = blockValues[attr.key] || '';
-                                                    
+
                                                     return (
                                                         <div key={attr.id} style={{ marginBottom: '12px' }}>
                                                             <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: themeColors.textQuaternary, opacity: 0.8, marginBottom: '4px' }}>
                                                                 {attr.name}
                                                             </label>
-                                                            
+
                                                             {attr.type === 'string' && (
                                                                 <input
                                                                     type="text"
@@ -464,7 +487,7 @@ const PropertiesPanel = () => {
                                                                     }}
                                                                 />
                                                             )}
-                                                            
+
                                                             {attr.type === 'number' && (
                                                                 <input
                                                                     type="number"
@@ -483,7 +506,7 @@ const PropertiesPanel = () => {
                                                                     }}
                                                                 />
                                                             )}
-                                                            
+
                                                             {attr.type === 'date' && (
                                                                 <input
                                                                     type="date"
@@ -501,7 +524,7 @@ const PropertiesPanel = () => {
                                                                     }}
                                                                 />
                                                             )}
-                                                            
+
                                                             {attr.type === 'boolean' && (
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                                     <input
@@ -519,7 +542,7 @@ const PropertiesPanel = () => {
                                                                     </span>
                                                                 </div>
                                                             )}
-                                                            
+
                                                             {attr.type === 'enum' && (
                                                                 <select
                                                                     value={currentValue}
@@ -797,6 +820,13 @@ const PropertiesPanel = () => {
                                     </button>
                                 </div>
                             </div>
+                        </>
+                    )}
+
+                    {activeSection === 'visualization' && repoView && (
+                        <>
+                            <ViewVisualizationPanel viewId={repoView.id} />
+                            <OnionDiagramLayout viewId={repoView.id} />
                         </>
                     )}
                 </div>

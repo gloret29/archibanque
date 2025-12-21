@@ -291,6 +291,12 @@ const ModelBrowser = () => {
     const [draggedItem, setDraggedItem] = useState<{ type: string; id: string } | null>(null);
     const [showElementLayers, setShowElementLayers] = useState(false);
     const [hoveredLayer, setHoveredLayer] = useState<string | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{
+        type: string;
+        id: string;
+        message: string;
+        title: string;
+    } | null>(null);
 
     const rootFolders = useMemo(() => folders.filter(f => f.parentId === null), [folders]);
     const rootViews = useMemo(() => views.filter(v => v.folderId === null), [views]);
@@ -355,29 +361,82 @@ const ModelBrowser = () => {
     }, [draggedItem, moveFolder, moveView, moveElement, moveRelation]);
 
     const handleAction = useCallback((action: string) => {
-        const { type, targetId, parentId } = contextMenu;
-        closeContextMenu();
+        const { type, targetId } = contextMenu;
 
-        if (action === 'new-folder' && targetId) {
-            addFolder('New Folder', targetId, 'folder');
-        } else if (action === 'new-view' && targetId) {
-            addView('New View', targetId);
-        } else if (action === 'rename' && type && targetId) {
-            const currentName = type === 'folder'
-                ? folders.find(f => f.id === targetId)?.name || ''
-                : type === 'view'
-                    ? useEditorStore.getState().views.find(v => v.id === targetId)?.name || ''
-                    : type === 'element'
-                        ? useEditorStore.getState().elements.find(e => e.id === targetId)?.name || ''
-                        : useEditorStore.getState().relations.find(r => r.id === targetId)?.name || '';
-            setEditingItem({ type, id: targetId, name: currentName });
-        } else if (action === 'delete' && type && targetId) {
-            if (type === 'folder') deleteFolder(targetId);
-            else if (type === 'view') deleteView(targetId);
-            else if (type === 'element') deleteElement(targetId);
-            else if (type === 'relation') deleteRelation(targetId);
+        if (!targetId && action !== 'new-folder') {
+            closeContextMenu();
+            return;
         }
-    }, [contextMenu, addFolder, addView, folders, deleteFolder, deleteView, deleteElement, deleteRelation, closeContextMenu]);
+
+        try {
+            if (action === 'new-folder') {
+                addFolder('New Folder', targetId, 'folder');
+                closeContextMenu();
+            } else if (action === 'new-view' && targetId) {
+                addView('New View', targetId);
+                closeContextMenu();
+            } else if (action === 'rename' && type && targetId) {
+                const currentName = type === 'folder'
+                    ? folders.find(f => f.id === targetId)?.name || ''
+                    : type === 'view'
+                        ? (views.find(v => v.id === targetId)?.name || '')
+                        : type === 'element'
+                            ? (elements.find(e => e.id === targetId)?.name || '')
+                            : (relations.find(r => r.id === targetId)?.name || '');
+                setEditingItem({ type, id: targetId, name: currentName });
+                closeContextMenu();
+            } else if (action === 'delete' && type && targetId) {
+                let title = "";
+                let message = "";
+
+                if (type === 'folder') {
+                    title = "Delete Folder";
+                    message = "Delete this folder and all its contents?";
+                } else if (type === 'view') {
+                    title = "Delete View";
+                    message = "Delete this view?";
+                } else if (type === 'element') {
+                    const element = elements.find(e => e.id === targetId);
+                    const affectedViews = views.filter(v => v.nodes.some(n => n.data?.elementId === targetId));
+
+                    title = `Delete element "${element?.name || 'Unknown'}"?`;
+                    message = "Are you sure you want to delete this element?";
+                    if (affectedViews.length > 0) {
+                        message = `This element is used in the following ${affectedViews.length} view(s):\n- ` +
+                            affectedViews.map(v => v.name).join('\n- ') +
+                            `\n\nIt will be removed from all these views and all its relations will be deleted.`;
+                    }
+                } else if (type === 'relation') {
+                    const relation = relations.find(r => r.id === targetId);
+                    const affectedViews = views.filter(v => v.edges.some(e => e.data?.relationId === targetId));
+
+                    title = `Delete relation "${relation?.name || relation?.type || 'Unknown'}"?`;
+                    message = "Are you sure you want to delete this relation?";
+                    if (affectedViews.length > 0) {
+                        message = `This relation is visible in ${affectedViews.length} view(s). It will be removed from all of them.`;
+                    }
+                }
+
+                setDeleteConfirmation({ type, id: targetId, title, message });
+                closeContextMenu();
+            }
+        } catch (err) {
+            console.error('Error in handleAction:', err);
+            closeContextMenu();
+        }
+    }, [contextMenu, addFolder, addView, folders, views, elements, relations, closeContextMenu, setDeleteConfirmation]);
+
+    const executeDelete = useCallback(() => {
+        if (!deleteConfirmation) return;
+        const { type, id } = deleteConfirmation;
+
+        if (type === 'folder') deleteFolder(id);
+        else if (type === 'view') deleteView(id);
+        else if (type === 'element') deleteElement(id);
+        else if (type === 'relation') deleteRelation(id);
+
+        setDeleteConfirmation(null);
+    }, [deleteConfirmation, deleteFolder, deleteView, deleteElement, deleteRelation]);
 
     const handleCreateElement = useCallback((elementType: string) => {
         const { targetId } = contextMenu;
@@ -575,26 +634,20 @@ const ModelBrowser = () => {
                 </div>
             )}
 
-            {/* Inline Edit Modal */}
-            {editingItem && (
-                <div className={styles.editOverlay} onClick={() => setEditingItem(null)}>
-                    <div className={styles.editDialog} onClick={(e) => e.stopPropagation()}>
-                        <input
-                            type="text"
-                            value={editingItem.name}
-                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleRename();
-                                if (e.key === 'Escape') setEditingItem(null);
-                            }}
-                            autoFocus
-                        />
-                        <div className={styles.editActions}>
-                            <button onClick={handleRename} className={styles.confirm}>
-                                <Check size={14} />
+            {/* Confirmation Modal */}
+            {deleteConfirmation && (
+                <div className={styles.editOverlay} onClick={() => setDeleteConfirmation(null)}>
+                    <div className={`${styles.editDialog} ${styles.confirmDialog}`} onClick={(e) => e.stopPropagation()}>
+                        <h3 className={styles.confirmTitle}>{deleteConfirmation.title}</h3>
+                        <div className={styles.confirmMessage}>
+                            {deleteConfirmation.message}
+                        </div>
+                        <div className={styles.confirmFooter}>
+                            <button onClick={executeDelete} className={`${styles.confirmBtn} ${styles.confirmDelete}`}>
+                                <Trash2 size={14} /> Delete
                             </button>
-                            <button onClick={() => setEditingItem(null)} className={styles.cancel}>
-                                <X size={14} />
+                            <button onClick={() => setDeleteConfirmation(null)} className={`${styles.confirmBtn} ${styles.cancel}`}>
+                                <X size={14} /> Cancel
                             </button>
                         </div>
                     </div>

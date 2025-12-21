@@ -105,7 +105,9 @@ export async function loadPackageData(packageId: string) {
             name: v.name,
             nodes: (layout?.nodes || []) as unknown[],
             edges: (layout?.edges || []) as unknown[],
-            folderId: v.folderId || undefined
+            folderId: v.folderId || undefined,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            viewSettings: ((v as any).viewSettings) || undefined
         };
     });
 
@@ -150,6 +152,7 @@ export async function saveRepositoryState(
         createdAt?: Date;
         modifiedAt?: Date;
         author?: string;
+        viewSettings?: Record<string, unknown>;
     }[],
     elements: {
         id: string;
@@ -265,8 +268,9 @@ export async function saveRepositoryState(
                     folderId: v.folderId,
                     description: v.description,
                     documentation: v.documentation,
-                    modifiedAt: v.modifiedAt || new Date()
-                },
+                    modifiedAt: v.modifiedAt || new Date(),
+                    viewSettings: (v.viewSettings || Prisma.DbNull) as Prisma.InputJsonValue
+                } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
                 create: {
                     id: v.id,
                     name: v.name,
@@ -277,8 +281,9 @@ export async function saveRepositoryState(
                     documentation: v.documentation,
                     createdAt: v.createdAt || new Date(),
                     modifiedAt: v.modifiedAt || new Date(),
-                    author: v.author
-                }
+                    author: v.author,
+                    viewSettings: (v.viewSettings || Prisma.DbNull) as Prisma.InputJsonValue
+                } as any // eslint-disable-line @typescript-eslint/no-explicit-any
             });
         }
     });

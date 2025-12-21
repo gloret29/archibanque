@@ -12,7 +12,8 @@ import {
     Connection,
     Edge,
     Node,
-    addEdge
+    addEdge,
+    ConnectionMode
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useEditorStore } from '@/store/useEditorStore';
@@ -20,12 +21,13 @@ import ArchimateNode from './ArchimateNode';
 import ArchimateEdge from './ArchimateEdge';
 import { getValidRelationships, ARCHIMATE_RELATIONS, RelationshipType, ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ExportControls } from './ExportControls';
 
 const ArchimateMarkers = ({ theme }: { theme: 'light' | 'dark' }) => {
     const strokeColor = theme === 'dark' ? '#e4e4e7' : '#333';
     const fillColor = theme === 'dark' ? '#27272a' : 'white';
     const filledColor = theme === 'dark' ? '#e4e4e7' : '#333';
-    
+
     return (
         <svg style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }}>
             <defs>
@@ -55,6 +57,36 @@ const ArchimateMarkers = ({ theme }: { theme: 'light' | 'dark' }) => {
             </defs>
         </svg>
     );
+};
+
+// Utility function to calculate optimal handles based on node positions
+const getOptimalHandles = (
+    sourceNode: Node,
+    targetNode: Node
+): { sourceHandle: string; targetHandle: string } => {
+    const sourceCenterX = sourceNode.position.x + (sourceNode.measured?.width || 120) / 2;
+    const sourceCenterY = sourceNode.position.y + (sourceNode.measured?.height || 60) / 2;
+    const targetCenterX = targetNode.position.x + (targetNode.measured?.width || 120) / 2;
+    const targetCenterY = targetNode.position.y + (targetNode.measured?.height || 60) / 2;
+
+    const dx = targetCenterX - sourceCenterX;
+    const dy = targetCenterY - sourceCenterY;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        // Horizontal relationship
+        if (dx > 0) {
+            return { sourceHandle: 'right-source', targetHandle: 'left-target' };
+        } else {
+            return { sourceHandle: 'left-source', targetHandle: 'right-target' };
+        }
+    } else {
+        // Vertical relationship
+        if (dy > 0) {
+            return { sourceHandle: 'bottom-source', targetHandle: 'top-target' };
+        } else {
+            return { sourceHandle: 'top-source', targetHandle: 'bottom-target' };
+        }
+    }
 };
 
 const nodeTypes = {
@@ -94,17 +126,175 @@ function EditorCanvasInner() {
     } = useEditorStore();
 
     const activeView = useMemo(() => views.find(v => v.id === activeViewId), [views, activeViewId]);
-    const nodes = useMemo(() => activeView?.nodes || [], [activeView]);
+    const rawNodes = useMemo(() => activeView?.nodes || [], [activeView]);
     const edges = useMemo(() => activeView?.edges || [], [activeView]);
+
+    const { dataBlocks } = useEditorStore();
+
+    // Calculate nodes with color/label overrides based on view settings (Heatmap & Label Views)
+    const nodes = useMemo(() => {
+        interface ColorRule {
+            id: string;
+            blockId?: string;
+            attributeKey?: string;
+            propertyKey?: string;
+            operator: string;
+            value: string;
+            color: string;
+            active: boolean;
+        }
+
+        interface LabelRule {
+            id: string;
+            blockId?: string;
+            attributeKey?: string;
+            propertyKey?: string;
+            position: string;
+            prefix?: string;
+            suffix?: string;
+            active: boolean;
+        }
+
+        const colorRules = (activeView?.viewSettings?.colorRules as unknown as ColorRule[])?.filter(r => r.active) || [];
+        const labelRules = (activeView?.viewSettings?.labelRules as unknown as LabelRule[])?.filter(r => r.active) || [];
+
+        if (colorRules.length === 0 && labelRules.length === 0) return rawNodes;
+
+        return rawNodes.map(node => {
+            const element = elements.find(e => e.id === node.data.elementId);
+            if (!element) return node;
+
+            let colorOverride: string | undefined;
+            let labelOverride: string | undefined;
+
+            // --- Apply Color Rules ---
+            for (const rule of colorRules) {
+                let actualValue: string | undefined;
+                if (rule.blockId && rule.attributeKey) {
+                    const blockData = element.properties?.[rule.blockId] as Record<string, string> | undefined;
+                    actualValue = blockData?.[rule.attributeKey];
+                } else if (rule.propertyKey === 'type') {
+                    actualValue = element.type;
+                }
+
+                if (actualValue === undefined) continue;
+
+                let match = false;
+                const ruleVal = rule.value.toLowerCase();
+                const actualValLow = String(actualValue).toLowerCase();
+
+                switch (rule.operator) {
+                    case 'equals': match = actualValLow === ruleVal; break;
+                    case 'contains': match = actualValLow.includes(ruleVal); break;
+                    case 'greaterThan': match = !isNaN(Number(actualValue)) && !isNaN(Number(rule.value)) && Number(actualValue) > Number(rule.value); break;
+                    case 'lessThan': match = !isNaN(Number(actualValue)) && !isNaN(Number(rule.value)) && Number(actualValue) < Number(rule.value); break;
+                }
+
+                if (match) {
+                    colorOverride = rule.color;
+                    break;
+                }
+            }
+
+            // --- Apply Label Rules ---
+            // We apply all valid label rules (could be multiple if they show different info, 
+            // but for simplicity let's say the first matching one wins for now, or maybe concatenate?)
+            // The current UI allows multiple rules. Let's process the first matching one per attribute logic,
+            // OR if multiple are constantly active (like show cost AND risk).
+            // Actually, usually you want to show specific attributes.
+            // Let's iterate all active label rules and *collect* the matches strings.
+            const labelParts: string[] = [];
+
+            for (const rule of labelRules) {
+                let actualValue: string | undefined;
+                if (rule.blockId && rule.attributeKey) {
+                    const blockData = element.properties?.[rule.blockId] as Record<string, string> | undefined;
+                    actualValue = blockData?.[rule.attributeKey];
+                } else if (rule.propertyKey === 'type') {
+                    actualValue = element.type;
+                }
+
+                // For label rules, we generally just want to SHOW the value if it exists.
+                // There is no condition (operator/value) in the rule definition we added, just "which property".
+                // So if value exists, we use it.
+                if (actualValue) {
+                    const text = `${rule.prefix || ''}${actualValue}${rule.suffix || ''}`;
+
+                    if (rule.position === 'replace') {
+                        // This is a "hard" override of the main label?
+                        // Or just "replace" the override section? 
+                        // Let's assume 'replace' means "Change the main label entirely" -> Wait, we cannot easily change main label without confusing user.
+                        // Let's interpret 'replace' as "Show this INSTEAD of other label rules" or similar.
+                        // Actually, let's treat 'replace' as "Use this text as the override content".
+                        labelParts.push(text);
+                    } else if (rule.position === 'append') {
+                        labelParts.push(text);
+                    } else if (rule.position === 'bottom') {
+                        labelParts.push(text);
+                    }
+                }
+            }
+
+            if (labelParts.length > 0) {
+                labelOverride = labelParts.join('\n');
+            }
+
+            if (colorOverride || labelOverride) {
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        colorOverride,
+                        labelOverride
+                    }
+                };
+            }
+
+            return node;
+        });
+    }, [rawNodes, activeView?.viewSettings, elements, dataBlocks]);
 
     // Get folder ID from active view for placing new elements
     const activeViewFolderId = activeView?.folderId || null;
 
     const { screenToFlowPosition } = useReactFlow();
 
+    // Dynamically update edge handles when nodes move
+    useEffect(() => {
+        if (edges.length === 0 || nodes.length === 0) return;
+
+        let hasChanges = false;
+        const updatedEdges = edges.map(edge => {
+            const sourceNode = nodes.find(n => n.id === edge.source);
+            const targetNode = nodes.find(n => n.id === edge.target);
+
+            if (!sourceNode || !targetNode) return edge;
+
+            const { sourceHandle, targetHandle } = getOptimalHandles(sourceNode, targetNode);
+
+            // Only update if handles have changed
+            if (edge.sourceHandle !== sourceHandle || edge.targetHandle !== targetHandle) {
+                hasChanges = true;
+                return {
+                    ...edge,
+                    sourceHandle,
+                    targetHandle
+                };
+            }
+            return edge;
+        });
+
+        // Only call setEdges if there are actual changes to prevent infinite loops
+        if (hasChanges) {
+            setEdges(updatedEdges);
+        }
+    }, [nodes]); // Only depend on nodes, not edges to avoid infinite loops
+
     const createEdge = useCallback((params: Connection, type: RelationshipType) => {
         const sourceNode = nodes.find(n => n.id === params.source);
         const targetNode = nodes.find(n => n.id === params.target);
+
+        if (!sourceNode || !targetNode) return;
 
         let relationId: string | undefined;
 
@@ -119,11 +309,16 @@ function EditorCanvasInner() {
             relationId = rel.id;
         }
 
-        // Create visual edge
+        // Calculate optimal handles based on relative positions
+        const { sourceHandle, targetHandle } = getOptimalHandles(sourceNode, targetNode);
+
+        // Create visual edge with optimized handles
         const newEdge: Edge = {
             id: `edge_${Date.now()}`,
             source: params.source!,
             target: params.target!,
+            sourceHandle,
+            targetHandle,
             type: 'archimate',
             data: { type, relationId },
             selected: true,
@@ -327,20 +522,25 @@ function EditorCanvasInner() {
                 onContextMenu={onContextMenu}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
+                connectionMode={ConnectionMode.Loose}
+                defaultEdgeOptions={{
+                    type: 'archimate',
+                }}
                 fitView
                 snapToGrid
                 snapGrid={[15, 15]}
             >
-                <Background 
-                    variant={BackgroundVariant.Lines} 
-                    gap={30} 
-                    size={1} 
+                <Background
+                    variant={BackgroundVariant.Lines}
+                    gap={30}
+                    size={1}
                     color={theme === 'dark' ? '#3f3f46' : '#e5e5e5'}
                     bgColor={theme === 'dark' ? '#1e1e1e' : '#ffffff'}
                 />
                 <Controls />
                 <MiniMap />
                 <ArchimateMarkers theme={theme} />
+                <ExportControls />
 
                 {connMenu && (
                     <div
@@ -390,16 +590,16 @@ function EditorCanvasInner() {
                         </div>
                         <button
                             onClick={() => setConnMenu(null)}
-                            style={{ 
-                                width: '100%', 
-                                marginTop: '12px', 
-                                fontSize: '11px', 
-                                color: 'var(--foreground)', 
+                            style={{
+                                width: '100%',
+                                marginTop: '12px',
+                                fontSize: '11px',
+                                color: 'var(--foreground)',
                                 opacity: 0.7,
-                                background: theme === 'dark' ? 'var(--border)' : '#f5f5f5', 
-                                border: `1px solid var(--border)`, 
-                                padding: '6px', 
-                                borderRadius: '4px', 
+                                background: theme === 'dark' ? 'var(--border)' : '#f5f5f5',
+                                border: `1px solid var(--border)`,
+                                padding: '6px',
+                                borderRadius: '4px',
                                 cursor: 'pointer',
                                 transition: 'background-color 0.2s, border-color 0.2s, color 0.2s'
                             }}

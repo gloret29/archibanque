@@ -29,6 +29,28 @@ export interface ArchimateView {
     createdAt?: Date;
     modifiedAt?: Date;
     author?: string;
+    viewSettings?: {
+        colorRules?: {
+            id: string;
+            blockId?: string; // If using DataBlock
+            attributeKey?: string; // If using DataBlock
+            propertyKey?: string; // If using standard property
+            operator: 'equals' | 'contains' | 'greaterThan' | 'lessThan';
+            value: string;
+            color: string;
+            active: boolean;
+        }[];
+        labelRules?: {
+            id: string;
+            blockId?: string;
+            attributeKey?: string;
+            propertyKey?: string;
+            position: 'replace' | 'append' | 'prepend' | 'bottom'; // Where to show the value
+            prefix?: string; // e.g. "ROI: "
+            suffix?: string; // e.g. "%"
+            active: boolean;
+        }[];
+    };
 }
 
 export interface ArchimateFolder {
@@ -137,6 +159,7 @@ interface EditorState {
     moveView: (viewId: string, folderId: string | null) => void;
     updateViewDescription: (viewId: string, description: string) => void;
     updateViewDocumentation: (viewId: string, documentation: string) => void;
+    updateViewSettings: (viewId: string, settings: Record<string, unknown>) => void;
     addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => void;
     deleteFolder: (folderId: string) => void;
     renameFolder: (folderId: string, name: string) => void;
@@ -185,6 +208,7 @@ interface EditorState {
     deleteEdge: (edgeId: string) => void;
     inferRelations: () => void;
     updateNodeParent: (nodeId: string, parentId: string | null, position?: { x: number, y: number }) => void;
+    updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
     saveToServer: () => Promise<void>;
 
     // Load from server
@@ -304,13 +328,42 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     loadFromServer: (packageId: string, folders: ArchimateFolder[], views: ArchimateView[], elements?: ModelElement[], relations?: ModelRelation[]) => {
+        const validElements = elements || [];
+        const elementIds = new Set(validElements.map(e => e.id));
+
+        // 1. Filter out relations that point to non-existent elements
+        const validRelations = (relations || []).filter(r =>
+            elementIds.has(r.sourceId) && elementIds.has(r.targetId)
+        );
+        const relationIds = new Set(validRelations.map(r => r.id));
+
+        // 2. Clean up views (nodes and edges pointing to non-existent items)
+        const cleanedViews = views.map(v => {
+            const validNodes = v.nodes.filter(node =>
+                !node.data?.elementId || elementIds.has(node.data.elementId as string)
+            );
+            const validNodeIds = new Set(validNodes.map(n => n.id));
+
+            const validEdges = v.edges.filter(edge => {
+                const hasRelation = !edge.data?.relationId || relationIds.has(edge.data.relationId as string);
+                const hasNodes = validNodeIds.has(edge.source) && validNodeIds.has(edge.target);
+                return hasRelation && hasNodes;
+            });
+
+            return {
+                ...v,
+                nodes: validNodes,
+                edges: validEdges
+            };
+        });
+
         // Start with no tabs open - user will open views from the Model Browser
         set({
             currentPackageId: packageId,
             folders: folders.length > 0 ? folders : initialFolders,
-            views: views, // Use provided views, can be empty
-            elements: elements || [],
-            relations: relations || [],
+            views: cleanedViews,
+            elements: validElements,
+            relations: validRelations,
             openViewIds: [], // No tabs open initially
             activeViewId: null, // No view active
             selectedNode: null,
@@ -413,6 +466,33 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         });
     },
 
+    updateViewSettings: (viewId: string, settings: Record<string, unknown>) => {
+        set({
+            views: get().views.map(v => v.id === viewId
+                ? { ...v, viewSettings: { ...(v.viewSettings || {}), ...settings }, modifiedAt: new Date() }
+                : v
+            )
+        });
+    },
+
+    updateNodePosition: (nodeId: string, position: { x: number; y: number }) => {
+        const { views, activeViewId } = get();
+        const updatedViews = views.map(v => {
+            if (v.id === activeViewId) {
+                return {
+                    ...v,
+                    nodes: v.nodes.map(node =>
+                        node.id === nodeId
+                            ? { ...node, position }
+                            : node
+                    )
+                };
+            }
+            return v;
+        });
+        set({ views: updatedViews });
+    },
+
     addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => {
         const newFolder: ArchimateFolder = {
             id: `folder_${Date.now()}`,
@@ -477,7 +557,30 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     deleteElement: (elementId: string) => {
-        set({ elements: get().elements.filter(e => e.id !== elementId) });
+        const { relations, views } = get();
+
+        // Find all relations that reference this element
+        const relationsToDelete = relations.filter(r => r.sourceId === elementId || r.targetId === elementId);
+        const relationIdsToDelete = relationsToDelete.map(r => r.id);
+
+        set({
+            elements: get().elements.filter(e => e.id !== elementId),
+            relations: relations.filter(r => !relationIdsToDelete.includes(r.id)),
+            views: views.map(v => {
+                const updatedNodes = v.nodes.filter(node => node.data?.elementId !== elementId);
+                const updatedNodeIds = new Set(updatedNodes.map(n => n.id));
+
+                return {
+                    ...v,
+                    nodes: updatedNodes,
+                    edges: v.edges.filter(edge =>
+                        !relationIdsToDelete.includes(edge.data?.relationId as string) &&
+                        updatedNodeIds.has(edge.source) &&
+                        updatedNodeIds.has(edge.target)
+                    )
+                };
+            })
+        });
     },
 
     renameElement: (elementId: string, name: string) => {
@@ -550,7 +653,14 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     deleteRelation: (relationId: string) => {
-        set({ relations: get().relations.filter(r => r.id !== relationId) });
+        const { views } = get();
+        set({
+            relations: get().relations.filter(r => r.id !== relationId),
+            views: views.map(v => ({
+                ...v,
+                edges: v.edges.filter(edge => edge.data?.relationId !== relationId)
+            }))
+        });
     },
 
     renameRelation: (relationId: string, name: string) => {
@@ -674,7 +784,17 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         if (!activeView) return;
 
         const updatedNodes = applyNodeChanges(changes, activeView.nodes);
-        const updatedViews = views.map(v => v.id === activeViewId ? { ...v, nodes: updatedNodes } : v);
+
+        // If some nodes were removed, we need to remove connected edges
+        const updatedNodeIds = new Set(updatedNodes.map(n => n.id));
+        const updatedEdges = activeView.edges.filter(edge =>
+            updatedNodeIds.has(edge.source) && updatedNodeIds.has(edge.target)
+        );
+
+        const updatedViews = views.map(v => v.id === activeViewId
+            ? { ...v, nodes: updatedNodes, edges: updatedEdges }
+            : v
+        );
 
         set(state => {
             const selected = updatedNodes.find(n => n.selected) || null;
@@ -684,13 +804,9 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
                 if (selected.data?.elementId) {
                     newSelectedObject = { type: 'element', id: selected.data.elementId as string };
                 } else {
-                    // Node not linked to an element (e.g. note), still valid selection but no repo object
                     newSelectedObject = null;
                 }
             } else if (!state.selectedEdge) {
-                // If nothing selected (and no edge selected), clear object selection?
-                // Or maybe keep it if it was a folder/view? 
-                // Let's clear it to match canvas "deselect all" behavior
                 newSelectedObject = null;
             }
 

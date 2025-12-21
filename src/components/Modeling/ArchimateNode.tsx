@@ -71,6 +71,8 @@ interface NodeData {
     textAlign?: string;
     width?: number;
     height?: number;
+    colorOverride?: string;
+    labelOverride?: string;
 }
 
 const ArchimateNode = ({ data, selected }: NodeProps) => {
@@ -88,7 +90,8 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
         return luminance > 0.5;
     };
 
-    const textColor = isLightColor(meta.color) ? '#1a1a1a' : '#ffffff';
+    const bgColor = nodeData.colorOverride || meta.color;
+    const textColor = isLightColor(bgColor) ? '#1a1a1a' : '#ffffff';
     const isGroup = typeKey === 'group';
 
     // Define header styles
@@ -110,7 +113,7 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 height: '100%',
                 padding: '0',
                 borderRadius: isGroup ? '0' : '3px',
-                background: isGroup ? 'rgba(0,0,0,0.02)' : meta.color,
+                background: isGroup ? 'rgba(0,0,0,0.02)' : bgColor,
                 border: selected ? '2px solid var(--primary, #3366ff)' : (isGroup ? '1px dashed rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.15)'),
                 minWidth: '100px',
                 minHeight: '60px',
@@ -140,7 +143,20 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                     borderColor: '#3366ff'
                 }}
             />
-            <Handle type="target" position={Position.Top} style={{ background: '#555', width: '6px', height: '6px', opacity: isGroup ? 0 : 1 }} />
+            {/* Handles on all 4 sides - both source AND target on each side */}
+            {/* Top */}
+            <Handle
+                type="target"
+                position={Position.Top}
+                id="top-target"
+                style={{ background: '#555', width: '8px', height: '8px', top: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
+            <Handle
+                type="source"
+                position={Position.Top}
+                id="top-source"
+                style={{ background: '#555', width: '8px', height: '8px', top: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
 
             {/* Header / Type area */}
             <div style={{
@@ -174,14 +190,58 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 wordBreak: 'break-word',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: textAlign === 'left' ? 'flex-start' : textAlign === 'right' ? 'flex-end' : 'center'
+                justifyContent: textAlign === 'left' ? 'flex-start' : textAlign === 'right' ? 'flex-end' : 'center',
+                flexDirection: 'column'
             }}>
-                {nodeData.label}
+                <div>{nodeData.label}</div>
+                {nodeData.labelOverride && (
+                    <div style={{ fontSize: '0.85em', opacity: 0.9, marginTop: '2px', whiteSpace: 'pre-line' }}>
+                        {nodeData.labelOverride}
+                    </div>
+                )}
             </div>
 
-            <Handle type="source" position={Position.Bottom} style={{ background: '#555', width: '6px', height: '6px', opacity: isGroup ? 0 : 1 }} />
-            <Handle type="source" position={Position.Left} id="left" style={{ background: '#3366ff', border: '1px solid white', width: '8px', height: '8px', left: '-4px', opacity: isGroup ? 0 : 1 }} />
-            <Handle type="source" position={Position.Right} id="right" style={{ background: '#3366ff', border: '1px solid white', width: '8px', height: '8px', right: '-4px', opacity: isGroup ? 0 : 1 }} />
+            {/* Bottom */}
+            <Handle
+                type="target"
+                position={Position.Bottom}
+                id="bottom-target"
+                style={{ background: '#555', width: '8px', height: '8px', bottom: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                id="bottom-source"
+                style={{ background: '#555', width: '8px', height: '8px', bottom: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
+
+            {/* Left */}
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="left-target"
+                style={{ background: '#555', width: '8px', height: '8px', left: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
+            <Handle
+                type="source"
+                position={Position.Left}
+                id="left-source"
+                style={{ background: '#555', width: '8px', height: '8px', left: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
+
+            {/* Right */}
+            <Handle
+                type="target"
+                position={Position.Right}
+                id="right-target"
+                style={{ background: '#555', width: '8px', height: '8px', right: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="right-source"
+                style={{ background: '#555', width: '8px', height: '8px', right: '-4px', opacity: isGroup ? 0 : 0.6 }}
+            />
         </div>
     );
 };

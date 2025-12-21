@@ -144,6 +144,7 @@ model ArchiView {
   createdAt     DateTime @default(now())
   modifiedAt    DateTime @default(now()) @updatedAt
   author        String?
+  viewSettings  Json?    // Custom view settings (e.g. heatmap rules)
 
   packageId   String
   package     ModelPackage @relation(fields: [packageId], references: [id])

@@ -179,20 +179,23 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Accès direct au manuel utilisateur depuis l'application via une page dédiée.*
   *Rendu riche du format Markdown pour une lecture fluide des instructions.*
 
-## 🧅 Phase 6: Advanced Visualization & "Onion" Diagrams
+## 🧅 Phase 6: Advanced Visualization & "Onion" Diagrams (IN PROGRESS)
 *Objective: Transform static diagrams into interactive heatmaps.*
-- [ ] **Color Views**: Dynamic coloring of nodes based on attributes (e.g., Cost > $10k = Red).
+- [x] **Color Views**: Dynamic coloring of nodes based on attributes (e.g., Cost > $10k = Red).
   *Mise en évidence automatique des objets en fonction de critères de performance, de coût ou de risque.*
   *Transforme les diagrammes techniques en véritables cartes de chaleur décisionnelles pour le management.*
-- [ ] **Label Views**: Overlay metrics (ROI, Availability %) directly on diagram labels.
+- [x] **Label Views**: Overlay metrics (ROI, Availability %) directly on diagram labels.
   *Affichage en temps réel des indicateurs clés de performance directement sur les icônes du diagramme.*
   *Permet de lire les données critiques sans avoir à consulter les panneaux de propriétés détaillés.*
-- [ ] **Onion Diagram Templates**: Concentric circle views for stakeholder and service mapping.
-  *Modèles visuels organisés en cercles concentriques pour représenter les couches de services et d'acteurs.*
+  *Configuration flexible avec préfixes, suffixes et positions multiples (replace, append, bottom).*
+- [x] **Onion Diagram Templates**: Concentric circle views for stakeholder and service mapping.
+  *Layout automatique en cercles concentriques basé sur les couches ArchiMate (Strategy → Business → Application → Technology).*
+  *Configuration de l'espacement, du centre et de l'ordre des couches avec interface visuelle.*
   *Vues synthétiques idéales pour la communication stratégique et la cartographie des écosystèmes.*
-- [ ] **Image Export Engine**: High-fidelity SVG, PNG, and PDF exports for executive reports.
+- [x] **Image Export Engine**: High-fidelity SVG, PNG, and PDF exports for executive reports.
   *Génération d'exports graphiques de qualité professionnelle pour l'inclusion dans des présentations ou documents PDF.*
   *Assure que les architectures dessinées sont diffusables proprement à tous les échelons de l'entreprise.*
+  *Support des formats PNG, SVG haute résolution et PDF multi-pages (ajustement automatique à la taille du diagramme).*
 
 ## 👁️ Phase 7: "Horizzon" Portal - Collaborative Consumption
 *Objective: Democratize architecture access for non-expert users.*
