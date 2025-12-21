@@ -154,7 +154,7 @@ const PropertiesPanel = () => {
         // Determine type and display info
         let nodeType = '';
         let displayType = 'Element';
-        let meta: any = null;
+        let meta: { name: string; layer?: string; color?: string } | null = null;
 
         if (repoElement) {
             nodeType = repoElement.type;
@@ -346,7 +346,7 @@ const PropertiesPanel = () => {
 
                                         {/* For view, type is not really stored in type field usually, or handled above */}
                                         <span style={{ color: '#888' }}>Type:</span>
-                                        <span style={{ color: '#444' }}>{(repoObject as any).type || nodeType}</span>
+                                        <span style={{ color: '#444' }}>{('type' in repoObject ? (repoObject as { type: string }).type : undefined) || nodeType}</span>
 
                                         <span style={{ color: '#888' }}>Created:</span>
                                         <span style={{ color: '#444' }}>

@@ -352,7 +352,7 @@ const ModelBrowser = () => {
             moveRelation(id, targetFolderId);
         }
         setDraggedItem(null);
-    }, [draggedItem, moveFolder, moveView, moveElement]);
+    }, [draggedItem, moveFolder, moveView, moveElement, moveRelation]);
 
     const handleAction = useCallback((action: string) => {
         const { type, targetId, parentId } = contextMenu;
@@ -377,7 +377,7 @@ const ModelBrowser = () => {
             else if (type === 'element') deleteElement(targetId);
             else if (type === 'relation') deleteRelation(targetId);
         }
-    }, [contextMenu, addFolder, addView, folders, deleteFolder, deleteView, deleteElement, closeContextMenu]);
+    }, [contextMenu, addFolder, addView, folders, deleteFolder, deleteView, deleteElement, deleteRelation, closeContextMenu]);
 
     const handleCreateElement = useCallback((elementType: string) => {
         const { targetId } = contextMenu;
@@ -395,7 +395,7 @@ const ModelBrowser = () => {
         else if (type === 'element') renameElement(id, name);
         else if (type === 'relation') renameRelation(id, name);
         setEditingItem(null);
-    }, [editingItem, renameFolder, renameView, renameElement]);
+    }, [editingItem, renameFolder, renameView, renameElement, renameRelation]);
 
     return (
         <div className={styles.modelBrowser} onClick={closeContextMenu}>
