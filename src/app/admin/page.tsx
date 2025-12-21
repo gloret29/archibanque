@@ -8,6 +8,7 @@ import { ArrowLeft, Layers, Database, Eye, EyeOff, Search, Loader2 } from 'lucid
 import DataBlockManager from '@/components/Admin/DataBlockManager';
 import { useInitializeFromDB } from '@/hooks/useInitializeFromDB';
 import { settingsApi } from '@/lib/api';
+import { UserMenuWrapper } from '@/components/UI/UserMenuWrapper';
 
 export default function AdminPage() {
     const {
@@ -103,8 +104,9 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {activeTab === 'visibility' && (
-                    <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
+                    {activeTab === 'visibility' && (
+                        <>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                             <input
@@ -131,8 +133,11 @@ export default function AdminPage() {
                                 <EyeOff size={14} /> Disable All
                             </button>
                         </div>
-                    </div>
-                )}
+                    </>
+                    )}
+                    <div className="h-8 w-px bg-slate-200 mx-2"></div>
+                    <UserMenuWrapper />
+                </div>
             </header>
 
             {/* Navigation Tabs */}

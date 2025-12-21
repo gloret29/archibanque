@@ -3,8 +3,11 @@ import { join } from 'path';
 import React from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { UserMenuWrapper } from '@/components/UI/UserMenuWrapper';
+import { getCurrentUser } from '@/lib/session';
 
 export default async function ManualPage() {
+    const user = await getCurrentUser();
     let markdownContent = '';
     
     try {
@@ -39,7 +42,9 @@ export default async function ManualPage() {
                     ← Retour à l&apos;accueil
                 </Link>
                 <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Manuel Utilisateur</h1>
-                <div style={{ width: '150px' }}></div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', minWidth: '200px' }}>
+                    <UserMenuWrapper user={user} />
+                </div>
             </header>
             
             <style dangerouslySetInnerHTML={{__html: `

@@ -12,6 +12,7 @@ const Palette = dynamic(() => import('@/components/Modeling/Palette'), { ssr: fa
 const ModelerTabs = dynamic(() => import('./ModelerTabs'), { ssr: false });
 const PackageSelector = dynamic(() => import('@/components/Modeling/PackageSelector'), { ssr: false });
 const ResizablePanel = dynamic(() => import('@/components/UI/ResizablePanel'), { ssr: false });
+const UserMenuWrapper = dynamic(() => import('@/components/UI/UserMenuWrapper').then(mod => ({ default: mod.UserMenuWrapper })), { ssr: false });
 
 import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
@@ -99,10 +100,7 @@ export default function ModelerPage() {
                             </>
                         )}
                     </div>
-                    <div className={styles.userProfile}>
-                        <span style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>Expert Mode</span>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#3366ff', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px' }}>JD</div>
-                    </div>
+                    <UserMenuWrapper />
                 </div>
             </header>
 

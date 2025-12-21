@@ -1,6 +1,7 @@
 import styles from "./page.module.css";
 import { getCurrentUser } from "@/lib/session";
 import Link from 'next/link';
+import { UserMenuWrapper } from '@/components/UI/UserMenuWrapper';
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -10,11 +11,7 @@ export default async function Home() {
       <header className={styles.header}>
         <Link href="/" className={styles.logo} style={{ textDecoration: 'none', color: 'inherit' }}>ArchiModeler</Link>
         <div className={styles.userSection}>
-          {user ? (
-            <span className={styles.welcomeInfo}>Welcome, <strong>{user.name}</strong> ({user.email})</span>
-          ) : (
-            <span className={styles.welcomeInfo}>NOT LOGGED IN</span>
-          )}
+          <UserMenuWrapper user={user} />
         </div>
       </header>
 
