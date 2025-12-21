@@ -134,6 +134,11 @@
   color: #666;
 }
 
+.manualLink:hover {
+  background-color: #3366ff;
+  color: white;
+}
+
 @media (max-width: 640px) {
   .hero h1 {
     font-size: 2rem;

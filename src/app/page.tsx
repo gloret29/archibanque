@@ -22,6 +22,26 @@ export default async function Home() {
         <div className={styles.hero}>
           <h1>Enterprise Architecture Tool</h1>
           <p>Collaborative modeling platform based on TOGAF, Archimate, and BIAN.</p>
+          <div style={{ marginTop: '24px' }}>
+            <Link 
+              href="/manual" 
+              className={styles.manualLink}
+              style={{
+                color: '#3366ff',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: 500,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                border: '1px solid #3366ff',
+                borderRadius: '6px',
+                transition: 'all 0.2s'
+              }}>
+              📘 Documentation utilisateur
+            </Link>
+          </div>
         </div>
 
         <div className={styles.grid}>
@@ -54,6 +74,19 @@ export default async function Home() {
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <p>&copy; 2025 ArchiModeler | GIT-backed Architecture Analysis</p>
+          <div style={{ marginTop: '16px' }}>
+            <Link href="/manual" style={{ 
+              color: '#3366ff', 
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              📘 Consulter le manuel utilisateur
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
