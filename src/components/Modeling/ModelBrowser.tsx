@@ -22,6 +22,10 @@ import {
 } from 'lucide-react';
 import styles from './model-browser.module.css';
 
+interface ModelBrowserProps {
+    readOnly?: boolean;
+}
+
 interface ContextMenuState {
     visible: boolean;
     x: number;
@@ -273,7 +277,7 @@ const RelationItem = ({ relation, level, onSelect, onContextMenu, onDragStart, o
     );
 };
 
-const ModelBrowser = () => {
+const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
     const {
         folders, views, elements, relations,
         setActiveView, openView, activeViewId, selectObject,
@@ -281,7 +285,8 @@ const ModelBrowser = () => {
         addView, deleteView, renameView, moveView,
         addElement, deleteElement, renameElement, moveElement,
         deleteRelation, renameRelation, moveRelation,
-        enabledElementTypes
+        enabledElementTypes,
+        currentPackageId, packages
     } = useEditorStore();
 
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -319,12 +324,13 @@ const ModelBrowser = () => {
     }, [enabledElementTypes]);
 
     const handleContextMenu = useCallback((e: React.MouseEvent, type: 'folder' | 'view' | 'element' | 'relation', id: string, parentId: string | null) => {
+        if (readOnly) return;
         e.preventDefault();
         e.stopPropagation();
         setContextMenu({ visible: true, x: e.clientX, y: e.clientY, type, targetId: id, parentId });
         setShowElementLayers(false);
         setHoveredLayer(null);
-    }, []);
+    }, [readOnly]);
 
     const closeContextMenu = useCallback(() => {
         setContextMenu(prev => ({ ...prev, visible: false }));
@@ -461,13 +467,15 @@ const ModelBrowser = () => {
             {/* Header */}
             <div className={styles.header}>
                 <span className={styles.title}>Model Browser</span>
-                <button
-                    className={styles.addBtn}
-                    onClick={() => addFolder('New Folder', null, 'folder')}
-                    title="Add root folder"
-                >
-                    <FolderPlus size={14} />
-                </button>
+                {!readOnly && (
+                    <button
+                        className={styles.addBtn}
+                        onClick={() => addFolder('New Folder', null, 'folder')}
+                        title="Add root folder"
+                    >
+                        <FolderPlus size={14} />
+                    </button>
+                )}
             </div>
 
             {/* Tree */}
@@ -478,26 +486,32 @@ const ModelBrowser = () => {
                         folder={folder}
                         level={0}
                         onContextMenu={handleContextMenu}
-                        draggedItem={draggedItem}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                        onDrop={handleDrop}
+                        draggedItem={readOnly ? null : draggedItem}
+                        onDragStart={readOnly ? () => { } : handleDragStart}
+                        onDragEnd={readOnly ? () => { } : handleDragEnd}
+                        onDrop={readOnly ? () => { } : handleDrop}
                     />
                 ))}
 
                 {/* Root Views */}
                 {rootViews.map(view => (
-                    <ViewItem
+                    <div
                         key={view.id}
-                        view={view}
-                        level={0}
-                        isActive={view.id === activeViewId}
-                        onSelect={() => selectObject('view', view.id)}
-                        onOpen={() => openView(view.id)}
-                        onContextMenu={handleContextMenu}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                    />
+                        className={`${styles.treeRow} ${styles.viewRow} ${activeViewId === view.id ? styles.active : ''}`}
+                        onClick={() => selectObject('view', view.id)}
+                        onDoubleClick={() => openView(view.id)}
+                        onContextMenu={(e) => handleContextMenu(e, 'view', view.id, null)}
+                        draggable={!readOnly}
+                        onDragStart={(e) => !readOnly && handleDragStart(e, 'view', view.id)}
+                        onDragEnd={() => !readOnly && handleDragEnd()}
+                    >
+                        <span className={styles.dragHandle}>
+                            <GripVertical size={12} />
+                        </span>
+                        <Layout size={14} className={styles.viewIcon} />
+                        <span className={styles.nodeName}>{view.name}</span>
+                        <span className={styles.badge}>{view.nodes.length}</span>
+                    </div>
                 ))}
 
                 {/* Root Elements */}

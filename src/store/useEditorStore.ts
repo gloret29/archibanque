@@ -29,6 +29,7 @@ export interface ArchimateView {
     createdAt?: Date;
     modifiedAt?: Date;
     author?: string;
+    packageId?: string;
     viewSettings?: {
         colorRules?: {
             id: string;
@@ -58,6 +59,7 @@ export interface ArchimateFolder {
     name: string;
     parentId: string | null;
     type: 'folder' | 'view-folder' | 'element-folder';
+    packageId?: string;
 }
 
 export interface ModelPackage {
@@ -74,6 +76,7 @@ export interface ModelElement {
     name: string;
     type: string;
     folderId: string | null;
+    packageId?: string;
     description?: string; // RW - Short description
     documentation?: string; // RW - Detailed documentation
     properties?: Record<string, unknown>; // JSON object for storing custom properties including DataBlocks
@@ -90,6 +93,7 @@ export interface ModelRelation {
     sourceId: string;
     targetId: string;
     folderId: string | null;
+    packageId?: string;
     description?: string;
     documentation?: string;
     properties?: Record<string, unknown>; // JSON object for storing custom properties including DataBlocks
@@ -146,7 +150,7 @@ interface EditorState {
 
     // Package Actions
     setPackages: (packages: ModelPackage[]) => void;
-    setCurrentPackage: (packageId: string) => void;
+    setCurrentPackage: (packageId: string | null) => void;
     addPackage: (name: string, description?: string) => ModelPackage;
 
     // Folder/View Actions
@@ -266,7 +270,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
 
     setPackages: (packages: ModelPackage[]) => set({ packages }),
 
-    setCurrentPackage: (packageId: string) => {
+    setCurrentPackage: (packageId: string | null) => {
         set({ currentPackageId: packageId, selectedNode: null, selectedEdge: null });
     },
 

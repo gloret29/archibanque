@@ -104,7 +104,11 @@ interface CanvasContextMenu {
     flowPosition: { x: number; y: number };
 }
 
-function EditorCanvasInner() {
+interface EditorCanvasProps {
+    readOnly?: boolean;
+}
+
+function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const { theme } = useTheme();
     const [connMenu, setConnMenu] = useState<{ x: number, y: number, params: Connection, options: RelationshipType[] } | null>(null);
@@ -512,14 +516,17 @@ function EditorCanvasInner() {
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onDrop={onDrop}
-                onDragOver={onDragOver}
-                onNodeDragStop={onNodeDragStop}
-                onKeyDown={onKeyDown}
-                onContextMenu={onContextMenu}
+                onNodesChange={readOnly ? undefined : onNodesChange}
+                onEdgesChange={readOnly ? undefined : onEdgesChange}
+                onConnect={readOnly ? undefined : onConnect}
+                onDrop={readOnly ? undefined : onDrop}
+                onDragOver={readOnly ? undefined : onDragOver}
+                onNodeDragStop={readOnly ? undefined : onNodeDragStop}
+                onKeyDown={readOnly ? undefined : onKeyDown}
+                onContextMenu={readOnly ? undefined : onContextMenu}
+                nodesDraggable={!readOnly}
+                nodesConnectable={!readOnly}
+                elementsSelectable={true}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 connectionMode={ConnectionMode.Loose}
@@ -540,9 +547,9 @@ function EditorCanvasInner() {
                 <Controls />
                 <MiniMap />
                 <ArchimateMarkers theme={theme} />
-                <ExportControls />
+                {!readOnly && <ExportControls />}
 
-                {connMenu && (
+                {connMenu && !readOnly && (
                     <div
                         style={{
                             position: 'absolute',
@@ -710,10 +717,10 @@ function EditorCanvasInner() {
     );
 }
 
-export default function EditorCanvas() {
+export default function EditorCanvas({ readOnly = false }: EditorCanvasProps) {
     return (
         <ReactFlowProvider>
-            <EditorCanvasInner />
+            <EditorCanvasInner readOnly={readOnly} />
         </ReactFlowProvider>
     );
 }

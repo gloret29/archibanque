@@ -14,8 +14,8 @@ export function HomeContent() {
           <h1>{t('home.hero.title')}</h1>
           <p>{t('home.hero.subtitle')}</p>
           <div style={{ marginTop: '24px' }}>
-            <Link 
-              href="/manual" 
+            <Link
+              href="/manual"
               className={styles.manualLink}
               style={{
                 color: 'var(--primary, #3366ff)',
@@ -48,7 +48,7 @@ export function HomeContent() {
             <h2>{t('home.card.portal.title')}</h2>
             <p>{t('home.card.portal.description')}</p>
             <div className={styles.cardActions}>
-              <button className={styles.secondaryButton}>{t('home.card.portal.button')}</button>
+              <Link href="/portal" className={styles.secondaryButton}>{t('home.card.portal.button')}</Link>
             </div>
           </div>
 
@@ -66,8 +66,8 @@ export function HomeContent() {
         <div className={styles.footerContent}>
           <p>{t('home.footer.copyright')}</p>
           <div style={{ marginTop: '16px' }}>
-            <Link href="/manual" style={{ 
-              color: 'var(--primary, #3366ff)', 
+            <Link href="/manual" style={{
+              color: 'var(--primary, #3366ff)',
               textDecoration: 'none',
               fontSize: '14px',
               fontWeight: 500,
