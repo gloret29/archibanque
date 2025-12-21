@@ -11,6 +11,96 @@ import {
 
 // --- Helper Components ---
 
+// Component for editing enum values inline
+const EnumValueItem = ({ value, index, onUpdate, onDelete }: { value: string, index: number, onUpdate: (index: number, newValue: string) => void, onDelete: (index: number) => void }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValue, setEditValue] = useState(value);
+
+    // Sync editValue with value when not editing
+    React.useEffect(() => {
+        if (!isEditing) {
+            setEditValue(value);
+        }
+    }, [value, isEditing]);
+
+    if (isEditing) {
+        return (
+            <li className="flex gap-1 items-center text-sm bg-white px-2 py-1 rounded border border-blue-300">
+                <input
+                    className="flex-1 border rounded px-2 py-1 text-xs"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && editValue.trim()) {
+                            onUpdate(index, editValue.trim());
+                            setIsEditing(false);
+                        } else if (e.key === 'Escape') {
+                            setEditValue(value);
+                            setIsEditing(false);
+                        }
+                    }}
+                    onBlur={() => {
+                        if (editValue.trim()) {
+                            onUpdate(index, editValue.trim());
+                        } else {
+                            setEditValue(value);
+                        }
+                        setIsEditing(false);
+                    }}
+                    autoFocus
+                />
+                <button
+                    onClick={() => {
+                        if (editValue.trim()) {
+                            onUpdate(index, editValue.trim());
+                        }
+                        setIsEditing(false);
+                    }}
+                    className="text-green-600 hover:bg-green-50 rounded p-1"
+                    title="Save"
+                >
+                    <Check size={12} />
+                </button>
+                <button
+                    onClick={() => {
+                        setEditValue(value);
+                        setIsEditing(false);
+                    }}
+                    className="text-gray-500 hover:bg-gray-50 rounded p-1"
+                    title="Cancel"
+                >
+                    <X size={12} />
+                </button>
+            </li>
+        );
+    }
+
+    return (
+        <li className="flex justify-between items-center text-sm bg-gray-50 px-2 py-1 rounded group">
+            <span className="flex-1">{value}</span>
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                    onClick={() => {
+                        setEditValue(value);
+                        setIsEditing(true);
+                    }}
+                    className="text-blue-600 hover:bg-blue-50 rounded p-1"
+                    title="Edit"
+                >
+                    <Edit2 size={12} />
+                </button>
+                <button
+                    onClick={() => onDelete(index)}
+                    className="text-red-500 hover:bg-red-50 rounded p-1"
+                    title="Delete"
+                >
+                    <X size={12} />
+                </button>
+            </div>
+        </li>
+    );
+};
+
 const Modal = ({ title, onClose, children }: { title: string, onClose: () => void, children: React.ReactNode }) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-xl w-[500px] max-w-full m-4 max-h-[90vh] flex flex-col">
@@ -95,6 +185,7 @@ const AttributeEditor = ({ attribute, onSave, onClose }: AttributeEditorProps) =
                         <option value="string">String</option>
                         <option value="number">Number</option>
                         <option value="date">Date</option>
+                        <option value="boolean">Boolean</option>
                         <option value="enum">Enum (List)</option>
                     </select>
                 </div>
@@ -168,15 +259,19 @@ const AttributeEditor = ({ attribute, onSave, onClose }: AttributeEditorProps) =
                         </div>
                         <ul className="space-y-1 max-h-[200px] overflow-y-auto mb-3">
                             {enumValues.map((val, idx) => (
-                                <li key={idx} className="flex justify-between items-center text-sm bg-gray-50 px-2 py-1 rounded">
-                                    <span>{val}</span>
-                                    <button
-                                        onClick={() => setEnumValues(enumValues.filter((_, i) => i !== idx))}
-                                        className="text-red-500 hover:bg-red-50 rounded"
-                                    >
-                                        <X size={12} />
-                                    </button>
-                                </li>
+                                <EnumValueItem
+                                    key={idx}
+                                    value={val}
+                                    index={idx}
+                                    onUpdate={(index, newValue) => {
+                                        const updated = [...enumValues];
+                                        updated[index] = newValue;
+                                        setEnumValues(updated);
+                                    }}
+                                    onDelete={(index) => {
+                                        setEnumValues(enumValues.filter((_, i) => i !== index));
+                                    }}
+                                />
                             ))}
                             {enumValues.length === 0 && <li className="text-gray-400 text-xs text-center p-2">List is empty</li>}
                         </ul>

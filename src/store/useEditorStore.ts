@@ -76,7 +76,7 @@ export interface ModelRelation {
     author?: string;
 }
 
-export type AttributeType = 'string' | 'number' | 'date' | 'enum';
+export type AttributeType = 'string' | 'number' | 'date' | 'enum' | 'boolean';
 
 export interface DataBlockAttribute {
     id: string;

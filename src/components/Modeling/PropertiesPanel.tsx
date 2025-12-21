@@ -466,6 +466,24 @@ const PropertiesPanel = () => {
                                                                 />
                                                             )}
                                                             
+                                                            {attr.type === 'boolean' && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={currentValue === 'true'}
+                                                                        onChange={(e) => updateDataBlockValue(block, attr.key, e.target.checked ? 'true' : 'false')}
+                                                                        style={{
+                                                                            width: '18px',
+                                                                            height: '18px',
+                                                                            cursor: 'pointer'
+                                                                        }}
+                                                                    />
+                                                                    <span style={{ fontSize: '12px', color: '#666' }}>
+                                                                        {currentValue === 'true' ? 'Yes' : 'No'}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            
                                                             {attr.type === 'enum' && (
                                                                 <select
                                                                     value={currentValue}
