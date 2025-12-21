@@ -169,6 +169,15 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
 - [x] **Type System Enhancement**: Extended properties type from `Record<string, string>` to `Record<string, unknown>` to support complex nested structures.
   *Évolution du système de types pour supporter des structures JSON complexes tout en maintenant la compatibilité avec la base de données Prisma.*
   *Support complet des relations avec ajout de `updateRelationProperties` dans le store.*
+- [x] **Dark/Light Theme Support**: System preference detection and manual toggle.
+  *Gestion complète des thèmes clair et sombre avec mémorisation de la préférence utilisateur.*
+  *Adaptation de toute l'interface (Palette, Propriétés, Canevas) pour un confort visuel optimal.*
+- [x] **Internationalization (i18n)**: Fully translated UI (English/French).
+  *Support complet du multilinguisme avec bascule instantanée sans rechargement.*
+  *Traduction de tous les menus, info-bulles et messages système.*
+- [x] **Integrated User Manual**: In-app documentation viewer (`.md` rendering).
+  *Accès direct au manuel utilisateur depuis l'application via une page dédiée.*
+  *Rendu riche du format Markdown pour une lecture fluide des instructions.*
 
 ## 🧅 Phase 6: Advanced Visualization & "Onion" Diagrams
 *Objective: Transform static diagrams into interactive heatmaps.*

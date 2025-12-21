@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useEditorStore, DataBlock, DataBlockAttribute, AttributeType } from '@/store/useEditorStore';
 import { ARCHIMATE_METAMODEL, ARCHIMATE_RELATIONS, RelationshipType } from '@/lib/metamodel';
 import styles from '@/app/modeler/modeler.module.css';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
     Bold,
     Italic,
@@ -29,11 +30,26 @@ const FONT_FAMILIES = [
 const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32];
 
 const PropertiesPanel = () => {
+    const { theme } = useTheme();
     const [activeSection, setActiveSection] = useState<'properties' | 'style'>('properties');
 
     const [localName, setLocalName] = useState('');
     const [localDescription, setLocalDescription] = useState('');
     const [localDocumentation, setLocalDocumentation] = useState('');
+
+    // Theme-aware colors using CSS variables
+    const themeColors = {
+        background: 'var(--background)',
+        backgroundSecondary: theme === 'dark' ? 'var(--background)' : '#f8f9fa',
+        border: 'var(--border)',
+        borderLight: 'var(--border)',
+        text: 'var(--foreground)',
+        textSecondary: 'var(--foreground)',
+        textTertiary: 'var(--foreground)',
+        textQuaternary: 'var(--foreground)',
+        inputBg: 'var(--background)',
+        inputBorder: 'var(--border)',
+    };
 
     const {
         selectedNode, selectedEdge, selectedObject,
@@ -197,7 +213,7 @@ const PropertiesPanel = () => {
     // Nothing selected and no active view?
     if (!repoElement && !repoView && !repoRelation && !selectedNode && !selectedEdge) {
         return (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+            <div style={{ padding: '20px', textAlign: 'center', color: themeColors.textTertiary }}>
                 <Type size={32} style={{ opacity: 0.3, marginBottom: '12px' }} />
                 <p style={{ fontSize: '13px', margin: 0 }}>Select an element or relationship to view and edit its properties</p>
             </div>
@@ -251,12 +267,13 @@ const PropertiesPanel = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 16px',
-                    borderBottom: '1px solid #eee',
-                    background: '#f8f9fa'
+                    borderBottom: `1px solid ${themeColors.borderLight}`,
+                    background: themeColors.backgroundSecondary,
+                    transition: 'background-color 0.2s, border-color 0.2s'
                 }}>
                     <div>
-                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{displayType}</h4>
-                        <span style={{ fontSize: '11px', color: '#888' }}>{nodeType}</span>
+                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: themeColors.text }}>{displayType}</h4>
+                        <span style={{ fontSize: '11px', color: themeColors.textTertiary, opacity: 0.7 }}>{nodeType}</span>
                     </div>
                     {selectedNode && (
                         <button
@@ -278,18 +295,20 @@ const PropertiesPanel = () => {
                 </div>
 
                 {/* Tab Switcher */}
-                <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+                <div style={{ display: 'flex', borderBottom: `1px solid ${themeColors.borderLight}`, transition: 'border-color 0.2s' }}>
                     <button
                         onClick={() => setActiveSection('properties')}
                         style={{
                             flex: 1,
                             padding: '10px',
                             border: 'none',
-                            background: activeSection === 'properties' ? '#fff' : '#f8f9fa',
-                            borderBottom: activeSection === 'properties' ? '2px solid #3366ff' : '2px solid transparent',
+                            background: activeSection === 'properties' ? themeColors.background : themeColors.backgroundSecondary,
+                            borderBottom: activeSection === 'properties' ? `2px solid var(--primary, #3366ff)` : '2px solid transparent',
                             fontSize: '12px',
                             fontWeight: activeSection === 'properties' ? 600 : 400,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            color: themeColors.text,
+                            transition: 'background-color 0.2s, border-color 0.2s, color 0.2s'
                         }}
                     >
                         Properties
@@ -301,11 +320,13 @@ const PropertiesPanel = () => {
                                 flex: 1,
                                 padding: '10px',
                                 border: 'none',
-                                background: activeSection === 'style' ? '#fff' : '#f8f9fa',
-                                borderBottom: activeSection === 'style' ? '2px solid #3366ff' : '2px solid transparent',
+                                background: activeSection === 'style' ? themeColors.background : themeColors.backgroundSecondary,
+                                borderBottom: activeSection === 'style' ? `2px solid var(--primary, #3366ff)` : '2px solid transparent',
                                 fontSize: '12px',
                                 fontWeight: activeSection === 'style' ? 600 : 400,
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                color: themeColors.text,
+                                transition: 'background-color 0.2s, border-color 0.2s, color 0.2s'
                             }}
                         >
                             Style
@@ -319,7 +340,7 @@ const PropertiesPanel = () => {
                         <>
                             {/* Name */}
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                     Name
                                 </label>
                                 <input
@@ -336,16 +357,19 @@ const PropertiesPanel = () => {
                                     style={{
                                         width: '100%',
                                         padding: '8px 10px',
-                                        border: '1px solid #ddd',
+                                        border: `1px solid ${themeColors.border}`,
                                         borderRadius: '6px',
-                                        fontSize: '13px'
+                                        fontSize: '13px',
+                                        background: themeColors.inputBg,
+                                        color: themeColors.text,
+                                        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                     }}
                                 />
                             </div>
 
                             {/* Description - Universal */}
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                     Description
                                 </label>
                                 <textarea
@@ -356,11 +380,14 @@ const PropertiesPanel = () => {
                                     style={{
                                         width: '100%',
                                         padding: '8px 10px',
-                                        border: '1px solid #ddd',
+                                        border: `1px solid ${themeColors.border}`,
                                         borderRadius: '6px',
                                         fontSize: '12px',
                                         minHeight: '80px',
-                                        resize: 'vertical'
+                                        resize: 'vertical',
+                                        background: themeColors.inputBg,
+                                        color: themeColors.text,
+                                        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                     }}
                                 />
                             </div>
@@ -368,7 +395,7 @@ const PropertiesPanel = () => {
                             {/* Documentation (RW) - Only for Repository Objects */}
                             {repoObject && (
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                         Documentation
                                     </label>
                                     <textarea
@@ -379,11 +406,14 @@ const PropertiesPanel = () => {
                                         style={{
                                             width: '100%',
                                             padding: '8px 10px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '6px',
                                             fontSize: '12px',
                                             minHeight: '100px',
-                                            resize: 'vertical'
+                                            resize: 'vertical',
+                                            background: themeColors.inputBg,
+                                            color: themeColors.text,
+                                            transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                         }}
                                     />
                                 </div>
@@ -391,10 +421,10 @@ const PropertiesPanel = () => {
 
                             {/* DataBlocks Section - Only for Repository Elements/Relations */}
                             {eligibleDataBlocks.length > 0 && (repoElement || repoRelation) && (
-                                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #eee' }}>
+                                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: `1px solid ${themeColors.borderLight}`, transition: 'border-color 0.2s' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-                                        <Database size={14} style={{ color: '#666' }} />
-                                        <h5 style={{ fontSize: '11px', fontWeight: 600, color: '#666', margin: 0, textTransform: 'uppercase' }}>
+                                        <Database size={14} style={{ color: themeColors.textSecondary, opacity: 0.7 }} />
+                                        <h5 style={{ fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, margin: 0, textTransform: 'uppercase' }}>
                                             Custom Attributes
                                         </h5>
                                     </div>
@@ -402,8 +432,8 @@ const PropertiesPanel = () => {
                                     {eligibleDataBlocks.map(block => {
                                         const blockValues = getDataBlockValues(block);
                                         return (
-                                            <div key={block.id} style={{ marginBottom: '20px', padding: '12px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #e0e0e0' }}>
-                                                <div style={{ fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '12px' }}>
+                                            <div key={block.id} style={{ marginBottom: '20px', padding: '12px', background: themeColors.backgroundSecondary, borderRadius: '6px', border: `1px solid ${themeColors.borderLight}`, transition: 'background-color 0.2s, border-color 0.2s' }}>
+                                                <div style={{ fontSize: '12px', fontWeight: 600, color: themeColors.text, marginBottom: '12px' }}>
                                                     {block.name}
                                                 </div>
                                                 
@@ -412,7 +442,7 @@ const PropertiesPanel = () => {
                                                     
                                                     return (
                                                         <div key={attr.id} style={{ marginBottom: '12px' }}>
-                                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: '#555', marginBottom: '4px' }}>
+                                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: themeColors.textQuaternary, opacity: 0.8, marginBottom: '4px' }}>
                                                                 {attr.name}
                                                             </label>
                                                             
@@ -425,10 +455,12 @@ const PropertiesPanel = () => {
                                                                     style={{
                                                                         width: '100%',
                                                                         padding: '6px 8px',
-                                                                        border: '1px solid #ddd',
+                                                                        border: `1px solid ${themeColors.border}`,
                                                                         borderRadius: '4px',
                                                                         fontSize: '12px',
-                                                                        background: '#fff'
+                                                                        background: themeColors.inputBg,
+                                                                        color: themeColors.text,
+                                                                        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                                                     }}
                                                                 />
                                                             )}
@@ -442,10 +474,12 @@ const PropertiesPanel = () => {
                                                                     style={{
                                                                         width: '100%',
                                                                         padding: '6px 8px',
-                                                                        border: '1px solid #ddd',
+                                                                        border: `1px solid ${themeColors.border}`,
                                                                         borderRadius: '4px',
                                                                         fontSize: '12px',
-                                                                        background: '#fff'
+                                                                        background: themeColors.inputBg,
+                                                                        color: themeColors.text,
+                                                                        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                                                     }}
                                                                 />
                                                             )}
@@ -458,10 +492,12 @@ const PropertiesPanel = () => {
                                                                     style={{
                                                                         width: '100%',
                                                                         padding: '6px 8px',
-                                                                        border: '1px solid #ddd',
+                                                                        border: `1px solid ${themeColors.border}`,
                                                                         borderRadius: '4px',
                                                                         fontSize: '12px',
-                                                                        background: '#fff'
+                                                                        background: themeColors.inputBg,
+                                                                        color: themeColors.text,
+                                                                        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                                                     }}
                                                                 />
                                                             )}
@@ -478,7 +514,7 @@ const PropertiesPanel = () => {
                                                                             cursor: 'pointer'
                                                                         }}
                                                                     />
-                                                                    <span style={{ fontSize: '12px', color: '#666' }}>
+                                                                    <span style={{ fontSize: '12px', color: themeColors.textSecondary, opacity: 0.8 }}>
                                                                         {currentValue === 'true' ? 'Yes' : 'No'}
                                                                     </span>
                                                                 </div>
@@ -491,10 +527,12 @@ const PropertiesPanel = () => {
                                                                     style={{
                                                                         width: '100%',
                                                                         padding: '6px 8px',
-                                                                        border: '1px solid #ddd',
+                                                                        border: `1px solid ${themeColors.border}`,
                                                                         borderRadius: '4px',
                                                                         fontSize: '12px',
-                                                                        background: '#fff'
+                                                                        background: themeColors.inputBg,
+                                                                        color: themeColors.text,
+                                                                        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s'
                                                                     }}
                                                                 >
                                                                     <option value="">-- Select {attr.name} --</option>
@@ -514,31 +552,31 @@ const PropertiesPanel = () => {
 
                             {/* Metadata Section (RO) - Only for Repository Objects */}
                             {repoObject && (
-                                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #eee' }}>
-                                    <h5 style={{ fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '12px', textTransform: 'uppercase' }}>
+                                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: `1px solid ${themeColors.borderLight}`, transition: 'border-color 0.2s' }}>
+                                    <h5 style={{ fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '12px', textTransform: 'uppercase' }}>
                                         Metadata (Read Only)
                                     </h5>
 
                                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 16px', fontSize: '11px' }}>
-                                        <span style={{ color: '#888' }}>ID:</span>
-                                        <code style={{ fontFamily: 'monospace', color: '#444' }}>{repoObject.id}</code>
+                                        <span style={{ color: themeColors.textTertiary, opacity: 0.7 }}>ID:</span>
+                                        <code style={{ fontFamily: 'monospace', color: themeColors.text, opacity: 0.9 }}>{repoObject.id}</code>
 
                                         {/* For view, type is not really stored in type field usually, or handled above */}
-                                        <span style={{ color: '#888' }}>Type:</span>
-                                        <span style={{ color: '#444' }}>{('type' in repoObject ? (repoObject as { type: string }).type : undefined) || nodeType}</span>
+                                        <span style={{ color: themeColors.textTertiary, opacity: 0.7 }}>Type:</span>
+                                        <span style={{ color: themeColors.text, opacity: 0.9 }}>{('type' in repoObject ? (repoObject as { type: string }).type : undefined) || nodeType}</span>
 
-                                        <span style={{ color: '#888' }}>Created:</span>
-                                        <span style={{ color: '#444' }}>
+                                        <span style={{ color: themeColors.textTertiary, opacity: 0.7 }}>Created:</span>
+                                        <span style={{ color: themeColors.text, opacity: 0.9 }}>
                                             {repoObject.createdAt ? new Date(repoObject.createdAt).toLocaleString() : '-'}
                                         </span>
 
-                                        <span style={{ color: '#888' }}>Modified:</span>
-                                        <span style={{ color: '#444' }}>
+                                        <span style={{ color: themeColors.textTertiary, opacity: 0.7 }}>Modified:</span>
+                                        <span style={{ color: themeColors.text, opacity: 0.9 }}>
                                             {repoObject.modifiedAt ? new Date(repoObject.modifiedAt).toLocaleString() : '-'}
                                         </span>
 
-                                        <span style={{ color: '#888' }}>Author:</span>
-                                        <span style={{ color: '#444' }}>{repoObject.author || '-'}</span>
+                                        <span style={{ color: themeColors.textTertiary, opacity: 0.7 }}>Author:</span>
+                                        <span style={{ color: themeColors.text, opacity: 0.9 }}>{repoObject.author || '-'}</span>
                                     </div>
                                 </div>
                             )}
@@ -546,7 +584,7 @@ const PropertiesPanel = () => {
                             {/* Layer Badge - For elements with metamodel */}
                             {meta && meta.layer && (
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                         Layer
                                     </label>
                                     <span style={{
@@ -567,10 +605,10 @@ const PropertiesPanel = () => {
                             {/* ID for Node if no repo element */}
                             {!repoElement && selectedNode && (
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                         Node ID
                                     </label>
-                                    <code style={{ fontSize: '10px', color: '#666', background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}>
+                                    <code style={{ fontSize: '10px', color: themeColors.textSecondary, opacity: 0.8, background: themeColors.backgroundSecondary, padding: '4px 8px', borderRadius: '4px', transition: 'background-color 0.2s, color 0.2s' }}>
                                         {selectedNode.id}
                                     </code>
                                 </div>
@@ -579,17 +617,17 @@ const PropertiesPanel = () => {
                             {/* Position - Only visual */}
                             {selectedNode && (
                                 <div style={{ marginTop: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                         Position
                                     </label>
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <div style={{ flex: 1 }}>
-                                            <span style={{ fontSize: '10px', color: '#888' }}>X</span>
-                                            <div style={{ fontSize: '12px' }}>{Math.round(selectedNode.position.x)}</div>
+                                            <span style={{ fontSize: '10px', color: themeColors.textTertiary, opacity: 0.7 }}>X</span>
+                                            <div style={{ fontSize: '12px', color: themeColors.text }}>{Math.round(selectedNode.position.x)}</div>
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                            <span style={{ fontSize: '10px', color: '#888' }}>Y</span>
-                                            <div style={{ fontSize: '12px' }}>{Math.round(selectedNode.position.y)}</div>
+                                            <span style={{ fontSize: '10px', color: themeColors.textTertiary, opacity: 0.7 }}>Y</span>
+                                            <div style={{ fontSize: '12px', color: themeColors.text }}>{Math.round(selectedNode.position.y)}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -601,26 +639,26 @@ const PropertiesPanel = () => {
                         <>
                             {/* Size */}
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase' }}>
                                     <Maximize2 size={12} /> Dimensions
                                 </label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     <div style={{ flex: 1 }}>
-                                        <span style={{ fontSize: '10px', color: '#888' }}>Width</span>
+                                        <span style={{ fontSize: '10px', color: themeColors.textTertiary, opacity: 0.7 }}>Width</span>
                                         <input
                                             type="number"
                                             value={nodeStyles.width}
                                             onChange={(e) => updateNodeData(selectedNode.id, { width: parseInt(e.target.value) || 140 })}
-                                            style={{ width: '100%', padding: '6px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '12px' }}
+                                            style={{ width: '100%', padding: '6px', border: `1px solid ${themeColors.border}`, borderRadius: '4px', fontSize: '12px', background: themeColors.inputBg, color: themeColors.text, transition: 'border-color 0.2s, background-color 0.2s, color 0.2s' }}
                                         />
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <span style={{ fontSize: '10px', color: '#888' }}>Height</span>
+                                        <span style={{ fontSize: '10px', color: themeColors.textTertiary, opacity: 0.7 }}>Height</span>
                                         <input
                                             type="number"
                                             value={nodeStyles.height}
                                             onChange={(e) => updateNodeData(selectedNode.id, { height: parseInt(e.target.value) || 60 })}
-                                            style={{ width: '100%', padding: '6px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '12px' }}
+                                            style={{ width: '100%', padding: '6px', border: `1px solid ${themeColors.border}`, borderRadius: '4px', fontSize: '12px', background: themeColors.inputBg, color: themeColors.text, transition: 'border-color 0.2s, background-color 0.2s, color 0.2s' }}
                                         />
                                     </div>
                                 </div>
@@ -628,13 +666,13 @@ const PropertiesPanel = () => {
 
                             {/* Font Family */}
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                     <Type size={12} /> Font
                                 </label>
                                 <select
                                     value={nodeStyles.fontFamily}
                                     onChange={(e) => updateNodeData(selectedNode.id, { fontFamily: e.target.value })}
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '12px' }}
+                                    style={{ width: '100%', padding: '8px', border: `1px solid ${themeColors.border}`, borderRadius: '6px', fontSize: '12px', background: themeColors.inputBg, color: themeColors.text, transition: 'border-color 0.2s, background-color 0.2s, color 0.2s' }}
                                 >
                                     {FONT_FAMILIES.map(f => (
                                         <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>{f.label}</option>
@@ -644,13 +682,13 @@ const PropertiesPanel = () => {
 
                             {/* Font Size */}
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '4px', textTransform: 'uppercase' }}>
                                     Size
                                 </label>
                                 <select
                                     value={nodeStyles.fontSize}
                                     onChange={(e) => updateNodeData(selectedNode.id, { fontSize: parseInt(e.target.value) })}
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '12px' }}
+                                    style={{ width: '100%', padding: '8px', border: `1px solid ${themeColors.border}`, borderRadius: '6px', fontSize: '12px', background: themeColors.inputBg, color: themeColors.text, transition: 'border-color 0.2s, background-color 0.2s, color 0.2s' }}
                                 >
                                     {FONT_SIZES.map(s => (
                                         <option key={s} value={s}>{s}px</option>
@@ -660,7 +698,7 @@ const PropertiesPanel = () => {
 
                             {/* Font Style Buttons */}
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Style
                                 </label>
                                 <div style={{ display: 'flex', gap: '4px' }}>
@@ -668,10 +706,11 @@ const PropertiesPanel = () => {
                                         onClick={() => updateNodeData(selectedNode.id, { fontWeight: nodeStyles.fontWeight === 'bold' ? 'normal' : 'bold' })}
                                         style={{
                                             padding: '8px 12px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '4px',
-                                            background: nodeStyles.fontWeight === 'bold' ? '#3366ff' : '#fff',
-                                            color: nodeStyles.fontWeight === 'bold' ? '#fff' : '#333',
+                                            background: nodeStyles.fontWeight === 'bold' ? 'var(--primary, #3366ff)' : themeColors.inputBg,
+                                            color: nodeStyles.fontWeight === 'bold' ? '#fff' : themeColors.text,
+                                            transition: 'background-color 0.2s, color 0.2s, border-color 0.2s',
                                             cursor: 'pointer'
                                         }}
                                     >
@@ -681,10 +720,11 @@ const PropertiesPanel = () => {
                                         onClick={() => updateNodeData(selectedNode.id, { fontStyle: nodeStyles.fontStyle === 'italic' ? 'normal' : 'italic' })}
                                         style={{
                                             padding: '8px 12px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '4px',
-                                            background: nodeStyles.fontStyle === 'italic' ? '#3366ff' : '#fff',
-                                            color: nodeStyles.fontStyle === 'italic' ? '#fff' : '#333',
+                                            background: nodeStyles.fontStyle === 'italic' ? 'var(--primary, #3366ff)' : themeColors.inputBg,
+                                            color: nodeStyles.fontStyle === 'italic' ? '#fff' : themeColors.text,
+                                            transition: 'background-color 0.2s, color 0.2s, border-color 0.2s',
                                             cursor: 'pointer'
                                         }}
                                     >
@@ -694,10 +734,11 @@ const PropertiesPanel = () => {
                                         onClick={() => updateNodeData(selectedNode.id, { textDecoration: nodeStyles.textDecoration === 'underline' ? 'none' : 'underline' })}
                                         style={{
                                             padding: '8px 12px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '4px',
-                                            background: nodeStyles.textDecoration === 'underline' ? '#3366ff' : '#fff',
-                                            color: nodeStyles.textDecoration === 'underline' ? '#fff' : '#333',
+                                            background: nodeStyles.textDecoration === 'underline' ? 'var(--primary, #3366ff)' : themeColors.inputBg,
+                                            color: nodeStyles.textDecoration === 'underline' ? '#fff' : themeColors.text,
+                                            transition: 'background-color 0.2s, color 0.2s, border-color 0.2s',
                                             cursor: 'pointer'
                                         }}
                                     >
@@ -708,7 +749,7 @@ const PropertiesPanel = () => {
 
                             {/* Text Alignment */}
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: themeColors.textSecondary, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Alignment
                                 </label>
                                 <div style={{ display: 'flex', gap: '4px' }}>
@@ -716,11 +757,12 @@ const PropertiesPanel = () => {
                                         onClick={() => updateNodeData(selectedNode.id, { textAlign: 'left' })}
                                         style={{
                                             padding: '8px 12px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '4px',
-                                            background: nodeStyles.textAlign === 'left' ? '#3366ff' : '#fff',
-                                            color: nodeStyles.textAlign === 'left' ? '#fff' : '#333',
-                                            cursor: 'pointer'
+                                            background: nodeStyles.textAlign === 'left' ? 'var(--primary, #3366ff)' : themeColors.inputBg,
+                                            color: nodeStyles.textAlign === 'left' ? '#fff' : themeColors.text,
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s, color 0.2s, border-color 0.2s'
                                         }}
                                     >
                                         <AlignLeft size={14} />
@@ -729,11 +771,12 @@ const PropertiesPanel = () => {
                                         onClick={() => updateNodeData(selectedNode.id, { textAlign: 'center' })}
                                         style={{
                                             padding: '8px 12px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '4px',
-                                            background: nodeStyles.textAlign === 'center' ? '#3366ff' : '#fff',
-                                            color: nodeStyles.textAlign === 'center' ? '#fff' : '#333',
-                                            cursor: 'pointer'
+                                            background: nodeStyles.textAlign === 'center' ? 'var(--primary, #3366ff)' : themeColors.inputBg,
+                                            color: nodeStyles.textAlign === 'center' ? '#fff' : themeColors.text,
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s, color 0.2s, border-color 0.2s'
                                         }}
                                     >
                                         <AlignCenter size={14} />
@@ -742,11 +785,12 @@ const PropertiesPanel = () => {
                                         onClick={() => updateNodeData(selectedNode.id, { textAlign: 'right' })}
                                         style={{
                                             padding: '8px 12px',
-                                            border: '1px solid #ddd',
+                                            border: `1px solid ${themeColors.border}`,
                                             borderRadius: '4px',
-                                            background: nodeStyles.textAlign === 'right' ? '#3366ff' : '#fff',
-                                            color: nodeStyles.textAlign === 'right' ? '#fff' : '#333',
-                                            cursor: 'pointer'
+                                            background: nodeStyles.textAlign === 'right' ? 'var(--primary, #3366ff)' : themeColors.inputBg,
+                                            color: nodeStyles.textAlign === 'right' ? '#fff' : themeColors.text,
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s, color 0.2s, border-color 0.2s'
                                         }}
                                     >
                                         <AlignRight size={14} />
@@ -772,11 +816,12 @@ const PropertiesPanel = () => {
                     justifyContent: 'space-between',
                     marginBottom: '20px',
                     paddingBottom: '12px',
-                    borderBottom: '1px solid #eee'
+                    borderBottom: `1px solid ${themeColors.borderLight}`,
+                    transition: 'border-color 0.2s'
                 }}>
                     <div>
-                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{meta?.name || 'Relationship'}</h4>
-                        <span style={{ fontSize: '11px', color: '#888' }}>Connection</span>
+                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: themeColors.text }}>{meta?.name || 'Relationship'}</h4>
+                        <span style={{ fontSize: '11px', color: themeColors.textTertiary, opacity: 0.7 }}>Connection</span>
                     </div>
                     <button
                         onClick={() => deleteEdge(selectedEdge.id)}

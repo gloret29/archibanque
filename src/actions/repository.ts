@@ -60,6 +60,16 @@ export async function deleteModelPackage(packageId: string) {
     revalidatePath('/modeler');
 }
 
+export async function deleteViewFromDB(viewId: string) {
+    try {
+        await prisma.archiView.delete({ where: { id: viewId } });
+        revalidatePath('/modeler');
+    } catch (error) {
+        console.error(`Failed to delete view ${viewId}:`, error);
+        throw error;
+    }
+}
+
 export async function loadPackageData(packageId: string) {
     const pkg = await prisma.modelPackage.findUnique({
         where: { id: packageId },

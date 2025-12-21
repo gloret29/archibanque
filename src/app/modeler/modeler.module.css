@@ -3,21 +3,23 @@
     flex-direction: column;
     height: 100vh;
     width: 100vw;
-    background: #fdfdfd;
+    background: var(--background, #fdfdfd);
     overflow: hidden;
-    color: #1a1a1a;
+    color: var(--foreground, #1a1a1a);
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .header {
     height: 48px;
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #e0e0e0;
+    background-color: var(--background, #f7f7f7);
+    border-bottom: 1px solid var(--border, #e0e0e0);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     z-index: 10;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .logo {
@@ -57,21 +59,24 @@
 
 .sidebar {
     width: auto;
-    background-color: #fcfcfc;
-    border-right: 1px solid #e0e0e0;
+    background-color: var(--background, #fcfcfc);
+    border-right: 1px solid var(--border, #e0e0e0);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     padding: 1rem;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .sidebar h3,
 .properties h3 {
     font-size: 0.9rem;
     text-transform: uppercase;
-    color: #6c757d;
+    color: var(--foreground, #6c757d);
+    opacity: 0.7;
     margin-bottom: 1rem;
     letter-spacing: 0.05em;
+    transition: color 0.2s;
 }
 
 .treePlaceholder,
@@ -87,8 +92,10 @@
 
 .treePlaceholder li {
     padding: 4px 0;
-    color: #495057;
+    color: var(--foreground, #495057);
+    opacity: 0.8;
     cursor: pointer;
+    transition: color 0.2s;
 }
 
 .treePlaceholder li:hover {
@@ -97,16 +104,22 @@
 
 .canvasArea {
     flex: 1;
-    background-color: #ffffff;
+    background-color: var(--background, #ffffff);
     position: relative;
+    transition: background-color 0.2s;
+}
+
+[data-theme="dark"] .canvasArea {
+    background-color: #18181b;
 }
 
 .properties {
     width: auto;
-    background-color: #f8f9fa;
-    border-left: 1px solid #dee2e6;
+    background-color: var(--background, #f8f9fa);
+    border-left: 1px solid var(--border, #dee2e6);
     padding: 1rem;
     overflow-y: auto;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .propertiesContent {
@@ -128,7 +141,8 @@
     margin: 0;
     font-size: 16px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--foreground, #1a1a1a);
+    transition: color 0.2s;
 }
 
 .deleteButton {
@@ -154,23 +168,30 @@
 .propGroup label {
     font-size: 0.75rem;
     font-weight: bold;
-    color: #6c757d;
+    color: var(--foreground, #6c757d);
+    opacity: 0.7;
     text-transform: uppercase;
+    transition: color 0.2s;
 }
 
 .propInput {
     padding: 6px;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--border, #ced4da);
     border-radius: 4px;
     font-size: 0.85rem;
+    background-color: var(--background, transparent);
+    color: var(--foreground, inherit);
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 
 .propCode {
-    background: #e9ecef;
+    background: var(--background, #e9ecef);
+    opacity: 0.9;
     padding: 2px 4px;
     border-radius: 4px;
     font-size: 0.75rem;
     font-family: monospace;
+    transition: background-color 0.2s;
 }
 
 .layerBadge {
@@ -179,33 +200,39 @@
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 500;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
     text-transform: capitalize;
+    transition: border-color 0.2s;
 }
 
 .metadataSection {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border, #eee);
+    transition: border-color 0.2s;
 }
 
 .metadataSection h5 {
     font-size: 0.8rem;
     margin-bottom: 0.5rem;
-    color: #999;
+    color: var(--foreground, #999);
+    opacity: 0.7;
+    transition: color 0.2s;
 }
 
 .metadataSection p {
     font-size: 0.75rem;
-    color: #666;
+    color: var(--foreground, #666);
+    opacity: 0.8;
     margin: 2px 0;
+    transition: color 0.2s;
 }
 
 /* ===== Tab Bar Styles ===== */
 .tabBar {
     height: 36px;
-    background: linear-gradient(to bottom, #f8f9fa, #f0f1f3);
-    border-bottom: 1px solid #e0e0e0;
+    background: var(--background, linear-gradient(to bottom, #f8f9fa, #f0f1f3));
+    border-bottom: 1px solid var(--border, #e0e0e0);
     display: flex;
     align-items: flex-end;
     padding: 0 8px;
@@ -213,6 +240,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .tabBar::-webkit-scrollbar {
@@ -220,8 +248,9 @@
 }
 
 .tabBar::-webkit-scrollbar-thumb {
-    background: #ccc;
+    background: var(--border, #ccc);
     border-radius: 2px;
+    transition: background 0.2s;
 }
 
 .tabsList {
@@ -236,13 +265,14 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #e8e9eb;
-    border: 1px solid #d0d0d0;
+    background: var(--background, #e8e9eb);
+    opacity: 0.8;
+    border: 1px solid var(--border, #d0d0d0);
     border-bottom: none;
     border-radius: 6px 6px 0 0;
     cursor: pointer;
     font-size: 12px;
-    color: #555;
+    color: var(--foreground, #555);
     min-width: 100px;
     max-width: 180px;
     transition: all 0.15s ease;
@@ -251,14 +281,16 @@
 }
 
 .tabItem:hover {
-    background: #f0f0f0;
-    color: #333;
+    background: var(--background, #f0f0f0);
+    opacity: 1;
+    color: var(--foreground, #333);
 }
 
 .tabItem.activeTab {
-    background: #ffffff;
-    color: #1a1a1a;
-    border-color: #d0d0d0;
+    background: var(--background, #ffffff);
+    opacity: 1;
+    color: var(--foreground, #1a1a1a);
+    border-color: var(--border, #d0d0d0);
     font-weight: 600;
     z-index: 1;
 }
@@ -295,7 +327,8 @@
     height: 16px;
     border: none;
     background: transparent;
-    color: #888;
+    color: var(--foreground, #888);
+    opacity: 0.7;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
@@ -333,9 +366,10 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    border: 1px dashed #ccc;
+    border: 1px dashed var(--border, #ccc);
     background: transparent;
-    color: #888;
+    color: var(--foreground, #888);
+    opacity: 0.7;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -346,10 +380,11 @@
 }
 
 .addTab:hover {
-    background: #3366ff;
+    background: var(--primary, #3366ff);
     color: white;
-    border-color: #3366ff;
+    border-color: var(--primary, #3366ff);
     border-style: solid;
+    opacity: 1;
 }
 
 /* Header layout improvements */

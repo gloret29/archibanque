@@ -4,10 +4,54 @@ import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import { useEditorStore } from '@/store/useEditorStore';
 import { ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
+import { useTheme } from '@/contexts/ThemeContext';
 import styles from './palette.module.css';
+
+// Helper function to determine if a color is light or dark
+const isLightColor = (color: string): boolean => {
+    // Remove # if present
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+};
 
 const Palette = () => {
     const { enabledElementTypes } = useEditorStore();
+    const { theme } = useTheme();
+
+    // Get text color and style based on background color for optimal contrast
+    const getTextStyle = (backgroundColor: string): { color: string; textShadow?: string; fontWeight?: number } => {
+        // Ensure valid hex color
+        if (!backgroundColor || !backgroundColor.startsWith('#')) {
+            return { color: 'var(--foreground)', fontWeight: 600 };
+        }
+
+        const isLight = isLightColor(backgroundColor);
+
+        // For ArchiMate standard colors (which are mostly light/pastel), 
+        // we ALWAYS want dark text for readability, regardless of the app theme.
+        // The Dark Mode generally affects the panel background, not the element fill color.
+
+        if (isLight) {
+            // Light background (ArchiMate standard): Always use black/dark text
+            return {
+                color: '#000000', // Always pure black for maximum contrast on pastel colors
+                textShadow: 'none', // Remove shadow to keeps it clean
+                fontWeight: 600 // Semi-bold
+            };
+        } else {
+            // Dark background (custom or specific elements): Use white text
+            return {
+                color: '#ffffff',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                fontWeight: 700
+            };
+        }
+    };
 
     const onDragStart = (event: React.DragEvent, nodeType: string) => {
         event.dataTransfer.setData('application/reactflow', nodeType);
@@ -17,8 +61,8 @@ const Palette = () => {
     const layers: ArchimateLayer[] = ['strategy', 'business', 'application', 'technology', 'physical', 'motivation', 'implementation', 'other'];
 
     return (
-        <div className={styles.palette}>
-            <div className={styles.paletteContent}>
+        <div className={styles.palette} style={{ background: 'var(--background)', transition: 'background-color 0.2s' }}>
+            <div className={styles.paletteContent} style={{ background: 'var(--background)', transition: 'background-color 0.2s' }}>
                 {layers.map(layer => {
                     const layerItems = Object.values(ARCHIMATE_METAMODEL)
                         .filter(item => item.layer === layer && enabledElementTypes.includes(item.id));
@@ -29,35 +73,51 @@ const Palette = () => {
                         <div key={layer} className={styles.layerSection}>
                             <h4 className={styles.layerTitle}>{layer}</h4>
                             <div className={styles.elementList}>
-                                {layerItems.map(item => (
-                                    <div
-                                        key={item.id}
-                                        className={styles.paletteItem}
-                                        style={{ backgroundColor: item.color }}
-                                        onDragStart={(event) => onDragStart(event, item.id)}
-                                        draggable
-                                    >
-                                        {item.name}
-                                    </div>
-                                ))}
+                                {layerItems.map(item => {
+                                    const textStyle = getTextStyle(item.color);
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className={styles.paletteItem}
+                                            style={{
+                                                backgroundColor: item.color,
+                                                color: textStyle.color,
+                                                fontWeight: textStyle.fontWeight || 600,
+                                                textShadow: textStyle.textShadow || 'none',
+                                                WebkitFontSmoothing: 'antialiased',
+                                                MozOsxFontSmoothing: 'grayscale'
+                                            }}
+                                            onDragStart={(event) => onDragStart(event, item.id)}
+                                            draggable
+                                        >
+                                            {item.name}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            <div style={{ padding: '10px', borderTop: '1px solid #e0e0e0', marginTop: 'auto' }}>
+            <div style={{
+                padding: '10px',
+                borderTop: `1px solid var(--border)`,
+                marginTop: 'auto',
+                transition: 'border-color 0.2s'
+            }}>
                 <Link href="/admin" style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '8px',
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: theme === 'dark' ? 'var(--background)' : '#f5f5f5',
                     borderRadius: '4px',
                     textDecoration: 'none',
-                    color: '#666',
+                    color: 'var(--foreground)',
                     fontSize: '12px',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    transition: 'background-color 0.2s, color 0.2s'
                 }}>
                     <Settings size={14} style={{ marginRight: '6px' }} />
                     Admin Settings

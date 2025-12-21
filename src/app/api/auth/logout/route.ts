@@ -11,3 +11,4 @@ export async function GET(request: NextRequest) {
   return NextResponse.redirect(`${authLogoutUrl}?rd=${encodeURIComponent(request.nextUrl.origin)}`);
 }
 
+

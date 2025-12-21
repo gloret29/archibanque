@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import {
     ReactFlow,
     Background,
@@ -19,36 +19,43 @@ import { useEditorStore } from '@/store/useEditorStore';
 import ArchimateNode from './ArchimateNode';
 import ArchimateEdge from './ArchimateEdge';
 import { getValidRelationships, ARCHIMATE_RELATIONS, RelationshipType, ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const ArchimateMarkers = () => (
-    <svg style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }}>
-        <defs>
-            {/* Arrowheads */}
-            <marker id="arrowhead-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="#333" strokeWidth="2" />
-            </marker>
-            <marker id="arrowhead-triangle" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 0 L 10 5 L 0 10 Z" fill="white" stroke="#333" strokeWidth="1" />
-            </marker>
-            <marker id="arrowhead-filled-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 0 L 10 5 L 0 10" fill="#333" />
-            </marker>
-            <marker id="arrowhead-filled-triangle" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 0 L 10 5 L 0 10 Z" fill="#333" />
-            </marker>
-            {/* Start Markers */}
-            <marker id="marker-diamond" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 5 L 5 0 L 10 5 L 5 10 Z" fill="#333" />
-            </marker>
-            <marker id="marker-open-diamond" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 5 L 5 0 L 10 5 L 5 10 Z" fill="white" stroke="#333" strokeWidth="1" />
-            </marker>
-            <marker id="marker-circle" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <circle cx="5" cy="5" r="4" fill="white" stroke="#333" strokeWidth="1" />
-            </marker>
-        </defs>
-    </svg>
-);
+const ArchimateMarkers = ({ theme }: { theme: 'light' | 'dark' }) => {
+    const strokeColor = theme === 'dark' ? '#e4e4e7' : '#333';
+    const fillColor = theme === 'dark' ? '#27272a' : 'white';
+    const filledColor = theme === 'dark' ? '#e4e4e7' : '#333';
+    
+    return (
+        <svg style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }}>
+            <defs>
+                {/* Arrowheads */}
+                <marker id="arrowhead-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={strokeColor} strokeWidth="2" />
+                </marker>
+                <marker id="arrowhead-triangle" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 Z" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+                </marker>
+                <marker id="arrowhead-filled-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10" fill={filledColor} />
+                </marker>
+                <marker id="arrowhead-filled-triangle" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 Z" fill={filledColor} />
+                </marker>
+                {/* Start Markers */}
+                <marker id="marker-diamond" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 5 L 5 0 L 10 5 L 5 10 Z" fill={filledColor} />
+                </marker>
+                <marker id="marker-open-diamond" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 5 L 5 0 L 10 5 L 5 10 Z" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+                </marker>
+                <marker id="marker-circle" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <circle cx="5" cy="5" r="4" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
+                </marker>
+            </defs>
+        </svg>
+    );
+};
 
 const nodeTypes = {
     archimate: ArchimateNode,
@@ -67,6 +74,7 @@ interface CanvasContextMenu {
 
 function EditorCanvasInner() {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
+    const { theme } = useTheme();
     const [connMenu, setConnMenu] = useState<{ x: number, y: number, params: Connection, options: RelationshipType[] } | null>(null);
     const [contextMenu, setContextMenu] = useState<CanvasContextMenu | null>(null);
     const [selectedLayer, setSelectedLayer] = useState<ArchimateLayer | null>(null);
@@ -323,10 +331,16 @@ function EditorCanvasInner() {
                 snapToGrid
                 snapGrid={[15, 15]}
             >
-                <Background variant={BackgroundVariant.Lines} gap={30} size={1} color="#f0f0f0" />
+                <Background 
+                    variant={BackgroundVariant.Lines} 
+                    gap={30} 
+                    size={1} 
+                    color={theme === 'dark' ? '#3f3f46' : '#e5e5e5'}
+                    bgColor={theme === 'dark' ? '#1e1e1e' : '#ffffff'}
+                />
                 <Controls />
                 <MiniMap />
-                <ArchimateMarkers />
+                <ArchimateMarkers theme={theme} />
 
                 {connMenu && (
                     <div
@@ -336,15 +350,16 @@ function EditorCanvasInner() {
                             top: '50%',
                             transform: 'translate(-50%, -50%)',
                             zIndex: 1000,
-                            background: 'white',
-                            border: '1px solid #ccc',
+                            background: 'var(--background)',
+                            border: `1px solid var(--border)`,
                             borderRadius: '6px',
                             padding: '12px',
                             boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-                            minWidth: '180px'
+                            minWidth: '180px',
+                            transition: 'background-color 0.2s, border-color 0.2s'
                         }}
                     >
-                        <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '10px', color: '#3366ff', borderBottom: '1px solid #eee', paddingBottom: '6px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '10px', color: 'var(--primary)', borderBottom: `1px solid var(--border)`, paddingBottom: '6px', transition: 'color 0.2s, border-color 0.2s' }}>
                             SELECT RELATIONSHIP
                         </div>
                         <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
@@ -362,11 +377,11 @@ function EditorCanvasInner() {
                                         cursor: 'pointer',
                                         fontSize: '12px',
                                         borderRadius: '4px',
-                                        transition: 'background 0.2s',
+                                        transition: 'background 0.2s, color 0.2s',
                                         fontWeight: 500,
-                                        color: '#333'
+                                        color: 'var(--foreground)'
                                     }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.background = '#edf2ff')}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = theme === 'dark' ? 'var(--border)' : '#edf2ff')}
                                     onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                                 >
                                     {ARCHIMATE_RELATIONS[opt].name}
@@ -375,7 +390,19 @@ function EditorCanvasInner() {
                         </div>
                         <button
                             onClick={() => setConnMenu(null)}
-                            style={{ width: '100%', marginTop: '12px', fontSize: '11px', color: '#888', background: '#f5f5f5', border: '1px solid #eee', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}
+                            style={{ 
+                                width: '100%', 
+                                marginTop: '12px', 
+                                fontSize: '11px', 
+                                color: 'var(--foreground)', 
+                                opacity: 0.7,
+                                background: theme === 'dark' ? 'var(--border)' : '#f5f5f5', 
+                                border: `1px solid var(--border)`, 
+                                padding: '6px', 
+                                borderRadius: '4px', 
+                                cursor: 'pointer',
+                                transition: 'background-color 0.2s, border-color 0.2s, color 0.2s'
+                            }}
                         >
                             Cancel
                         </button>
@@ -391,16 +418,17 @@ function EditorCanvasInner() {
                         left: contextMenu.x,
                         top: contextMenu.y,
                         zIndex: 1001,
-                        background: 'white',
-                        border: '1px solid #e0e0e0',
+                        background: 'var(--background)',
+                        border: `1px solid var(--border)`,
                         borderRadius: '8px',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                         minWidth: '180px',
-                        padding: '4px'
+                        padding: '4px',
+                        transition: 'background-color 0.2s, border-color 0.2s'
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div style={{ fontSize: '10px', fontWeight: 600, color: '#888', padding: '6px 12px', borderBottom: '1px solid #eee', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--foreground)', opacity: 0.7, padding: '6px 12px', borderBottom: `1px solid var(--border)`, marginBottom: '4px', transition: 'color 0.2s, border-color 0.2s' }}>
                         CREATE ELEMENT
                     </div>
                     {elementsByLayer.map(group => (
@@ -414,15 +442,17 @@ function EditorCanvasInner() {
                                     width: '100%',
                                     padding: '8px 12px',
                                     border: 'none',
-                                    background: selectedLayer === group.layer ? '#f5f5f5' : 'transparent',
+                                    background: selectedLayer === group.layer ? (theme === 'dark' ? 'var(--border)' : '#f5f5f5') : 'transparent',
                                     fontSize: '12px',
                                     cursor: 'pointer',
                                     borderRadius: '4px',
-                                    textTransform: 'capitalize'
+                                    textTransform: 'capitalize',
+                                    color: 'var(--foreground)',
+                                    transition: 'background-color 0.2s, color 0.2s'
                                 }}
                             >
                                 {group.layer}
-                                <span style={{ color: '#aaa' }}>▶</span>
+                                <span style={{ color: 'var(--foreground)', opacity: 0.5 }}>▶</span>
                             </button>
 
                             {/* Submenu for layer elements */}
@@ -433,14 +463,15 @@ function EditorCanvasInner() {
                                         left: '100%',
                                         top: 0,
                                         marginLeft: '4px',
-                                        background: 'white',
-                                        border: '1px solid #e0e0e0',
+                                        background: 'var(--background)',
+                                        border: `1px solid var(--border)`,
                                         borderRadius: '8px',
                                         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                                         minWidth: '200px',
                                         maxHeight: '300px',
                                         overflowY: 'auto',
-                                        padding: '4px'
+                                        padding: '4px',
+                                        transition: 'background-color 0.2s, border-color 0.2s'
                                     }}
                                 >
                                     {group.items.map(item => (
@@ -459,8 +490,10 @@ function EditorCanvasInner() {
                                                 cursor: 'pointer',
                                                 borderRadius: '4px',
                                                 textAlign: 'left',
+                                                color: 'var(--foreground)',
+                                                transition: 'background-color 0.2s, color 0.2s'
                                             }}
-                                            onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                                            onMouseEnter={(e) => (e.currentTarget.style.background = theme === 'dark' ? 'var(--border)' : '#f5f5f5')}
                                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                         >
                                             <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: item.color }} />

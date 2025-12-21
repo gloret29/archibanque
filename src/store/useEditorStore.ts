@@ -15,7 +15,7 @@ import {
 // Temporarily disabled due to SSR hydration issues with React 19
 // import { temporal } from 'zundo';
 import { RelationshipType, getDerivedRelationship, ARCHIMATE_METAMODEL } from '@/lib/metamodel';
-import { saveRepositoryState } from '@/actions/repository';
+import { saveRepositoryState, deleteViewFromDB } from '@/actions/repository';
 import { loadDataBlocks } from '@/actions/datablocks';
 
 export interface ArchimateView {
@@ -373,6 +373,12 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         const { views, openViewIds, activeViewId } = get();
         const newViews = views.filter(v => v.id !== viewId);
         const newOpenViewIds = openViewIds.filter(id => id !== viewId);
+
+        // Server action: delete from DB
+        deleteViewFromDB(viewId).catch(err => {
+            console.error('Failed to delete view from DB:', err);
+            // Optionally revert state here if needed, but for now we assume success
+        });
 
         // If deleting the active view, select another open one or null
         let newActiveId: string | null = activeViewId;

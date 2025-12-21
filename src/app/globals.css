@@ -35,25 +35,29 @@
 
 /* Dark theme support */
 [data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --border: #333333;
+  --background: #1e1e1e;
+  --foreground: #e4e4e7;
+  --border: #3f3f46;
+  --primary: #5b8fff;
+  --primary-foreground: #ffffff;
   
   /* User menu variables for dark theme */
-  --user-menu-bg: #1a1a1a;
-  --user-menu-hover-bg: #2a2a2a;
-  --user-menu-text: #ededed;
-  --user-menu-text-secondary: #999;
-  --user-menu-dropdown-bg: #1a1a1a;
-  --user-menu-dropdown-border: #333;
-  --user-menu-item-hover: #2a2a2a;
-  --user-menu-item-active: #1a3a5a;
+  --user-menu-bg: #27272a;
+  --user-menu-hover-bg: #3f3f46;
+  --user-menu-text: #e4e4e7;
+  --user-menu-text-secondary: #a1a1aa;
+  --user-menu-dropdown-bg: #27272a;
+  --user-menu-dropdown-border: #3f3f46;
+  --user-menu-item-hover: #3f3f46;
+  --user-menu-item-active: #1e3a5f;
 }
 
 [data-theme="light"] {
   --background: #ffffff;
   --foreground: #171717;
   --border: #e5e5e5;
+  --primary: #3366ff;
+  --primary-foreground: #ffffff;
   
   /* User menu variables for light theme */
   --user-menu-bg: #fff;

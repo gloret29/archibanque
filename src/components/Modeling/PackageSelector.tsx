@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useEditorStore, ModelPackage, ArchimateFolder, ArchimateView, ModelElement, ModelRelation } from '@/store/useEditorStore';
 import { getModelPackages, createModelPackage, loadPackageData } from '@/actions/repository';
 import { Package, Plus, ChevronDown, Loader2 } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface PackageSelectorProps {
     className?: string;
@@ -16,6 +17,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
     const [newName, setNewName] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { theme } = useTheme();
 
     // Handle hydration - set mounted first
     useEffect(() => {
@@ -135,13 +137,13 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                     alignItems: 'center',
                     gap: '8px',
                     padding: '8px 12px',
-                    background: '#f8f9fa',
-                    border: '1px solid #e0e0e0',
+                    background: theme === 'dark' ? '#27272a' : '#f8f9fa',
+                    border: theme === 'dark' ? '1px solid #3f3f46' : '1px solid #e0e0e0',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     fontSize: '13px',
                     fontWeight: 500,
-                    color: '#333',
+                    color: theme === 'dark' ? '#e4e4e7' : '#333',
                     minWidth: '180px',
                     transition: 'all 0.2s'
                 }}
@@ -165,8 +167,8 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                         top: '100%',
                         left: 0,
                         marginTop: '4px',
-                        background: 'white',
-                        border: '1px solid #e0e0e0',
+                        background: theme === 'dark' ? '#18181b' : 'white',
+                        border: theme === 'dark' ? '1px solid #3f3f46' : '1px solid #e0e0e0',
                         borderRadius: '8px',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                         minWidth: '250px',
@@ -186,7 +188,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     gap: '10px',
                                     width: '100%',
                                     padding: '10px 14px',
-                                    background: pkg.id === currentPackageId ? '#edf2ff' : 'transparent',
+                                    background: pkg.id === currentPackageId ? (theme === 'dark' ? '#1e3a8a' : '#edf2ff') : 'transparent',
                                     border: 'none',
                                     cursor: 'pointer',
                                     fontSize: '13px',
@@ -195,7 +197,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                 }}
                                 onMouseEnter={(e) => {
                                     if (pkg.id !== currentPackageId) {
-                                        e.currentTarget.style.background = '#f5f5f5';
+                                        e.currentTarget.style.background = theme === 'dark' ? '#27272a' : '#f5f5f5';
                                     }
                                 }}
                                 onMouseLeave={(e) => {
@@ -204,13 +206,13 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     }
                                 }}
                             >
-                                <Package size={16} style={{ color: pkg.id === currentPackageId ? '#3366ff' : '#999' }} />
+                                <Package size={16} style={{ color: pkg.id === currentPackageId ? '#60a5fa' : (theme === 'dark' ? '#a1a1aa' : '#999') }} />
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: pkg.id === currentPackageId ? 600 : 400, color: pkg.id === currentPackageId ? '#3366ff' : '#333' }}>
+                                    <div style={{ fontWeight: pkg.id === currentPackageId ? 600 : 400, color: pkg.id === currentPackageId ? '#60a5fa' : (theme === 'dark' ? '#e4e4e7' : '#333') }}>
                                         {pkg.name}
                                     </div>
                                     {pkg.description && (
-                                        <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
+                                        <div style={{ fontSize: '11px', color: theme === 'dark' ? '#71717a' : '#888', marginTop: '2px' }}>
                                             {pkg.description}
                                         </div>
                                     )}
@@ -220,7 +222,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                     </div>
 
                     {/* Create New button */}
-                    <div style={{ borderTop: '1px solid #eee', padding: '8px' }}>
+                    <div style={{ borderTop: theme === 'dark' ? '1px solid #3f3f46' : '1px solid #eee', padding: '8px' }}>
                         {!isCreateOpen ? (
                             <button
                                 onClick={() => setIsCreateOpen(true)}
@@ -230,12 +232,12 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     gap: '8px',
                                     width: '100%',
                                     padding: '8px 10px',
-                                    background: '#f8f9fa',
-                                    border: '1px dashed #ccc',
+                                    background: theme === 'dark' ? '#27272a' : '#f8f9fa',
+                                    border: theme === 'dark' ? '1px dashed #52525b' : '1px dashed #ccc',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
                                     fontSize: '12px',
-                                    color: '#666',
+                                    color: theme === 'dark' ? '#a1a1aa' : '#666',
                                     transition: 'all 0.2s'
                                 }}
                             >
@@ -251,7 +253,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     onChange={(e) => setNewName(e.target.value)}
                                     style={{
                                         padding: '8px 10px',
-                                        border: '1px solid #ddd',
+                                        border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ddd',
+                                        background: theme === 'dark' ? '#3f3f46' : '#fff',
+                                        color: theme === 'dark' ? '#e4e4e7' : '#000',
                                         borderRadius: '4px',
                                         fontSize: '12px'
                                     }}
@@ -264,7 +268,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     onChange={(e) => setNewDescription(e.target.value)}
                                     style={{
                                         padding: '8px 10px',
-                                        border: '1px solid #ddd',
+                                        border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ddd',
+                                        background: theme === 'dark' ? '#3f3f46' : '#fff',
+                                        color: theme === 'dark' ? '#e4e4e7' : '#000',
                                         borderRadius: '4px',
                                         fontSize: '12px'
                                     }}
@@ -275,8 +281,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                         style={{
                                             flex: 1,
                                             padding: '6px',
-                                            background: '#f5f5f5',
-                                            border: '1px solid #ddd',
+                                            background: theme === 'dark' ? '#3f3f46' : '#f5f5f5',
+                                            border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ddd',
+                                            color: theme === 'dark' ? '#e4e4e7' : '#000',
                                             borderRadius: '4px',
                                             fontSize: '11px',
                                             cursor: 'pointer'

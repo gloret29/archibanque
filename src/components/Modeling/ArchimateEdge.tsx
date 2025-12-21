@@ -4,6 +4,8 @@ import React from 'react';
 import { BaseEdge, EdgeProps, getSmoothStepPath, EdgeLabelRenderer } from '@xyflow/react';
 import { ARCHIMATE_RELATIONS, RelationshipType } from '@/lib/metamodel';
 
+import { useTheme } from '@/contexts/ThemeContext';
+
 export default function ArchimateEdge({
     sourceX,
     sourceY,
@@ -14,6 +16,7 @@ export default function ArchimateEdge({
     style = {},
     data,
 }: EdgeProps) {
+    const { theme } = useTheme();
     const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX,
         sourceY,
@@ -30,7 +33,8 @@ export default function ArchimateEdge({
     const edgeStyle: React.CSSProperties = {
         ...style,
         strokeWidth: 2,
-        stroke: '#333',
+        // Adapt stroke color for dark mode visibility (white/light-gray vs dark-gray)
+        stroke: theme === 'dark' ? '#d4d4d8' : '#333',
         strokeDasharray: meta.lineStyle === 'dashed' ? '5,5' : meta.lineStyle === 'dotted' ? '2,2' : 'none',
     };
 
@@ -51,13 +55,14 @@ export default function ArchimateEdge({
                     style={{
                         position: 'absolute',
                         transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                        background: '#fff',
+                        background: theme === 'dark' ? '#27272a' : '#fff',
+                        color: theme === 'dark' ? '#e4e4e7' : '#000',
                         padding: '2px 5px',
                         borderRadius: '5px',
                         fontSize: '10px',
                         fontWeight: 700,
                         pointerEvents: 'all',
-                        border: '1px solid #ccc',
+                        border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ccc',
                     }}
                     className="nodrag nopan"
                 >

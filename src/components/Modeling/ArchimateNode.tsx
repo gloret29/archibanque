@@ -77,7 +77,23 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
     const nodeData = data as unknown as NodeData;
     const typeKey = nodeData.type || 'business-process';
     const meta = ARCHIMATE_METAMODEL[typeKey] || { name: 'Unknown', color: '#fff', id: '' };
+
+    // Helper function to determine if a color is light or dark
+    const isLightColor = (color: string): boolean => {
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5;
+    };
+
+    const textColor = isLightColor(meta.color) ? '#1a1a1a' : '#ffffff';
     const isGroup = typeKey === 'group';
+
+    // Define header styles
+    const headerBg = 'rgba(0,0,0,0.05)';
+    const headerBorder = 'rgba(0,0,0,0.1)';
 
     // Get style properties with defaults
     const fontSize = nodeData.fontSize || 12;
@@ -95,11 +111,11 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 padding: '0',
                 borderRadius: isGroup ? '0' : '3px',
                 background: isGroup ? 'rgba(0,0,0,0.02)' : meta.color,
-                border: selected ? '2px solid #3366ff' : (isGroup ? '1px dashed rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.15)'),
+                border: selected ? '2px solid var(--primary, #3366ff)' : (isGroup ? '1px dashed rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.15)'),
                 minWidth: '100px',
                 minHeight: '60px',
                 boxShadow: selected ? '0 0 10px rgba(51, 102, 255, 0.3)' : '0 2px 4px rgba(0,0,0,0.05)',
-                color: '#1a1a1a',
+                color: textColor,
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
@@ -132,14 +148,16 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 padding: '4px 6px',
-                background: 'rgba(255,255,255,0.25)',
-                borderBottom: '1px solid rgba(0,0,0,0.08)',
+                background: headerBg,
+                borderBottom: `1px solid ${headerBorder}`,
                 flexShrink: 0
             }}>
-                <span style={{ fontSize: '9px', opacity: 0.7, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '9px', opacity: 0.8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: textColor }}>
                     {meta.name}
                 </span>
-                {getSymbol(meta.id)}
+                <div style={{ color: textColor }}>
+                    {getSymbol(meta.id)}
+                </div>
             </div>
 
             {/* Label area - applies custom styles */}
