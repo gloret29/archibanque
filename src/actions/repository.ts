@@ -129,7 +129,18 @@ export async function loadPackageData(packageId: string) {
 export async function saveRepositoryState(
     packageId: string,
     folders: { id: string, name: string, type: string, parentId: string | null }[],
-    views: { id: string, name: string, nodes: unknown[], edges: unknown[], folderId?: string }[],
+    views: {
+        id: string;
+        name: string;
+        nodes: unknown[];
+        edges: unknown[];
+        folderId?: string;
+        description?: string;
+        documentation?: string;
+        createdAt?: Date;
+        modifiedAt?: Date;
+        author?: string;
+    }[],
     elements: {
         id: string;
         name: string;
@@ -142,7 +153,19 @@ export async function saveRepositoryState(
         modifiedAt?: Date;
         author?: string;
     }[] = [],
-    relations: { id: string, type: string, sourceId: string, targetId: string, folderId: string | null }[] = []
+    relations: {
+        id: string;
+        type: string;
+        sourceId: string;
+        targetId: string;
+        folderId: string | null;
+        name?: string;
+        description?: string;
+        documentation?: string;
+        createdAt?: Date;
+        modifiedAt?: Date;
+        author?: string;
+    }[] = []
 ) {
     console.log(`💾 Starting transactional save for package ${packageId}...`);
 
