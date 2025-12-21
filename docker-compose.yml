@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: archimodeler:latest
     restart: always
     ports:
       - "${APP_PORT:-3003}:3000"
