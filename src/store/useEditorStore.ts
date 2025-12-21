@@ -16,6 +16,7 @@ import {
 // import { temporal } from 'zundo';
 import { RelationshipType, getDerivedRelationship, ARCHIMATE_METAMODEL } from '@/lib/metamodel';
 import { saveRepositoryState } from '@/actions/repository';
+import { loadDataBlocks } from '@/actions/datablocks';
 
 export interface ArchimateView {
     id: string;
@@ -282,35 +283,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     // Persistence actions for loading from database
-    loadSettingsFromDB: async () => {
-        try {
-            const res = await fetch('/api/settings');
-            if (res.ok) {
-                const settings = await res.json();
-                set({
-                    enabledElementTypes: settings.enabledElementTypes,
-                    settingsLoaded: true
-                });
-            }
-        } catch (error) {
-            console.error('Failed to load settings from DB:', error);
-        }
-    },
-
-    loadDataBlocksFromDB: async () => {
-        try {
-            const res = await fetch('/api/datablocks');
-            if (res.ok) {
-                const blocks = await res.json();
-                set({
-                    dataBlocks: blocks,
-                    dataBlocksLoaded: true
-                });
-            }
-        } catch (error) {
-            console.error('Failed to load data blocks from DB:', error);
-        }
-    },
+    // Note: loadSettingsFromDB and loadDataBlocksFromDB are defined later in the store
 
     setDataBlocks: (blocks: DataBlock[]) => set({ dataBlocks: blocks }),
 
@@ -655,6 +628,28 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         });
     },
 
+
+    loadDataBlocksFromDB: async () => {
+        const result = await loadDataBlocks();
+        if (result.success && result.data) {
+            set({ dataBlocks: result.data as DataBlock[], dataBlocksLoaded: true });
+        }
+    },
+
+    loadSettingsFromDB: async () => {
+        try {
+            const res = await fetch('/api/settings');
+            if (res.ok) {
+                const settings = await res.json();
+                set({
+                    enabledElementTypes: settings.enabledElementTypes,
+                    settingsLoaded: true
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load settings from DB:', error);
+        }
+    },
 
     onNodesChange: (changes: NodeChange[]) => {
         const { views, activeViewId } = get();

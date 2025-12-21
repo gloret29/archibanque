@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useEditorStore, DataBlock, DataBlockAttribute, AttributeType } from '@/store/useEditorStore';
+import { syncDataBlocks } from '@/actions/datablocks';
 import { ARCHIMATE_METAMODEL, ARCHIMATE_RELATIONS, ArchimateLayer } from '@/lib/metamodel';
 import {
     Plus, Trash2, Edit2, Database, Check, X,
@@ -199,6 +200,7 @@ const AttributeEditor = ({ attribute, onSave, onClose }: AttributeEditorProps) =
 export default function DataBlockManager() {
     const {
         dataBlocks,
+        dataBlocksLoaded,
         addDataBlock, updateDataBlock, deleteDataBlock,
         addAttributeToBlock, updateBlockAttribute, deleteBlockAttribute
     } = useEditorStore();
@@ -208,6 +210,26 @@ export default function DataBlockManager() {
     const [editingAttributeId, setEditingAttributeId] = useState<string | null>(null);
 
     const selectedBlock = dataBlocks.find(b => b.id === selectedBlockId);
+
+    // Auto-save data blocks when they change (only after initial load)
+    useEffect(() => {
+        // Only sync if data blocks were loaded from DB first (to avoid overwriting with empty array)
+        if (!dataBlocksLoaded) return;
+
+        // We use a debounce to avoid spamming server
+        const timer = setTimeout(() => {
+            syncDataBlocks(dataBlocks).then(res => {
+                if (!res.success) {
+                    console.error('Failed to sync data blocks:', res.error);
+                } else {
+                    console.log('✅ Data blocks saved successfully');
+                }
+            }).catch(error => {
+                console.error('Error syncing data blocks:', error);
+            });
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [dataBlocks, dataBlocksLoaded]);
 
     // Grouping for Target Selector
     const targetGroups = useMemo(() => {
