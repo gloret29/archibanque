@@ -337,10 +337,13 @@ const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
         })).filter(group => group.items.length > 0);
     }, [enabledElementTypes]);
 
-    // Handle F2 key for renaming
+    // Handle F2 and Delete keys
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'F2' && selectedObject && !readOnly && !editingItem) {
+            // Ignore if typing in an input or if a modal is open
+            if (editingItem || deleteConfirmation || (e.target as HTMLElement).tagName === 'INPUT') return;
+
+            if (e.key === 'F2' && selectedObject && !readOnly) {
                 e.preventDefault();
                 const { type, id } = selectedObject;
                 let currentName = '';
@@ -353,14 +356,45 @@ const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
                 } else if (type === 'relation') {
                     currentName = relations.find(r => r.id === id)?.name || '';
                 }
-                if (currentName || type === 'relation') {
-                    setEditingItem({ type, id, name: currentName });
+                setEditingItem({ type, id, name: currentName });
+            }
+
+            if (e.key === 'Delete' && selectedObject && !readOnly) {
+                e.preventDefault();
+                const { type, id } = selectedObject;
+                let title = "";
+                let message = "";
+
+                if (type === 'folder') {
+                    title = "Delete Folder";
+                    message = "Delete this folder and all its contents?";
+                } else if (type === 'view') {
+                    title = "Delete View";
+                    message = "Delete this view?";
+                } else if (type === 'element') {
+                    const element = elements.find(e => e.id === id);
+                    const affectedViews = views.filter(v => v.nodes.some(n => n.data?.elementId === id));
+                    title = `Delete element "${element?.name || 'Unknown'}"?`;
+                    message = "Are you sure you want to delete this element?";
+                    if (affectedViews.length > 0) {
+                        message += `\n\nThis element is used in ${affectedViews.length} view(s). It will be removed from all of them.`;
+                    }
+                } else if (type === 'relation') {
+                    const relation = relations.find(r => r.id === id);
+                    const affectedViews = views.filter(v => v.edges.some(e => e.data?.relationId === id));
+                    title = `Delete relation "${relation?.name || relation?.type || 'Unknown'}"?`;
+                    message = "Are you sure you want to delete this relation?";
+                    if (affectedViews.length > 0) {
+                        message += `\n\nThis relation is visible in ${affectedViews.length} view(s).`;
+                    }
                 }
+
+                setDeleteConfirmation({ type, id, title, message });
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedObject, readOnly, editingItem, folders, views, elements, relations]);
+    }, [selectedObject, readOnly, editingItem, deleteConfirmation, folders, views, elements, relations]);
 
     const handleContextMenu = useCallback((e: React.MouseEvent, type: 'folder' | 'view' | 'element' | 'relation', id: string, parentId: string | null) => {
         if (readOnly) return;

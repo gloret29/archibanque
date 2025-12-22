@@ -107,6 +107,7 @@ L'interface du mode Expert est organisée en plusieurs zones :
 - **Double-clic sur une vue** : Ouvrir la vue dans un nouvel onglet
 - **Double-clic sur un élément** : Sélectionner l'élément dans le panneau de propriétés
 - **Touche F2** : Renommer l'élément actuellement sélectionné
+- **Touche Suppr** : Supprimer l'élément actuellement sélectionné (avec confirmation)
 
 #### 2. Palette ArchiMate
 

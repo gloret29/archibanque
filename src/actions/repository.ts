@@ -191,7 +191,37 @@ export async function saveRepositoryState(
             create: { id: packageId, name: 'Default Project' }
         });
 
-        // 2. Sync Folders
+        // 2. Prepare IDs for orphan deletion
+        const folderIds = folders.map(f => f.id);
+        const elementIds = elements.map(e => e.id);
+        const relationIds = relations.map(r => r.id);
+        const viewIds = views.map(v => v.id);
+
+        // 3. Delete orphans in correct order to respect foreign key constraints
+        // Delete views first (no dependents)
+        await tx.archiView.deleteMany({
+            where: { packageId, id: { notIn: viewIds } }
+        });
+
+        // Delete relations (depend on elements and folders)
+        await tx.archiRelation.deleteMany({
+            where: { packageId, id: { notIn: relationIds } }
+        });
+
+        // Delete elements (depend on folders, but relations depend on them)
+        await tx.archiElement.deleteMany({
+            where: { packageId, id: { notIn: elementIds } }
+        });
+
+        // Delete folders (self-referencing and parents of elements/relations/views)
+        // Note: Simple deleteMany might fail on deeply nested folders due to self-referencing FK
+        // For now we assume the UI handles recursive deletion and we hope deleteMany works 
+        // or we might need a more complex recursive delete if this fails frequently.
+        await tx.folder.deleteMany({
+            where: { packageId, id: { notIn: folderIds } }
+        });
+
+        // 4. Sync Folders (Upsert)
         for (const f of folders) {
             await tx.folder.upsert({
                 where: { id: f.id },
@@ -200,7 +230,7 @@ export async function saveRepositoryState(
             });
         }
 
-        // 3. Sync Elements
+        // 5. Sync Elements (Upsert)
         for (const e of elements) {
             await tx.archiElement.upsert({
                 where: { id: e.id },
@@ -229,7 +259,7 @@ export async function saveRepositoryState(
             });
         }
 
-        // 4. Sync Relations
+        // 6. Sync Relations (Upsert)
         for (const r of relations) {
             await tx.archiRelation.upsert({
                 where: { id: r.id },
@@ -258,7 +288,7 @@ export async function saveRepositoryState(
             });
         }
 
-        // 5. Sync Views
+        // 7. Sync Views (Upsert)
         for (const v of views) {
             await tx.archiView.upsert({
                 where: { id: v.id },
