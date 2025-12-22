@@ -11,7 +11,7 @@ interface SymbolShapeProps {
 }
 
 export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolShapeProps) => {
-    const [svgContent, setSvgContent] = useState<string | null>(null);
+    const [parts, setParts] = useState<{ bg: string, decorator: string | null } | null>(null);
 
     useEffect(() => {
         const loadSvg = async () => {
@@ -30,7 +30,7 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
                 const text = await response.text();
 
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'image/svg+xml');
+                const doc = parser.parseFromString(text, 'image/xml');
                 const svg = doc.querySelector('svg');
 
                 if (svg) {
@@ -38,77 +38,106 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
                     svg.querySelectorAll('text').forEach(t => t.remove());
                     svg.querySelectorAll('title').forEach(t => t.remove());
 
-                    // Handle viewBox if missing or based on original attributes
-                    const originalWidth = svg.getAttribute('width');
-                    const originalHeight = svg.getAttribute('height');
-                    if (!svg.getAttribute('viewBox') && originalWidth && originalHeight) {
-                        svg.setAttribute('viewBox', `0 0 ${originalWidth.replace(/[^\d.]/g, '')} ${originalHeight.replace(/[^\d.]/g, '')}`);
+                    const originalWidthStr = svg.getAttribute('width') || '100';
+                    const originalHeightStr = svg.getAttribute('height') || '100';
+                    const originalWidth = parseFloat(originalWidthStr.replace(/[^\d.]/g, ''));
+                    const originalHeight = parseFloat(originalHeightStr.replace(/[^\d.]/g, ''));
+
+                    if (!svg.getAttribute('viewBox')) {
+                        svg.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
                     }
 
-                    // Set attributes for scaling
-                    svg.setAttribute('width', '100%');
-                    svg.setAttribute('height', '100%');
-                    svg.setAttribute('preserveAspectRatio', 'none'); // Stretch to fit node
+                    // Identify background vs decorator
+                    const children = Array.from(svg.children);
+                    const isJunction = type.includes('junction');
 
-                    // Apply colors
-                    const paths = svg.querySelectorAll('path');
+                    // Create Background SVG
+                    const bgSvg = svg.cloneNode(false) as SVGElement;
+                    bgSvg.setAttribute('preserveAspectRatio', 'none');
+                    bgSvg.setAttribute('width', '100%');
+                    bgSvg.setAttribute('height', '100%');
 
-                    // The first path is usually the background
-                    if (paths.length > 0) {
-                        paths[0].style.fill = bgColor;
-                    }
+                    // Create Decorator SVG
+                    const decSvg = svg.cloneNode(false) as SVGElement;
+                    decSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                    decSvg.setAttribute('width', '100%');
+                    decSvg.setAttribute('height', '100%');
 
-                    // Update strokes of other elements to match text color for visibility
-                    svg.querySelectorAll('path').forEach((p, index) => {
-                        if (index === 0) return; // Skip background
+                    children.forEach((child, index) => {
+                        const clone = child.cloneNode(true) as HTMLElement;
 
-                        // If it has a stroke, update it
-                        if (p.getAttribute('stroke') || p.style.stroke) {
-                            p.style.stroke = textColor;
+                        // Apply colors
+                        clone.querySelectorAll('path').forEach(p => {
+                            if (index === 0) { // Main background path
+                                p.style.fill = bgColor;
+                            } else {
+                                if (p.getAttribute('stroke') || p.style.stroke || p.getAttribute('fill') === 'none') {
+                                    p.style.stroke = textColor;
+                                }
+                                if (p.getAttribute('fill') === '#000000' || p.style.fill === '#000000' || p.style.fill === 'rgb(0, 0, 0)') {
+                                    p.style.fill = textColor;
+                                }
+                            }
+                        });
+
+                        if (child.tagName.toLowerCase() === 'path') {
+                            const p = clone as unknown as SVGPathElement;
+                            if (index === 0) p.style.fill = bgColor;
+                            else if (p.getAttribute('stroke') || p.style.stroke) p.style.stroke = textColor;
                         }
-                        // If it has a fill (the symbol icon part), usually it should be the text color or a variant
-                        if (p.getAttribute('fill') === '#000000' || p.style.fill === '#000000' || p.style.fill === 'rgb(0, 0, 0)') {
-                            p.style.fill = textColor;
+
+                        if (index < 2 || isJunction) {
+                            bgSvg.appendChild(clone);
+                        } else {
+                            decSvg.appendChild(clone);
                         }
                     });
 
-                    setSvgContent(svg.outerHTML);
+                    setParts({
+                        bg: bgSvg.outerHTML,
+                        decorator: children.length > 2 && !isJunction ? decSvg.outerHTML : null
+                    });
                 }
             } catch (err) {
                 console.error(`Failed to load ArchiMate symbol: ${type}`, err);
-                setSvgContent(null);
+                setParts(null);
             }
         };
 
         loadSvg();
     }, [type, bgColor, textColor]);
 
-    if (!svgContent) {
+    if (!parts) {
         return (
-            <div
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    background: bgColor,
-                    border: `1px solid ${textColor}44`,
-                    borderRadius: '2px'
-                }}
-            />
+            <div style={{
+                width: '100%', height: '100%', background: bgColor,
+                border: `1px solid ${textColor}44`, borderRadius: '2px'
+            }} />
         );
     }
 
     return (
-        <div
-            style={{
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                pointerEvents: 'none',
-                zIndex: 0
-            }}
-            dangerouslySetInnerHTML={{ __html: svgContent }}
-        />
+        <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 0 }}>
+            {/* Background Shape - Stretched */}
+            <div
+                style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+                dangerouslySetInnerHTML={{ __html: parts.bg }}
+            />
+            {/* Decorator Icon - Fixed Aspect Ratio, Top Right */}
+            {parts.decorator && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '6px',
+                        right: '6px',
+                        width: '32px',
+                        height: '32px',
+                        zIndex: 1,
+                        opacity: 0.8
+                    }}
+                    dangerouslySetInnerHTML={{ __html: parts.decorator }}
+                />
+            )}
+        </div>
     );
 };
