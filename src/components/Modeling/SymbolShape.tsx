@@ -30,7 +30,7 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
                 const text = await response.text();
 
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'image/xml');
+                const doc = parser.parseFromString(text, 'image/svg+xml');
                 const svg = doc.querySelector('svg');
 
                 if (svg) {

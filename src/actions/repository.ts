@@ -214,9 +214,6 @@ export async function saveRepositoryState(
         });
 
         // Delete folders (self-referencing and parents of elements/relations/views)
-        // Note: Simple deleteMany might fail on deeply nested folders due to self-referencing FK
-        // For now we assume the UI handles recursive deletion and we hope deleteMany works 
-        // or we might need a more complex recursive delete if this fails frequently.
         await tx.folder.deleteMany({
             where: { packageId, id: { notIn: folderIds } }
         });
@@ -316,9 +313,11 @@ export async function saveRepositoryState(
                 } as any // eslint-disable-line @typescript-eslint/no-explicit-any
             });
         }
+    }, {
+        maxWait: 20000,
+        timeout: 60000
     });
 
     revalidatePath('/modeler');
     console.log(`✅ Transactional save complete for ${packageId}`);
 }
-
