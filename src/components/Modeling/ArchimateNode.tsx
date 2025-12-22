@@ -3,12 +3,7 @@
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps, NodeResizer } from '@xyflow/react';
 import { ARCHIMATE_METAMODEL } from '@/lib/metamodel';
-
-import { SymbolIcon } from './SymbolIcon';
-
-const getSymbol = (type: string, textColor: string) => {
-    return <SymbolIcon type={type} textColor={textColor} size={16} />;
-};
+import { SymbolShape } from './SymbolShape';
 
 interface NodeData {
     label: string;
@@ -45,10 +40,6 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
     const textColor = isLightColor(bgColor) ? '#1a1a1a' : '#ffffff';
     const isGroup = typeKey === 'group';
 
-    // Define header styles
-    const headerBg = 'rgba(0,0,0,0.05)';
-    const headerBorder = 'rgba(0,0,0,0.1)';
-
     // Get style properties with defaults
     const fontSize = nodeData.fontSize || 12;
     const fontFamily = nodeData.fontFamily || 'Inter, sans-serif';
@@ -63,17 +54,12 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 width: '100%',
                 height: '100%',
                 padding: '0',
-                borderRadius: isGroup ? '0' : '3px',
-                background: isGroup ? 'rgba(0,0,0,0.02)' : bgColor,
-                border: selected ? '2px solid var(--primary, #3366ff)' : (isGroup ? '1px dashed rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.15)'),
-                minWidth: '100px',
-                minHeight: '60px',
-                boxShadow: selected ? '0 0 10px rgba(51, 102, 255, 0.3)' : '0 2px 4px rgba(0,0,0,0.05)',
+                borderRadius: '0',
+                background: 'transparent',
                 color: textColor,
-                overflow: 'hidden',
+                position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'box-shadow 0.2s ease-in-out'
             }}
         >
             <NodeResizer
@@ -94,105 +80,69 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                     borderColor: '#3366ff'
                 }}
             />
-            {/* Handles on all 4 sides - both source AND target on each side */}
-            {/* Top */}
-            <Handle
-                type="target"
-                position={Position.Top}
-                id="top-target"
-                style={{ background: '#555', width: '8px', height: '8px', top: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
-            <Handle
-                type="source"
-                position={Position.Top}
-                id="top-source"
-                style={{ background: '#555', width: '8px', height: '8px', top: '-4px', opacity: isGroup ? 0 : 0.6 }}
+
+            {/* ArchiMate SVG Shape */}
+            <SymbolShape
+                type={typeKey}
+                bgColor={bgColor}
+                textColor={textColor}
+                width="100%"
+                height="100%"
             />
 
-            {/* Header / Type area */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '4px 6px',
-                background: headerBg,
-                borderBottom: `1px solid ${headerBorder}`,
-                flexShrink: 0
-            }}>
-                <span style={{ fontSize: '9px', opacity: 0.8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: textColor }}>
-                    {meta.name}
-                </span>
-                <div style={{ color: textColor }}>
-                    {getSymbol(meta.id, textColor)}
-                </div>
-            </div>
+            {/* Selection Highlight - Follows the rectangular bounds of the node */}
+            {selected && (
+                <div style={{
+                    position: 'absolute',
+                    top: -2,
+                    left: -2,
+                    right: -2,
+                    bottom: -2,
+                    border: '2px solid var(--primary, #3366ff)',
+                    borderRadius: '4px',
+                    pointerEvents: 'none',
+                    zIndex: 1,
+                    boxShadow: '0 0 10px rgba(51, 102, 255, 0.3)'
+                }} />
+            )}
 
-            {/* Label area - applies custom styles */}
+            {/* Hidden Handles - Source and Target on each side for connectivity */}
+            <Handle type="target" position={Position.Top} id="top-t" style={{ opacity: 0 }} />
+            <Handle type="source" position={Position.Top} id="top-s" style={{ opacity: 0 }} />
+            <Handle type="target" position={Position.Bottom} id="bot-t" style={{ opacity: 0 }} />
+            <Handle type="source" position={Position.Bottom} id="bot-s" style={{ opacity: 0 }} />
+            <Handle type="target" position={Position.Left} id="left-t" style={{ opacity: 0 }} />
+            <Handle type="source" position={Position.Left} id="left-s" style={{ opacity: 0 }} />
+            <Handle type="target" position={Position.Right} id="right-t" style={{ opacity: 0 }} />
+            <Handle type="source" position={Position.Right} id="right-s" style={{ opacity: 0 }} />
+
+            {/* Label area - Overlaid on the SVG shape */}
             <div style={{
+                position: 'relative',
+                zIndex: 2,
                 flex: 1,
-                padding: '8px 10px',
+                padding: isGroup ? '12px 10px 8px' : '8px 10px',
                 textAlign: textAlign,
                 fontWeight: fontWeight as 'normal' | 'bold' | '400' | '600',
                 fontStyle: fontStyle as 'normal' | 'italic',
                 textDecoration: textDecoration,
                 fontFamily: fontFamily,
                 fontSize: `${fontSize}px`,
-                lineHeight: '1.3',
+                lineHeight: '1.2',
                 wordBreak: 'break-word',
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: isGroup ? 'flex-start' : 'center',
                 justifyContent: textAlign === 'left' ? 'flex-start' : textAlign === 'right' ? 'flex-end' : 'center',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                pointerEvents: 'none'
             }}>
-                <div>{nodeData.label}</div>
+                <div style={{ pointerEvents: 'auto' }}>{nodeData.label}</div>
                 {nodeData.labelOverride && (
                     <div style={{ fontSize: '0.85em', opacity: 0.9, marginTop: '2px', whiteSpace: 'pre-line' }}>
                         {nodeData.labelOverride}
                     </div>
                 )}
             </div>
-
-            {/* Bottom */}
-            <Handle
-                type="target"
-                position={Position.Bottom}
-                id="bottom-target"
-                style={{ background: '#555', width: '8px', height: '8px', bottom: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
-            <Handle
-                type="source"
-                position={Position.Bottom}
-                id="bottom-source"
-                style={{ background: '#555', width: '8px', height: '8px', bottom: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
-
-            {/* Left */}
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="left-target"
-                style={{ background: '#555', width: '8px', height: '8px', left: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
-            <Handle
-                type="source"
-                position={Position.Left}
-                id="left-source"
-                style={{ background: '#555', width: '8px', height: '8px', left: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
-
-            {/* Right */}
-            <Handle
-                type="target"
-                position={Position.Right}
-                id="right-target"
-                style={{ background: '#555', width: '8px', height: '8px', right: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="right-source"
-                style={{ background: '#555', width: '8px', height: '8px', right: '-4px', opacity: isGroup ? 0 : 0.6 }}
-            />
         </div>
     );
 };

@@ -11,17 +11,20 @@ interface SymbolIconProps {
 
 export const SymbolIcon = ({ type, textColor, size = 14, opacity = 0.8 }: SymbolIconProps) => {
     const [hasError, setHasError] = React.useState(false);
-    const symbolPath = `/symbols/archimate/${type}.svg`;
 
-    // Fallback for special types or when SVG is missing
-    if (type === 'group' || hasError) {
-        if (type === 'group') {
-            return (
-                <svg width={size} height={size} viewBox="0 0 16 16" fill="none" style={{ opacity }}>
-                    <path d="M2 4h4l2-2h6v10H2V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                </svg>
-            );
-        }
+    // Map some types to their SVG filenames if they differ
+    const fileNameMap: Record<string, string> = {
+        'group': 'grouping',
+        'access': 'acces',
+        'and-junction': 'and-junction',
+        'or-junction': 'or-junction',
+    };
+
+    const fileName = fileNameMap[type] || type;
+    const symbolPath = `/symbols/archimate/${fileName}.svg`;
+
+    // Fallback when SVG is missing
+    if (hasError) {
         return null;
     }
 

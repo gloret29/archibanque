@@ -5,6 +5,7 @@ import { Settings } from 'lucide-react';
 import { useEditorStore } from '@/store/useEditorStore';
 import { ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
 import { useTheme } from '@/contexts/ThemeContext';
+import { SymbolIcon } from './SymbolIcon';
 import styles from './palette.module.css';
 
 // Helper function to determine if a color is light or dark
@@ -85,12 +86,19 @@ const Palette = () => {
                                                 fontWeight: textStyle.fontWeight || 600,
                                                 textShadow: textStyle.textShadow || 'none',
                                                 WebkitFontSmoothing: 'antialiased',
-                                                MozOsxFontSmoothing: 'grayscale'
+                                                MozOsxFontSmoothing: 'grayscale',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                padding: '4px 8px'
                                             }}
                                             onDragStart={(event) => onDragStart(event, item.id)}
                                             draggable
                                         >
-                                            {item.name}
+                                            <SymbolIcon type={item.id} textColor={textStyle.color} size={14} />
+                                            <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {item.name}
+                                            </span>
                                         </div>
                                     );
                                 })}
