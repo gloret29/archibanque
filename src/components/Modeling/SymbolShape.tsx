@@ -33,6 +33,7 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
                 const svg = doc.querySelector('svg');
 
                 if (svg) {
+                    // Remove text and tiles
                     svg.querySelectorAll('text').forEach(t => t.remove());
                     svg.querySelectorAll('title').forEach(t => t.remove());
 
@@ -42,40 +43,24 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
                     const originalHeight = parseFloat(sh.replace(/[^\d.]/g, ''));
                     const viewBox = svg.getAttribute('viewBox') || `0 0 ${originalWidth} ${originalHeight}`;
 
-                    // Extract elements
+                    // Extract elements from potentially wrapped structure
                     let elements: Element[] = Array.from(svg.children);
-                    // Handle the common wrapper G
                     const wrapperG = elements.find(e => e.tagName.toLowerCase() === 'g' && e.getAttribute('transform')?.includes('scale'));
                     if (wrapperG) {
                         elements = Array.from(wrapperG.children);
                     }
 
                     const isJunction = type.includes('junction');
-
-                    // Separate Background (Fill + Main Stroke) from Decorators
-                    // Heuristic: Layer1000 or the first two paths are background.
-                    // Elements with IDs starting with Layer1001+ are decorations.
                     const bgElements: Element[] = [];
                     const decElements: Element[] = [];
 
+                    // NEW ROBUST HEURISTIC:
+                    // In these specific Visio-converted SVGs:
+                    // Index 0: Main background fill
+                    // Index 1: Main background stroke (usually a <g>)
+                    // Index 2+: Decorator icons
                     elements.forEach((el, index) => {
-                        const id = el.getAttribute('id') || '';
-                        // Junctions are simple shapes, no decorators
-                        if (isJunction) {
-                            bgElements.push(el);
-                            return;
-                        }
-
-                        // Specific ArchiMate SVG structure:
-                        // - index 0 is usually the background <path>
-                        // - id "Layer1000" is usually the main container <g>
-                        // - ids "Layer1001", "Layer1002" etc. are decorators
-                        if (index === 0 || id === 'Layer1000') {
-                            bgElements.push(el);
-                        } else if (id.startsWith('Layer100') && id !== 'Layer1000') {
-                            decElements.push(el);
-                        } else if (index === 1 && !id.startsWith('Layer')) {
-                            // If index 1 is not a specific layer, it's probably still part of the main shape
+                        if (index < 2 || isJunction) {
                             bgElements.push(el);
                         } else {
                             decElements.push(el);
@@ -89,11 +74,10 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
                             if (isBg && isBgPath(path)) {
                                 path.style.fill = bgColor;
                             } else {
-                                // Stroke coloring
+                                // Apply text color to all lines/fills of the icon/border
                                 if (path.getAttribute('stroke') || path.style.stroke || path.getAttribute('fill') === 'none') {
                                     path.style.stroke = textColor;
                                 }
-                                // Icon detail coloring (usually black in original)
                                 const f = path.getAttribute('fill') || path.style.fill;
                                 if (f === '#000000' || f === 'black' || f === 'rgb(0, 0, 0)') {
                                     path.style.fill = textColor;
@@ -103,19 +87,16 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
                     };
 
                     const isBgPath = (p: SVGPathElement) => {
-                        // Background paths are usually solid fills, not strokes only
                         const fill = p.getAttribute('fill');
-                        return fill && fill !== 'none' && fill !== '#000000';
+                        return fill && fill !== 'none' && fill !== '#000000' && fill !== 'black';
                     };
 
-                    // Create Background SVG content
                     const bgContent = bgElements.map(el => {
                         const clone = el.cloneNode(true) as HTMLElement;
                         colorize(clone, true);
                         return clone.outerHTML;
                     }).join('');
 
-                    // Create Decorator SVG content
                     const decContent = decElements.length > 0 ? decElements.map(el => {
                         const clone = el.cloneNode(true) as HTMLElement;
                         colorize(clone, false);
@@ -139,13 +120,13 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
 
     if (!parts) {
         return (
-            <div style={{ width: '100%', height: '100%', background: bgColor, border: `1px solid ${textColor}44` }} />
+            <div style={{ width: '100%', height: '100%', background: bgColor, border: `1px solid ${textColor}44`, borderRadius: '2px' }} />
         );
     }
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 0 }}>
-            {/* Background Shape - STRETCHED to fill node bounds */}
+            {/* Background Layer - Stretched to fit container */}
             <svg
                 viewBox={parts.viewBox}
                 preserveAspectRatio="none"
@@ -153,14 +134,14 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
                 dangerouslySetInnerHTML={{ __html: parts.bg }}
             />
 
-            {/* Decorator Icon - FIXED ASPECT RATIO, constant size in top right */}
+            {/* Decorator Layer - Proportional and small in the top-right corner */}
             {parts.decorator && (
                 <div style={{
                     position: 'absolute',
-                    top: '6px',
-                    right: '6px',
-                    width: '40px',
-                    height: '24px',
+                    top: '4px',
+                    right: '4px',
+                    width: '32px',
+                    height: '20px',
                     zIndex: 1
                 }}>
                     <svg
