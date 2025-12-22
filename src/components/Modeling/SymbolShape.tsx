@@ -38,10 +38,17 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
                     svg.querySelectorAll('text').forEach(t => t.remove());
                     svg.querySelectorAll('title').forEach(t => t.remove());
 
+                    // Handle viewBox if missing or based on original attributes
+                    const originalWidth = svg.getAttribute('width');
+                    const originalHeight = svg.getAttribute('height');
+                    if (!svg.getAttribute('viewBox') && originalWidth && originalHeight) {
+                        svg.setAttribute('viewBox', `0 0 ${originalWidth.replace(/[^\d.]/g, '')} ${originalHeight.replace(/[^\d.]/g, '')}`);
+                    }
+
                     // Set attributes for scaling
                     svg.setAttribute('width', '100%');
                     svg.setAttribute('height', '100%');
-                    svg.setAttribute('preserveAspectRatio', 'none');
+                    svg.setAttribute('preserveAspectRatio', 'none'); // Stretch to fit node
 
                     // Apply colors
                     const paths = svg.querySelectorAll('path');
