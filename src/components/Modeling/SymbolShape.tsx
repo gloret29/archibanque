@@ -6,11 +6,12 @@ interface SymbolShapeProps {
     type: string;
     bgColor: string;
     textColor: string;
-    width: number | string;
-    height: number | string;
+    width?: number | string;
+    height?: number | string;
+    hideDecorator?: boolean;
 }
 
-export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
+export const SymbolShape = ({ type, bgColor, textColor, hideDecorator }: SymbolShapeProps) => {
     const [parts, setParts] = useState<{ bg: string, decorator: string | null, viewBox: string } | null>(null);
 
     useEffect(() => {
@@ -135,7 +136,7 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
             />
 
             {/* Decorator Layer - Proportional and small in the top-right corner */}
-            {parts.decorator && (
+            {parts.decorator && !hideDecorator && (
                 <div style={{
                     position: 'absolute',
                     top: '6px',

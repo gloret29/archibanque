@@ -5,7 +5,7 @@ import { Settings } from 'lucide-react';
 import { useEditorStore } from '@/store/useEditorStore';
 import { ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
 import { useTheme } from '@/contexts/ThemeContext';
-import { SymbolIcon } from './SymbolIcon';
+import { SymbolShape } from './SymbolShape';
 import styles from './palette.module.css';
 
 // Helper function to determine if a color is light or dark
@@ -81,22 +81,37 @@ const Palette = () => {
                                             key={item.id}
                                             className={styles.paletteItem}
                                             style={{
-                                                backgroundColor: item.color,
+                                                backgroundColor: 'transparent',
                                                 color: textStyle.color,
                                                 fontWeight: textStyle.fontWeight || 600,
                                                 textShadow: textStyle.textShadow || 'none',
                                                 WebkitFontSmoothing: 'antialiased',
                                                 MozOsxFontSmoothing: 'grayscale',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                padding: '4px 8px'
+                                                position: 'relative',
+                                                border: 'none', // Shape has its own border
+                                                boxShadow: 'none',
+                                                padding: '0'
                                             }}
                                             onDragStart={(event) => onDragStart(event, item.id)}
                                             draggable
                                         >
-                                            <SymbolIcon type={item.id} textColor={textStyle.color} size={14} />
-                                            <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                                                <SymbolShape
+                                                    type={item.id}
+                                                    bgColor={item.color}
+                                                    textColor={textStyle.color}
+                                                    hideDecorator={true}
+                                                />
+                                            </div>
+                                            <span style={{
+                                                position: 'relative',
+                                                zIndex: 2,
+                                                flex: 1,
+                                                textAlign: 'center',
+                                                padding: '4px 8px',
+                                                fontSize: '10px',
+                                                wordBreak: 'break-word'
+                                            }}>
                                                 {item.name}
                                             </span>
                                         </div>
