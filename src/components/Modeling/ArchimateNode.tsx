@@ -4,59 +4,10 @@ import React, { memo } from 'react';
 import { Handle, Position, NodeProps, NodeResizer } from '@xyflow/react';
 import { ARCHIMATE_METAMODEL } from '@/lib/metamodel';
 
-const getSymbol = (type: string) => {
-    switch (type) {
-        case 'business-process':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <path d="M2 8h12m-3-3l3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            );
-        case 'application-component':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <rect x="2" y="4" width="12" height="8" rx="1" stroke="currentColor" strokeWidth="2" />
-                    <rect x="0" y="6" width="3" height="2" fill="white" stroke="currentColor" strokeWidth="1" />
-                    <rect x="0" y="9" width="3" height="2" fill="white" stroke="currentColor" strokeWidth="1" />
-                </svg>
-            );
-        case 'data-object':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <path d="M3 3h10v10H3z" stroke="currentColor" strokeWidth="2" />
-                    <path d="M3 6h10" stroke="currentColor" strokeWidth="1" />
-                </svg>
-            );
-        case 'group':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <path d="M2 4h4l2-2h6v10H2V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                </svg>
-            );
-        case 'business-actor':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M3 14c0-3 2.5-5 5-5s5 2 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-            );
-        case 'business-role':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <circle cx="8" cy="8" r="5" stroke="currentColor" strokeWidth="1.5" />
-                    <circle cx="8" cy="8" r="2" fill="currentColor" />
-                </svg>
-            );
-        case 'application-service':
-        case 'business-service':
-            return (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.7 }}>
-                    <rect x="2" y="4" width="12" height="8" rx="4" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-            );
-        default:
-            return null;
-    }
+import { SymbolIcon } from './SymbolIcon';
+
+const getSymbol = (type: string, textColor: string) => {
+    return <SymbolIcon type={type} textColor={textColor} size={16} />;
 };
 
 interface NodeData {
@@ -172,7 +123,7 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                     {meta.name}
                 </span>
                 <div style={{ color: textColor }}>
-                    {getSymbol(meta.id)}
+                    {getSymbol(meta.id, textColor)}
                 </div>
             </div>
 

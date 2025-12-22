@@ -107,6 +107,11 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
   *Création rapide d'objets ArchiMate par clic droit sur le canevas avec menu par couche.*
   *Les éléments créés sont automatiquement ajoutés au même dossier que la vue active.*
 - [x] **View/Element Rename**: Inline editing for quick renaming of any repository item.
+- [x] **Advanced Repository UX (New)**:
+  - [x] **Linear Indentation**: Uniform 10px indentation for all repository items (Folders, Views, Elements, Relations).
+  - [x] **Keyboard Productivity**: `F2` for renaming and `Delete` for removing selected items.
+  - [x] **Visual Symbols**: High-fidelity ArchiMate SVG icons integrated into node headers and the repository tree.
+  - [x] **DB Sync & Orphanage cleanup**: Automatic deletion of database records when items are removed from the browser.
   *Modification instantanée des noms sans dialogue modal pour fluidifier le travail.*
 - [x] **Hydration Fix**: Resolved React 19 / Next.js 15 SSR issues with Zustand stores.
   *Correction technique permettant le fonctionnement stable de l'application avec les dernières versions.*

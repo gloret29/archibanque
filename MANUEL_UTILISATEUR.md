@@ -109,6 +109,9 @@ L'interface du mode Expert est organisée en plusieurs zones :
 - **Touche F2** : Renommer l'élément actuellement sélectionné
 - **Touche Suppr** : Supprimer l'élément actuellement sélectionné (avec confirmation)
 
+**Symboles ArchiMate** :
+Le navigateur affiche les symboles officiels ArchiMate à côté de chaque élément du référentiel pour une identification visuelle rapide. Ces mêmes symboles apparaissent dans l'en-tête des objets sur le diagramme.
+
 #### 2. Palette ArchiMate
 
 **Localisation** : Panneau gauche, section inférieure

@@ -20,6 +20,7 @@ import {
     GripVertical,
     ArrowRightLeft
 } from 'lucide-react';
+import { SymbolIcon } from './SymbolIcon';
 import styles from './model-browser.module.css';
 
 interface ModelBrowserProps {
@@ -251,7 +252,7 @@ const ElementItem = ({ element, level, color, onSelect, onContextMenu, onDragSta
             <span className={styles.dragHandle}>
                 <GripVertical size={12} />
             </span>
-            <Box size={14} style={{ color }} />
+            <SymbolIcon type={element.type} size={14} />
             <span className={styles.nodeName}>{element.name}</span>
         </div>
     );
