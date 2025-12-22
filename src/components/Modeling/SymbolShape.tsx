@@ -138,10 +138,10 @@ export const SymbolShape = ({ type, bgColor, textColor }: SymbolShapeProps) => {
             {parts.decorator && (
                 <div style={{
                     position: 'absolute',
-                    top: '4px',
-                    right: '4px',
-                    width: '32px',
-                    height: '20px',
+                    top: '6px',
+                    right: '6px',
+                    width: '64px',
+                    height: '40px',
                     zIndex: 1
                 }}>
                     <svg
