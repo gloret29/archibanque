@@ -16,7 +16,6 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
     useEffect(() => {
         const loadSvg = async () => {
             try {
-                // Map some types to their SVG filenames if they differ
                 const fileNameMap: Record<string, string> = {
                     'group': 'grouping',
                     'access': 'acces',
@@ -34,68 +33,73 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
                 const svg = doc.querySelector('svg');
 
                 if (svg) {
-                    // Clean up
                     svg.querySelectorAll('text').forEach(t => t.remove());
                     svg.querySelectorAll('title').forEach(t => t.remove());
 
-                    const originalWidthStr = svg.getAttribute('width') || '100';
-                    const originalHeightStr = svg.getAttribute('height') || '100';
-                    const originalWidth = parseFloat(originalWidthStr.replace(/[^\d.]/g, ''));
-                    const originalHeight = parseFloat(originalHeightStr.replace(/[^\d.]/g, ''));
+                    const sw = svg.getAttribute('width') || '100';
+                    const sh = svg.getAttribute('height') || '100';
+                    const originalWidth = parseFloat(sw.replace(/[^\d.]/g, ''));
+                    const originalHeight = parseFloat(sh.replace(/[^\d.]/g, ''));
 
-                    if (!svg.getAttribute('viewBox')) {
-                        svg.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
+                    const viewBox = svg.getAttribute('viewBox') || `0 0 ${originalWidth} ${originalHeight}`;
+                    svg.setAttribute('viewBox', viewBox);
+
+                    // Robust element extraction: look into the first <g> if it's a wrapper
+                    let elements: Element[] = Array.from(svg.children);
+                    if (elements.length === 1 && elements[0].tagName.toLowerCase() === 'g') {
+                        elements = Array.from(elements[0].children);
+                    } else if (elements.length > 1) {
+                        const wrapperG = elements.find(e => e.tagName.toLowerCase() === 'g' && e.getAttribute('transform')?.includes('scale'));
+                        if (wrapperG) elements = Array.from(wrapperG.children);
                     }
 
-                    // Identify background vs decorator
-                    const children = Array.from(svg.children);
                     const isJunction = type.includes('junction');
 
-                    // Create Background SVG
                     const bgSvg = svg.cloneNode(false) as SVGElement;
                     bgSvg.setAttribute('preserveAspectRatio', 'none');
                     bgSvg.setAttribute('width', '100%');
                     bgSvg.setAttribute('height', '100%');
 
-                    // Create Decorator SVG
                     const decSvg = svg.cloneNode(false) as SVGElement;
-                    decSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                    decSvg.setAttribute('preserveAspectRatio', 'xMaxYMin meet');
                     decSvg.setAttribute('width', '100%');
                     decSvg.setAttribute('height', '100%');
 
-                    children.forEach((child, index) => {
-                        const clone = child.cloneNode(true) as HTMLElement;
+                    elements.forEach((el, index) => {
+                        const clone = el.cloneNode(true) as HTMLElement;
 
-                        // Apply colors
-                        clone.querySelectorAll('path').forEach(p => {
-                            if (index === 0) { // Main background path
-                                p.style.fill = bgColor;
-                            } else {
-                                if (p.getAttribute('stroke') || p.style.stroke || p.getAttribute('fill') === 'none') {
-                                    p.style.stroke = textColor;
+                        const colorize = (node: HTMLElement, isBg: boolean) => {
+                            const paths = node.tagName.toLowerCase() === 'path' ? [node] : Array.from(node.querySelectorAll('path'));
+                            paths.forEach(p => {
+                                if (isBg) {
+                                    p.style.fill = bgColor;
+                                } else {
+                                    if (p.getAttribute('stroke') || p.style.stroke || p.getAttribute('fill') === 'none') {
+                                        p.style.stroke = textColor;
+                                    }
+                                    const f = p.getAttribute('fill') || p.style.fill;
+                                    if (f === '#000000' || f === 'black' || f === 'rgb(0,0,0)') {
+                                        p.style.fill = textColor;
+                                    }
                                 }
-                                if (p.getAttribute('fill') === '#000000' || p.style.fill === '#000000' || p.style.fill === 'rgb(0, 0, 0)') {
-                                    p.style.fill = textColor;
-                                }
-                            }
-                        });
+                            });
+                        };
 
-                        if (child.tagName.toLowerCase() === 'path') {
-                            const p = clone as unknown as SVGPathElement;
-                            if (index === 0) p.style.fill = bgColor;
-                            else if (p.getAttribute('stroke') || p.style.stroke) p.style.stroke = textColor;
-                        }
-
-                        if (index < 2 || isJunction) {
+                        if (index === 0) { // Background Fill
+                            colorize(clone, true);
                             bgSvg.appendChild(clone);
-                        } else {
+                        } else if (index === 1 || isJunction) { // Background Stroke
+                            colorize(clone, false);
+                            bgSvg.appendChild(clone);
+                        } else { // Decorator
+                            colorize(clone, false);
                             decSvg.appendChild(clone);
                         }
                     });
 
                     setParts({
                         bg: bgSvg.outerHTML,
-                        decorator: children.length > 2 && !isJunction ? decSvg.outerHTML : null
+                        decorator: elements.length > 2 && !isJunction ? decSvg.outerHTML : null
                     });
                 }
             } catch (err) {
@@ -109,31 +113,28 @@ export const SymbolShape = ({ type, bgColor, textColor, width, height }: SymbolS
 
     if (!parts) {
         return (
-            <div style={{
-                width: '100%', height: '100%', background: bgColor,
-                border: `1px solid ${textColor}44`, borderRadius: '2px'
-            }} />
+            <div style={{ width: '100%', height: '100%', background: bgColor, border: `1px solid ${textColor}44` }} />
         );
     }
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 0 }}>
-            {/* Background Shape - Stretched */}
+            {/* Background - STRETCHED */}
             <div
                 style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
                 dangerouslySetInnerHTML={{ __html: parts.bg }}
             />
-            {/* Decorator Icon - Fixed Aspect Ratio, Top Right */}
+            {/* Decorator - PROPORTIONAL (Fixed aspect ratio, aligned top-right) */}
             {parts.decorator && (
                 <div
                     style={{
                         position: 'absolute',
-                        top: '6px',
-                        right: '6px',
-                        width: '32px',
-                        height: '32px',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
                         zIndex: 1,
-                        opacity: 0.8
+                        padding: '4px' // Padding to keep icon away from extreme edges
                     }}
                     dangerouslySetInnerHTML={{ __html: parts.decorator }}
                 />
