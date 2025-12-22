@@ -102,9 +102,11 @@ L'interface du mode Expert est organisée en plusieurs zones :
 - Réorganisation par glisser-déposer
 
 **Actions disponibles** :
+- **Clic gauche sur un élément** : Sélectionne l'élément avec un highlight visuel (fond bleu)
 - **Clic droit sur un dossier** : Créer un nouveau dossier, une vue, ou un élément
 - **Double-clic sur une vue** : Ouvrir la vue dans un nouvel onglet
 - **Double-clic sur un élément** : Sélectionner l'élément dans le panneau de propriétés
+- **Touche F2** : Renommer l'élément actuellement sélectionné
 
 #### 2. Palette ArchiMate
 
@@ -230,6 +232,7 @@ Une vue est un diagramme qui représente une partie de l'architecture.
 **Renommage** :
 - Double-clic sur le nom de l'élément sur le canvas
 - Ou sélectionner l'élément et modifier le nom dans le Properties Panel
+- Ou appuyer sur **F2** après avoir sélectionné l'élément dans le Model Browser
 
 **Déplacement** :
 - Glisser-déposer l'élément sur le canvas
@@ -694,6 +697,7 @@ Pour toute question ou problème :
 
 *Document généré le : Décembre 2024*  
 *ArchiModeler - Enterprise Architecture Platform*
+
 
 
 

@@ -58,6 +58,11 @@
     user-select: none;
 }
 
+.children {
+    margin: 0;
+    padding: 0;
+}
+
 .treeRow {
     display: flex;
     align-items: center;
@@ -76,9 +81,13 @@
 }
 
 .treeRow.active {
-    background: var(--primary, #e8f0fe);
-    opacity: 0.2;
-    color: var(--primary, #1a73e8);
+    background: #e8f0fe;
+    color: #1a73e8;
+    font-weight: 500;
+}
+
+.treeRow.isActiveTab {
+    border-left: 2px solid #1a73e8;
 }
 
 .treeRow.dragOver {
@@ -146,13 +155,9 @@
     transition: background-color 0.2s, color 0.2s;
 }
 
-.viewRow {
-    padding-left: 24px;
-}
+.viewRow {}
 
-.elementRow {
-    padding-left: 24px;
-}
+.elementRow {}
 
 /* Context Menu */
 .contextMenu {

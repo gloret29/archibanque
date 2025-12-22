@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useEditorStore, ArchimateFolder, ArchimateView, ModelElement, ModelRelation } from '@/store/useEditorStore';
 import { ARCHIMATE_METAMODEL, ArchimateLayer } from '@/lib/metamodel';
 import {
@@ -50,8 +50,11 @@ const TreeNode = ({ folder, level, onContextMenu, draggedItem, onDragStart, onDr
     const [isDragOver, setIsDragOver] = useState(false);
     const {
         folders, views, elements, relations,
-        openView, activeViewId, selectObject
+        openView, activeViewId, selectObject,
+        selectedObject
     } = useEditorStore();
+
+    const isSelected = selectedObject?.type === 'folder' && selectedObject?.id === folder.id;
 
     const childFolders = useMemo(() => folders.filter(f => f.parentId === folder.id), [folders, folder.id]);
     const folderViews = useMemo(() => views.filter(v => v.folderId === folder.id || (!v.folderId && folder.type === 'view-folder')), [views, folder.id, folder.type]);
@@ -83,10 +86,11 @@ const TreeNode = ({ folder, level, onContextMenu, draggedItem, onDragStart, onDr
     };
 
     return (
-        <div className={styles.treeNode} style={{ marginLeft: level * 16 }}>
+        <div className={styles.treeNode}>
             {/* Folder Row */}
             <div
-                className={`${styles.treeRow} ${isDragOver ? styles.dragOver : ''}`}
+                className={`${styles.treeRow} ${isDragOver ? styles.dragOver : ''} ${isSelected ? styles.active : ''}`}
+                style={{ paddingLeft: level * 10 }}
                 onClick={() => selectObject('folder', folder.id)}
                 onContextMenu={(e) => onContextMenu(e, 'folder', folder.id, folder.parentId)}
                 onDragOver={handleDragOver}
@@ -196,10 +200,13 @@ interface ViewItemProps {
 }
 
 const ViewItem = ({ view, level, isActive, onSelect, onOpen, onContextMenu, onDragStart, onDragEnd }: ViewItemProps) => {
+    const { selectedObject } = useEditorStore();
+    const isSelected = selectedObject?.type === 'view' && selectedObject?.id === view.id;
+
     return (
         <div
-            className={`${styles.treeRow} ${styles.viewRow} ${isActive ? styles.active : ''}`}
-            style={{ marginLeft: level * 16 }}
+            className={`${styles.treeRow} ${styles.viewRow} ${isActive ? styles.isActiveTab : ''} ${isSelected ? styles.active : ''}`}
+            style={{ paddingLeft: level * 10 }}
             onClick={onSelect}
             onDoubleClick={onOpen}
             onContextMenu={(e) => onContextMenu(e, 'view', view.id, view.folderId || null)}
@@ -228,10 +235,13 @@ interface ElementItemProps {
 }
 
 const ElementItem = ({ element, level, color, onSelect, onContextMenu, onDragStart, onDragEnd }: ElementItemProps) => {
+    const { selectedObject } = useEditorStore();
+    const isSelected = selectedObject?.type === 'element' && selectedObject?.id === element.id;
+
     return (
         <div
-            className={`${styles.treeRow} ${styles.elementRow}`}
-            style={{ marginLeft: level * 16 }}
+            className={`${styles.treeRow} ${styles.elementRow} ${isSelected ? styles.active : ''}`}
+            style={{ paddingLeft: level * 10 }}
             onClick={onSelect}
             onContextMenu={(e) => onContextMenu(e, 'element', element.id, element.folderId)}
             draggable
@@ -258,10 +268,13 @@ interface RelationItemProps {
 }
 
 const RelationItem = ({ relation, level, onSelect, onContextMenu, onDragStart, onDragEnd }: RelationItemProps) => {
+    const { selectedObject } = useEditorStore();
+    const isSelected = selectedObject?.type === 'relation' && selectedObject?.id === relation.id;
+
     return (
         <div
-            className={`${styles.treeRow} ${styles.elementRow}`}
-            style={{ marginLeft: level * 16 }}
+            className={`${styles.treeRow} ${styles.elementRow} ${isSelected ? styles.active : ''}`}
+            style={{ paddingLeft: level * 10 }}
             onClick={onSelect}
             onContextMenu={(e) => onContextMenu(e, 'relation', relation.id, relation.folderId)}
             draggable
@@ -286,7 +299,8 @@ const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
         addElement, deleteElement, renameElement, moveElement,
         deleteRelation, renameRelation, moveRelation,
         enabledElementTypes,
-        currentPackageId, packages
+        currentPackageId, packages,
+        selectedObject
     } = useEditorStore();
 
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -322,6 +336,31 @@ const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
                 .filter(item => item.layer === layer && enabledElementTypes.includes(item.id))
         })).filter(group => group.items.length > 0);
     }, [enabledElementTypes]);
+
+    // Handle F2 key for renaming
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'F2' && selectedObject && !readOnly && !editingItem) {
+                e.preventDefault();
+                const { type, id } = selectedObject;
+                let currentName = '';
+                if (type === 'folder') {
+                    currentName = folders.find(f => f.id === id)?.name || '';
+                } else if (type === 'view') {
+                    currentName = views.find(v => v.id === id)?.name || '';
+                } else if (type === 'element') {
+                    currentName = elements.find(el => el.id === id)?.name || '';
+                } else if (type === 'relation') {
+                    currentName = relations.find(r => r.id === id)?.name || '';
+                }
+                if (currentName || type === 'relation') {
+                    setEditingItem({ type, id, name: currentName });
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedObject, readOnly, editingItem, folders, views, elements, relations]);
 
     const handleContextMenu = useCallback((e: React.MouseEvent, type: 'folder' | 'view' | 'element' | 'relation', id: string, parentId: string | null) => {
         if (readOnly) return;
@@ -497,7 +536,8 @@ const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
                 {rootViews.map(view => (
                     <div
                         key={view.id}
-                        className={`${styles.treeRow} ${styles.viewRow} ${activeViewId === view.id ? styles.active : ''}`}
+                        className={`${styles.treeRow} ${styles.viewRow} ${activeViewId === view.id ? styles.isActiveTab : ''} ${selectedObject?.type === 'view' && selectedObject?.id === view.id ? styles.active : ''}`}
+                        style={{ paddingLeft: 0 }}
                         onClick={() => selectObject('view', view.id)}
                         onDoubleClick={() => openView(view.id)}
                         onContextMenu={(e) => handleContextMenu(e, 'view', view.id, null)}
@@ -645,6 +685,31 @@ const ModelBrowser = ({ readOnly = false }: ModelBrowserProps) => {
                     <button onClick={() => handleAction('delete')} className={styles.danger}>
                         <Trash2 size={14} /> Delete
                     </button>
+                </div>
+            )}
+
+            {/* Rename Modal */}
+            {editingItem && (
+                <div className={styles.editOverlay} onClick={() => setEditingItem(null)}>
+                    <div className={styles.editDialog} onClick={(e) => e.stopPropagation()}>
+                        <input
+                            autoFocus
+                            value={editingItem.name}
+                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleRename();
+                                if (e.key === 'Escape') setEditingItem(null);
+                            }}
+                        />
+                        <div className={styles.editActions}>
+                            <button className={styles.confirm} onClick={handleRename}>
+                                <Check size={16} />
+                            </button>
+                            <button className={styles.cancel} onClick={() => setEditingItem(null)}>
+                                <X size={16} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -199,7 +199,7 @@ ArchiModeler is a production-grade Enterprise Architecture platform inspired by 
 
 ## 👁️ Phase 7: "Horizzon" Portal - Collaborative Consumption (IN PROGRESS)
 *Objective: Democratize architecture access for non-expert users.*
-- [ ] **Read-only Web Portal**: Streamlined interface for stakeholders (Consumers).
+- [x] **Read-only Web Portal**: Streamlined interface for stakeholders (Consumers).
   *Interface simplifiée permettant à n'importe quel employé de consulter l'architecture sans risque de la modifier.*
   *Point d'entrée unique pour la "Vérité Unique" (Single Source of Truth) du système d'information.*
 - [ ] **Global Search**: OpenSearch-powered indexing of every object, property, and diagram.
