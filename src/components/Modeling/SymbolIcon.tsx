@@ -18,6 +18,8 @@ export const SymbolIcon = ({ type, textColor, size = 14, opacity = 0.8 }: Symbol
         'access': 'acces',
         'and-junction': 'and-junction',
         'or-junction': 'or-junction',
+        'junction': 'and-junction',
+        'value-stream': 'business-process',
     };
 
     const fileName = fileNameMap[type] || type;

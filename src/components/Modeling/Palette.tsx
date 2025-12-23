@@ -100,7 +100,8 @@ const Palette = () => {
                                                     type={item.id}
                                                     bgColor={item.color}
                                                     textColor={textStyle.color}
-                                                    hideDecorator={true}
+                                                    hideDecorator={false}
+                                                    decoratorSize={72}
                                                 />
                                             </div>
                                             <span style={{

@@ -60,16 +60,6 @@ export async function deleteModelPackage(packageId: string) {
     revalidatePath('/modeler');
 }
 
-export async function deleteViewFromDB(viewId: string) {
-    try {
-        await prisma.archiView.delete({ where: { id: viewId } });
-        revalidatePath('/modeler');
-    } catch (error) {
-        console.error(`Failed to delete view ${viewId}:`, error);
-        throw error;
-    }
-}
-
 export async function loadPackageData(packageId: string) {
     const pkg = await prisma.modelPackage.findUnique({
         where: { id: packageId },
@@ -105,9 +95,7 @@ export async function loadPackageData(packageId: string) {
             name: v.name,
             nodes: (layout?.nodes || []) as unknown[],
             edges: (layout?.edges || []) as unknown[],
-            folderId: v.folderId || undefined,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            viewSettings: ((v as any).viewSettings) || undefined
+            folderId: v.folderId || undefined
         };
     });
 
@@ -152,7 +140,6 @@ export async function saveRepositoryState(
         createdAt?: Date;
         modifiedAt?: Date;
         author?: string;
-        viewSettings?: Record<string, unknown>;
     }[],
     elements: {
         id: string;
@@ -161,7 +148,7 @@ export async function saveRepositoryState(
         folderId: string | null;
         description?: string;
         documentation?: string;
-        properties?: Record<string, unknown>;
+        properties?: Record<string, string>;
         createdAt?: Date;
         modifiedAt?: Date;
         author?: string;
@@ -175,7 +162,6 @@ export async function saveRepositoryState(
         name?: string;
         description?: string;
         documentation?: string;
-        properties?: Record<string, unknown>;
         createdAt?: Date;
         modifiedAt?: Date;
         author?: string;
@@ -191,34 +177,7 @@ export async function saveRepositoryState(
             create: { id: packageId, name: 'Default Project' }
         });
 
-        // 2. Prepare IDs for orphan deletion
-        const folderIds = folders.map(f => f.id);
-        const elementIds = elements.map(e => e.id);
-        const relationIds = relations.map(r => r.id);
-        const viewIds = views.map(v => v.id);
-
-        // 3. Delete orphans in correct order to respect foreign key constraints
-        // Delete views first (no dependents)
-        await tx.archiView.deleteMany({
-            where: { packageId, id: { notIn: viewIds } }
-        });
-
-        // Delete relations (depend on elements and folders)
-        await tx.archiRelation.deleteMany({
-            where: { packageId, id: { notIn: relationIds } }
-        });
-
-        // Delete elements (depend on folders, but relations depend on them)
-        await tx.archiElement.deleteMany({
-            where: { packageId, id: { notIn: elementIds } }
-        });
-
-        // Delete folders (self-referencing and parents of elements/relations/views)
-        await tx.folder.deleteMany({
-            where: { packageId, id: { notIn: folderIds } }
-        });
-
-        // 4. Sync Folders (Upsert)
+        // 2. Sync Folders
         for (const f of folders) {
             await tx.folder.upsert({
                 where: { id: f.id },
@@ -227,7 +186,7 @@ export async function saveRepositoryState(
             });
         }
 
-        // 5. Sync Elements (Upsert)
+        // 3. Sync Elements
         for (const e of elements) {
             await tx.archiElement.upsert({
                 where: { id: e.id },
@@ -256,7 +215,7 @@ export async function saveRepositoryState(
             });
         }
 
-        // 6. Sync Relations (Upsert)
+        // 4. Sync Relations
         for (const r of relations) {
             await tx.archiRelation.upsert({
                 where: { id: r.id },
@@ -285,7 +244,7 @@ export async function saveRepositoryState(
             });
         }
 
-        // 7. Sync Views (Upsert)
+        // 5. Sync Views
         for (const v of views) {
             await tx.archiView.upsert({
                 where: { id: v.id },
@@ -295,9 +254,8 @@ export async function saveRepositoryState(
                     folderId: v.folderId,
                     description: v.description,
                     documentation: v.documentation,
-                    modifiedAt: v.modifiedAt || new Date(),
-                    viewSettings: (v.viewSettings || Prisma.DbNull) as Prisma.InputJsonValue
-                } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                    modifiedAt: v.modifiedAt || new Date()
+                },
                 create: {
                     id: v.id,
                     name: v.name,
@@ -308,16 +266,13 @@ export async function saveRepositoryState(
                     documentation: v.documentation,
                     createdAt: v.createdAt || new Date(),
                     modifiedAt: v.modifiedAt || new Date(),
-                    author: v.author,
-                    viewSettings: (v.viewSettings || Prisma.DbNull) as Prisma.InputJsonValue
-                } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+                    author: v.author
+                }
             });
         }
-    }, {
-        maxWait: 20000,
-        timeout: 60000
     });
 
     revalidatePath('/modeler');
     console.log(`✅ Transactional save complete for ${packageId}`);
 }
+

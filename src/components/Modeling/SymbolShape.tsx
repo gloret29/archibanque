@@ -9,9 +9,10 @@ interface SymbolShapeProps {
     width?: number | string;
     height?: number | string;
     hideDecorator?: boolean;
+    decoratorSize?: number;
 }
 
-export const SymbolShape = ({ type, bgColor, textColor, hideDecorator }: SymbolShapeProps) => {
+export const SymbolShape = ({ type, bgColor, textColor, hideDecorator, decoratorSize = 16 }: SymbolShapeProps) => {
     const [parts, setParts] = useState<{ bg: string, decorator: string | null, viewBox: string } | null>(null);
 
     useEffect(() => {
@@ -22,11 +23,17 @@ export const SymbolShape = ({ type, bgColor, textColor, hideDecorator }: SymbolS
                     'access': 'acces',
                     'and-junction': 'and-junction',
                     'or-junction': 'or-junction',
+                    'junction': 'and-junction',
+                    'value-stream': 'business-process', // Fallback for missing value-stream symbol
                 };
 
                 const fileName = fileNameMap[type] || type;
                 const response = await fetch(`/symbols/archimate/${fileName}.svg`);
-                if (!response.ok) throw new Error('Not found');
+                if (!response.ok) {
+                    console.warn(`ArchiMate symbol not found: ${type} (tried ${fileName}.svg)`);
+                    setParts(null);
+                    return;
+                }
                 const text = await response.text();
 
                 const parser = new DOMParser();
@@ -139,10 +146,10 @@ export const SymbolShape = ({ type, bgColor, textColor, hideDecorator }: SymbolS
             {parts.decorator && !hideDecorator && (
                 <div style={{
                     position: 'absolute',
-                    top: '6px',
-                    right: '6px',
-                    width: '64px',
-                    height: '40px',
+                    top: '4px',
+                    right: '4px',
+                    width: `${decoratorSize * 1.6}px`,
+                    height: `${decoratorSize}px`,
                     zIndex: 1
                 }}>
                     <svg

@@ -17,17 +17,11 @@ const UserMenuWrapper = dynamic(() => import('@/components/UI/UserMenuWrapper').
 import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { useInitializeFromDB } from '@/hooks/useInitializeFromDB';
 import { CloudCheck, CloudUpload, Loader2 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ModelerPage() {
     const [mounted, setMounted] = useState(false);
     const [paletteHeight, setPaletteHeight] = useState(280);
-    const { t } = useLanguage();
-
-    // Initialize data from DB (settings and dataBlocks)
-    useInitializeFromDB();
 
     // Initialize Auto-save
     const { isSaving } = useAutoSave(2000);
@@ -93,16 +87,19 @@ export default function ModelerPage() {
                         {isSaving ? (
                             <>
                                 <Loader2 size={16} className="animate-spin" />
-                                <span>{t('modeler.status.saving')}</span>
+                                <span>Saving...</span>
                             </>
                         ) : (
                             <>
                                 <CloudCheck size={18} />
-                                <span>{t('modeler.status.saved')}</span>
+                                <span>Saved</span>
                             </>
                         )}
                     </div>
-                    <UserMenuWrapper />
+                    <div className={styles.userProfile}>
+                        <span style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>Expert Mode</span>
+                        <UserMenuWrapper />
+                    </div>
                 </div>
             </header>
 
@@ -118,7 +115,7 @@ export default function ModelerPage() {
                     style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
                 >
                     {/* Model Browser - Top section (flexible) */}
-                    <div style={{ flex: 1, minHeight: '150px', display: 'flex', flexDirection: 'column', overflow: 'hidden', borderBottom: '1px solid var(--border)', transition: 'border-color 0.2s' }}>
+                    <div style={{ flex: 1, minHeight: '150px', display: 'flex', flexDirection: 'column', overflow: 'hidden', borderBottom: '1px solid #e0e0e0' }}>
                         <ModelBrowser />
                     </div>
 
@@ -129,21 +126,21 @@ export default function ModelerPage() {
                         minSize={150}
                         maxSize={500}
                         handlePosition="start"
-                        style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--background)', transition: 'background-color 0.2s' }}
+                        style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
                     >
-                        <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', background: 'var(--background)', transition: 'border-color 0.2s, background-color 0.2s' }}>
-                            <h3 style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', color: 'var(--foreground)', opacity: 0.7, letterSpacing: '0.05em', fontWeight: 600, transition: 'color 0.2s' }}>
+                        <div style={{ padding: '8px 12px', borderBottom: '1px solid #eee', background: '#f8f9fa' }}>
+                            <h3 style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em', fontWeight: 600 }}>
                                 ArchiMate Palette
                             </h3>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', background: 'var(--background)', transition: 'background-color 0.2s' }}>
+                        <div style={{ flex: 1, overflowY: 'auto' }}>
                             <Palette />
                         </div>
                     </ResizablePanel>
                 </ResizablePanel>
 
                 {/* Main Content Area */}
-                <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: 'var(--background)', minWidth: 0, transition: 'background-color 0.2s' }}>
+                <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#fff', minWidth: 0 }}>
                     <ModelerTabs />
 
                     <div style={{ flex: 1, position: 'relative' }}>
@@ -156,14 +153,12 @@ export default function ModelerPage() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 height: '100%',
-                                background: 'var(--background)',
-                                color: 'var(--foreground)',
-                                opacity: 0.7,
-                                transition: 'background-color 0.2s, color 0.2s'
+                                background: '#f8f9fa',
+                                color: '#888'
                             }}>
                                 <span style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>📐</span>
                                 <p style={{ fontSize: '16px', margin: 0, fontWeight: 500 }}>Ouvrir une vue</p>
-                                <p style={{ fontSize: '13px', margin: '8px 0 0', opacity: 0.6 }}>
+                                <p style={{ fontSize: '13px', margin: '8px 0 0', color: '#aaa' }}>
                                     Double-cliquez sur une vue dans le Model Browser
                                 </p>
                             </div>
@@ -173,16 +168,14 @@ export default function ModelerPage() {
                     {/* Status Bar */}
                     <footer style={{
                         height: '28px',
-                        background: 'var(--background)',
-                        borderTop: '1px solid var(--border)',
+                        background: '#f7f7f7',
+                        borderTop: '1px solid #e0e0e0',
                         display: 'flex',
                         alignItems: 'center',
                         padding: '0 15px',
                         fontSize: '11px',
-                        color: 'var(--foreground)',
-                        opacity: 0.7,
-                        gap: '20px',
-                        transition: 'background-color 0.2s, border-color 0.2s, color 0.2s'
+                        color: '#666',
+                        gap: '20px'
                     }}>
                         <span>Working Copy: <strong>{currentPackage?.name || 'No Package'}</strong></span>
                         <span>Elements: {activeView?.nodes.length || 0}</span>

@@ -88,6 +88,7 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 textColor={textColor}
                 width="100%"
                 height="100%"
+                decoratorSize={40}
             />
 
             {/* Selection Highlight - Follows the rectangular bounds of the node */}
@@ -106,15 +107,19 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 }} />
             )}
 
-            {/* Hidden Handles - Source and Target on each side for connectivity */}
-            <Handle type="target" position={Position.Top} id="top-t" style={{ opacity: 0 }} />
-            <Handle type="source" position={Position.Top} id="top-s" style={{ opacity: 0 }} />
-            <Handle type="target" position={Position.Bottom} id="bot-t" style={{ opacity: 0 }} />
-            <Handle type="source" position={Position.Bottom} id="bot-s" style={{ opacity: 0 }} />
-            <Handle type="target" position={Position.Left} id="left-t" style={{ opacity: 0 }} />
-            <Handle type="source" position={Position.Left} id="left-s" style={{ opacity: 0 }} />
-            <Handle type="target" position={Position.Right} id="right-t" style={{ opacity: 0 }} />
-            <Handle type="source" position={Position.Right} id="right-s" style={{ opacity: 0 }} />
+            {/* Single central handle for floating edges */}
+            <Handle
+                type="target"
+                position={Position.Top}
+                id="target"
+                style={{ top: '50%', left: '50%', opacity: 0, pointerEvents: 'auto', width: '100%', height: '100%', borderRadius: 0 }}
+            />
+            <Handle
+                type="source"
+                position={Position.Top}
+                id="source"
+                style={{ top: '50%', left: '50%', opacity: 0, pointerEvents: 'auto', width: '100%', height: '100%', borderRadius: 0 }}
+            />
 
             {/* Label area - Overlaid on the SVG shape */}
             <div style={{

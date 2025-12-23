@@ -1,8 +1,6 @@
 .palette {
     padding: 10px 0;
     user-select: none;
-    background: var(--background);
-    transition: background-color 0.2s;
 }
 
 .layerSection {
@@ -12,14 +10,12 @@
 .layerTitle {
     font-size: 11px;
     text-transform: uppercase;
-    color: var(--foreground, #888);
-    opacity: 0.7;
+    color: #888;
     margin: 0 0 10px 0;
     padding-bottom: 4px;
-    border-bottom: 1px solid var(--border, #f0f0f0);
+    border-bottom: 1px solid #f0f0f0;
     letter-spacing: 0.05em;
     font-weight: 700;
-    transition: color 0.2s, border-color 0.2s;
 }
 
 .elementList {
@@ -30,14 +26,15 @@
 
 .paletteItem {
     padding: 8px 6px;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     font-size: 11px;
     text-align: center;
     cursor: grab;
-    transition: all 0.2s, border-color 0.2s;
-    font-weight: 600;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    font-weight: 500;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,6 +48,6 @@
 }
 
 .paletteItem:hover {
-    border-color: var(--primary, #3366ff);
+    border-color: #3366ff;
     box-shadow: 0 2px 4px rgba(51, 102, 255, 0.15);
 }

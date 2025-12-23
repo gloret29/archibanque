@@ -15,11 +15,12 @@ import {
 // Temporarily disabled due to SSR hydration issues with React 19
 // import { temporal } from 'zundo';
 import { RelationshipType, getDerivedRelationship, ARCHIMATE_METAMODEL } from '@/lib/metamodel';
-import { saveRepositoryState, deleteViewFromDB } from '@/actions/repository';
+import { saveRepositoryState } from '@/actions/repository';
 import { loadDataBlocks } from '@/actions/datablocks';
 
 export interface ArchimateView {
     id: string;
+    packageId?: string;
     name: string;
     nodes: Node[];
     edges: Edge[];
@@ -29,37 +30,15 @@ export interface ArchimateView {
     createdAt?: Date;
     modifiedAt?: Date;
     author?: string;
-    packageId?: string;
-    viewSettings?: {
-        colorRules?: {
-            id: string;
-            blockId?: string; // If using DataBlock
-            attributeKey?: string; // If using DataBlock
-            propertyKey?: string; // If using standard property
-            operator: 'equals' | 'contains' | 'greaterThan' | 'lessThan';
-            value: string;
-            color: string;
-            active: boolean;
-        }[];
-        labelRules?: {
-            id: string;
-            blockId?: string;
-            attributeKey?: string;
-            propertyKey?: string;
-            position: 'replace' | 'append' | 'prepend' | 'bottom'; // Where to show the value
-            prefix?: string; // e.g. "ROI: "
-            suffix?: string; // e.g. "%"
-            active: boolean;
-        }[];
-    };
+    viewSettings?: any;
 }
 
 export interface ArchimateFolder {
     id: string;
+    packageId?: string;
     name: string;
     parentId: string | null;
     type: 'folder' | 'view-folder' | 'element-folder';
-    packageId?: string;
 }
 
 export interface ModelPackage {
@@ -73,13 +52,13 @@ export interface ModelPackage {
 // Repository element - exists independently of views
 export interface ModelElement {
     id: string;
+    packageId?: string;
     name: string;
     type: string;
     folderId: string | null;
-    packageId?: string;
     description?: string; // RW - Short description
     documentation?: string; // RW - Detailed documentation
-    properties?: Record<string, unknown>; // JSON object for storing custom properties including DataBlocks
+    properties?: Record<string, string>;
     // Read-only metadata (system-generated)
     createdAt?: Date; // RO - Creation timestamp
     modifiedAt?: Date; // RO - Last modification timestamp
@@ -88,21 +67,20 @@ export interface ModelElement {
 
 export interface ModelRelation {
     id: string;
+    packageId?: string;
     type: string;
     name: string;
     sourceId: string;
     targetId: string;
     folderId: string | null;
-    packageId?: string;
     description?: string;
     documentation?: string;
-    properties?: Record<string, unknown>; // JSON object for storing custom properties including DataBlocks
     createdAt?: Date;
     modifiedAt?: Date;
     author?: string;
 }
 
-export type AttributeType = 'string' | 'number' | 'date' | 'enum' | 'boolean';
+export type AttributeType = 'string' | 'number' | 'date' | 'enum';
 
 export interface DataBlockAttribute {
     id: string;
@@ -163,7 +141,7 @@ interface EditorState {
     moveView: (viewId: string, folderId: string | null) => void;
     updateViewDescription: (viewId: string, description: string) => void;
     updateViewDocumentation: (viewId: string, documentation: string) => void;
-    updateViewSettings: (viewId: string, settings: Record<string, unknown>) => void;
+    updateViewSettings: (viewId: string, settings: any) => void;
     addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => void;
     deleteFolder: (folderId: string) => void;
     renameFolder: (folderId: string, name: string) => void;
@@ -174,7 +152,7 @@ interface EditorState {
     deleteElement: (elementId: string) => void;
     renameElement: (elementId: string, name: string) => void;
     moveElement: (elementId: string, folderId: string | null) => void;
-    updateElementProperties: (elementId: string, properties: Record<string, unknown>) => void;
+    updateElementProperties: (elementId: string, properties: Record<string, string>) => void;
     updateElementDescription: (elementId: string, description: string) => void;
     updateElementDocumentation: (elementId: string, documentation: string) => void;
 
@@ -183,7 +161,6 @@ interface EditorState {
     deleteRelation: (relationId: string) => void;
     renameRelation: (relationId: string, name: string) => void;
     moveRelation: (relationId: string, folderId: string | null) => void;
-    updateRelationProperties: (relationId: string, properties: Record<string, unknown>) => void;
     updateRelationDescription: (relationId: string, description: string) => void;
     updateRelationDocumentation: (relationId: string, documentation: string) => void;
 
@@ -212,7 +189,7 @@ interface EditorState {
     deleteEdge: (edgeId: string) => void;
     inferRelations: () => void;
     updateNodeParent: (nodeId: string, parentId: string | null, position?: { x: number, y: number }) => void;
-    updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
+    updateNodePosition: (nodeId: string, position: { x: number, y: number }) => void;
     saveToServer: () => Promise<void>;
 
     // Load from server
@@ -313,7 +290,35 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     // Persistence actions for loading from database
-    // Note: loadSettingsFromDB and loadDataBlocksFromDB are defined later in the store
+    loadSettingsFromDB: async () => {
+        try {
+            const res = await fetch('/api/settings');
+            if (res.ok) {
+                const settings = await res.json();
+                set({
+                    enabledElementTypes: settings.enabledElementTypes,
+                    settingsLoaded: true
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load settings from DB:', error);
+        }
+    },
+
+    loadDataBlocksFromDB: async () => {
+        try {
+            const res = await fetch('/api/datablocks');
+            if (res.ok) {
+                const blocks = await res.json();
+                set({
+                    dataBlocks: blocks,
+                    dataBlocksLoaded: true
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load data blocks from DB:', error);
+        }
+    },
 
     setDataBlocks: (blocks: DataBlock[]) => set({ dataBlocks: blocks }),
 
@@ -332,42 +337,13 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     loadFromServer: (packageId: string, folders: ArchimateFolder[], views: ArchimateView[], elements?: ModelElement[], relations?: ModelRelation[]) => {
-        const validElements = elements || [];
-        const elementIds = new Set(validElements.map(e => e.id));
-
-        // 1. Filter out relations that point to non-existent elements
-        const validRelations = (relations || []).filter(r =>
-            elementIds.has(r.sourceId) && elementIds.has(r.targetId)
-        );
-        const relationIds = new Set(validRelations.map(r => r.id));
-
-        // 2. Clean up views (nodes and edges pointing to non-existent items)
-        const cleanedViews = views.map(v => {
-            const validNodes = v.nodes.filter(node =>
-                !node.data?.elementId || elementIds.has(node.data.elementId as string)
-            );
-            const validNodeIds = new Set(validNodes.map(n => n.id));
-
-            const validEdges = v.edges.filter(edge => {
-                const hasRelation = !edge.data?.relationId || relationIds.has(edge.data.relationId as string);
-                const hasNodes = validNodeIds.has(edge.source) && validNodeIds.has(edge.target);
-                return hasRelation && hasNodes;
-            });
-
-            return {
-                ...v,
-                nodes: validNodes,
-                edges: validEdges
-            };
-        });
-
         // Start with no tabs open - user will open views from the Model Browser
         set({
             currentPackageId: packageId,
             folders: folders.length > 0 ? folders : initialFolders,
-            views: cleanedViews,
-            elements: validElements,
-            relations: validRelations,
+            views: views, // Use provided views, can be empty
+            elements: elements || [],
+            relations: relations || [],
             openViewIds: [], // No tabs open initially
             activeViewId: null, // No view active
             selectedNode: null,
@@ -431,12 +407,6 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         const newViews = views.filter(v => v.id !== viewId);
         const newOpenViewIds = openViewIds.filter(id => id !== viewId);
 
-        // Server action: delete from DB
-        deleteViewFromDB(viewId).catch(err => {
-            console.error('Failed to delete view from DB:', err);
-            // Optionally revert state here if needed, but for now we assume success
-        });
-
         // If deleting the active view, select another open one or null
         let newActiveId: string | null = activeViewId;
         if (activeViewId === viewId) {
@@ -470,31 +440,10 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         });
     },
 
-    updateViewSettings: (viewId: string, settings: Record<string, unknown>) => {
+    updateViewSettings: (viewId: string, settings: any) => {
         set({
-            views: get().views.map(v => v.id === viewId
-                ? { ...v, viewSettings: { ...(v.viewSettings || {}), ...settings }, modifiedAt: new Date() }
-                : v
-            )
+            views: get().views.map(v => v.id === viewId ? { ...v, viewSettings: { ...v.viewSettings, ...settings }, modifiedAt: new Date() } : v)
         });
-    },
-
-    updateNodePosition: (nodeId: string, position: { x: number; y: number }) => {
-        const { views, activeViewId } = get();
-        const updatedViews = views.map(v => {
-            if (v.id === activeViewId) {
-                return {
-                    ...v,
-                    nodes: v.nodes.map(node =>
-                        node.id === nodeId
-                            ? { ...node, position }
-                            : node
-                    )
-                };
-            }
-            return v;
-        });
-        set({ views: updatedViews });
     },
 
     addFolder: (name: string, parentId: string | null, type: ArchimateFolder['type']) => {
@@ -561,30 +510,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     deleteElement: (elementId: string) => {
-        const { relations, views } = get();
-
-        // Find all relations that reference this element
-        const relationsToDelete = relations.filter(r => r.sourceId === elementId || r.targetId === elementId);
-        const relationIdsToDelete = relationsToDelete.map(r => r.id);
-
-        set({
-            elements: get().elements.filter(e => e.id !== elementId),
-            relations: relations.filter(r => !relationIdsToDelete.includes(r.id)),
-            views: views.map(v => {
-                const updatedNodes = v.nodes.filter(node => node.data?.elementId !== elementId);
-                const updatedNodeIds = new Set(updatedNodes.map(n => n.id));
-
-                return {
-                    ...v,
-                    nodes: updatedNodes,
-                    edges: v.edges.filter(edge =>
-                        !relationIdsToDelete.includes(edge.data?.relationId as string) &&
-                        updatedNodeIds.has(edge.source) &&
-                        updatedNodeIds.has(edge.target)
-                    )
-                };
-            })
-        });
+        set({ elements: get().elements.filter(e => e.id !== elementId) });
     },
 
     renameElement: (elementId: string, name: string) => {
@@ -615,10 +541,10 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         });
     },
 
-    updateElementProperties: (elementId: string, properties: Record<string, unknown>) => {
+    updateElementProperties: (elementId: string, properties: Record<string, string>) => {
         set({
             elements: get().elements.map(e => e.id === elementId
-                ? { ...e, properties: { ...(e.properties || {}), ...properties }, modifiedAt: new Date() }
+                ? { ...e, properties: { ...e.properties, ...properties }, modifiedAt: new Date() }
                 : e
             )
         });
@@ -657,14 +583,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     },
 
     deleteRelation: (relationId: string) => {
-        const { views } = get();
-        set({
-            relations: get().relations.filter(r => r.id !== relationId),
-            views: views.map(v => ({
-                ...v,
-                edges: v.edges.filter(edge => edge.data?.relationId !== relationId)
-            }))
-        });
+        set({ relations: get().relations.filter(r => r.id !== relationId) });
     },
 
     renameRelation: (relationId: string, name: string) => {
@@ -682,15 +601,6 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     updateRelationDescription: (relationId: string, description: string) => {
         set({
             relations: get().relations.map(r => r.id === relationId ? { ...r, description, modifiedAt: new Date() } : r)
-        });
-    },
-
-    updateRelationProperties: (relationId: string, properties: Record<string, unknown>) => {
-        set({
-            relations: get().relations.map(r => r.id === relationId
-                ? { ...r, properties: { ...(r.properties || {}), ...properties }, modifiedAt: new Date() }
-                : r
-            )
         });
     },
 
@@ -759,46 +669,13 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         });
     },
 
-
-    loadDataBlocksFromDB: async () => {
-        const result = await loadDataBlocks();
-        if (result.success && result.data) {
-            set({ dataBlocks: result.data as DataBlock[], dataBlocksLoaded: true });
-        }
-    },
-
-    loadSettingsFromDB: async () => {
-        try {
-            const res = await fetch('/api/settings');
-            if (res.ok) {
-                const settings = await res.json();
-                set({
-                    enabledElementTypes: settings.enabledElementTypes,
-                    settingsLoaded: true
-                });
-            }
-        } catch (error) {
-            console.error('Failed to load settings from DB:', error);
-        }
-    },
-
     onNodesChange: (changes: NodeChange[]) => {
         const { views, activeViewId } = get();
         const activeView = views.find(v => v.id === activeViewId);
         if (!activeView) return;
 
         const updatedNodes = applyNodeChanges(changes, activeView.nodes);
-
-        // If some nodes were removed, we need to remove connected edges
-        const updatedNodeIds = new Set(updatedNodes.map(n => n.id));
-        const updatedEdges = activeView.edges.filter(edge =>
-            updatedNodeIds.has(edge.source) && updatedNodeIds.has(edge.target)
-        );
-
-        const updatedViews = views.map(v => v.id === activeViewId
-            ? { ...v, nodes: updatedNodes, edges: updatedEdges }
-            : v
-        );
+        const updatedViews = views.map(v => v.id === activeViewId ? { ...v, nodes: updatedNodes } : v);
 
         set(state => {
             const selected = updatedNodes.find(n => n.selected) || null;
@@ -808,9 +685,13 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
                 if (selected.data?.elementId) {
                     newSelectedObject = { type: 'element', id: selected.data.elementId as string };
                 } else {
+                    // Node not linked to an element (e.g. note), still valid selection but no repo object
                     newSelectedObject = null;
                 }
             } else if (!state.selectedEdge) {
+                // If nothing selected (and no edge selected), clear object selection?
+                // Or maybe keep it if it was a folder/view? 
+                // Let's clear it to match canvas "deselect all" behavior
                 newSelectedObject = null;
             }
 
@@ -878,6 +759,16 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     addNode: (node: Node) => {
         const { views, activeViewId } = get();
         const updatedViews = views.map(v => v.id === activeViewId ? { ...v, nodes: [...v.nodes, node] } : v);
+        set({ views: updatedViews });
+    },
+
+    updateNodePosition: (nodeId: string, position: { x: number, y: number }) => {
+        const { views, activeViewId } = get();
+        const updatedViews = views.map(v =>
+            v.id === activeViewId
+                ? { ...v, nodes: v.nodes.map(n => n.id === nodeId ? { ...n, position } : n) }
+                : v
+        );
         set({ views: updatedViews });
     },
 

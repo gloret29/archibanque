@@ -18,18 +18,7 @@ export async function loadDataBlocks() {
     }
 }
 
-export async function syncDataBlocks(blocks: Array<{
-    id: string;
-    name: string;
-    targetTypes?: string[];
-    attributes?: Array<{
-        id: string;
-        name: string;
-        key: string;
-        type: string;
-        enumValues?: string[];
-    }>;
-}>) {
+export async function syncDataBlocks(blocks: any[]) {
     try {
         await prisma.$transaction(async (tx) => {
             // 1. Get all existing IDs to handle deletions (Global Sync)
@@ -53,12 +42,12 @@ export async function syncDataBlocks(blocks: Array<{
                     where: { id: block.id },
                     update: {
                         name: block.name,
-                        targetTypes: block.targetTypes || []
+                        targetTypes: block.targetTypes
                     },
                     create: {
                         id: block.id,
                         name: block.name,
-                        targetTypes: block.targetTypes || []
+                        targetTypes: block.targetTypes
                     }
                 });
 
@@ -68,8 +57,7 @@ export async function syncDataBlocks(blocks: Array<{
                     select: { id: true }
                 });
                 const existingAttrIds = existingAttrs.map(a => a.id);
-                const attributes = block.attributes || [];
-                const incomingAttrIds = attributes.map((a) => a.id);
+                const incomingAttrIds = block.attributes.map((a: any) => a.id);
 
                 const attrsToDelete = existingAttrIds.filter(id => !incomingAttrIds.includes(id));
 
@@ -77,8 +65,8 @@ export async function syncDataBlocks(blocks: Array<{
                     await tx.dataBlockAttribute.deleteMany({ where: { id: { in: attrsToDelete } } });
                 }
 
-                for (let i = 0; i < attributes.length; i++) {
-                    const attr = attributes[i];
+                for (let i = 0; i < block.attributes.length; i++) {
+                    const attr = block.attributes[i];
                     await tx.dataBlockAttribute.upsert({
                         where: { id: attr.id },
                         update: {
