@@ -364,15 +364,15 @@ function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
                             top: '50%',
                             transform: 'translate(-50%, -50%)',
                             zIndex: 1000,
-                            background: 'white',
-                            border: '1px solid #ccc',
+                            background: 'var(--background, white)',
+                            border: '1px solid var(--border, #ccc)',
                             borderRadius: '8px',
                             padding: '15px',
                             boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                             minWidth: '180px'
                         }}
                     >
-                        <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '10px', color: '#3366ff', borderBottom: '1px solid #eee', paddingBottom: '6px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '10px', color: 'var(--primary, #3366ff)', borderBottom: '1px solid var(--border, #eee)', paddingBottom: '6px' }}>
                             SELECT RELATIONSHIP
                         </div>
                         <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
@@ -392,9 +392,9 @@ function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
                                         borderRadius: '4px',
                                         transition: 'background 0.2s',
                                         fontWeight: 500,
-                                        color: '#333'
+                                        color: 'var(--foreground, #333)'
                                     }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.background = '#edf2ff')}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--user-menu-item-hover, #edf2ff)')}
                                     onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                                 >
                                     {ARCHIMATE_RELATIONS[opt].name}
@@ -403,7 +403,17 @@ function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
                         </div>
                         <button
                             onClick={() => setConnMenu(null)}
-                            style={{ width: '100%', marginTop: '12px', fontSize: '11px', color: '#888', background: '#f5f5f5', border: '1px solid #eee', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}
+                            style={{
+                                width: '100%',
+                                marginTop: '12px',
+                                fontSize: '11px',
+                                color: 'var(--foreground-secondary, #888)',
+                                background: 'var(--header-bg, #f5f5f5)',
+                                border: '1px solid var(--border, #eee)',
+                                padding: '6px',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
                         >
                             Cancel
                         </button>
@@ -421,8 +431,8 @@ function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
                         left: contextMenu.x,
                         top: contextMenu.y,
                         zIndex: 1001,
-                        background: 'white',
-                        border: '1px solid #e0e0e0',
+                        background: 'var(--background, white)',
+                        border: '1px solid var(--border, #e0e0e0)',
                         borderRadius: '8px',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                         minWidth: '180px',
@@ -430,7 +440,7 @@ function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div style={{ fontSize: '10px', fontWeight: 600, color: '#888', padding: '6px 12px', borderBottom: '1px solid #eee', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--foreground-secondary, #888)', padding: '6px 12px', borderBottom: '1px solid var(--border, #eee)', marginBottom: '4px' }}>
                         CREATE ELEMENT
                     </div>
                     {elementsByLayer.map(group => (
@@ -444,10 +454,11 @@ function EditorCanvasInner({ readOnly = false }: EditorCanvasProps) {
                                     width: '100%',
                                     padding: '8px 12px',
                                     border: 'none',
-                                    background: selectedLayer === group.layer ? '#f5f5f5' : 'transparent',
+                                    background: selectedLayer === group.layer ? 'var(--user-menu-item-hover, #f5f5f5)' : 'transparent',
                                     fontSize: '12px',
                                     cursor: 'pointer',
                                     borderRadius: '4px',
+                                    color: 'var(--foreground)',
                                     textTransform: 'capitalize'
                                 }}
                             >

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface SymbolIconProps {
     type: string;
@@ -11,6 +12,7 @@ interface SymbolIconProps {
 
 export const SymbolIcon = ({ type, textColor, size = 14, opacity = 0.8 }: SymbolIconProps) => {
     const [hasError, setHasError] = React.useState(false);
+    const { theme } = useTheme();
 
     // Map some types to their SVG filenames if they differ
     const fileNameMap: Record<string, string> = {
@@ -39,7 +41,7 @@ export const SymbolIcon = ({ type, textColor, size = 14, opacity = 0.8 }: Symbol
                 height: `${size}px`,
                 objectFit: 'contain',
                 opacity,
-                filter: textColor === '#ffffff' ? 'invert(0)' : 'none'
+                filter: (theme === 'dark' || textColor === '#ffffff') ? 'invert(1) brightness(1.5)' : 'none'
             }}
             onError={() => setHasError(true)}
         />

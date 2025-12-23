@@ -2,8 +2,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: #fcfcfc;
+    background: var(--background, #fcfcfc);
     font-size: 12px;
+    color: var(--foreground);
 }
 
 .header {
@@ -11,15 +12,19 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
-    border-bottom: 1px solid #eee;
-    background: #f8f9fa;
+    border-bottom: 1px solid var(--border, #eee);
+    background: var(--header-bg, #f8f9fa);
+}
+
+:global([data-theme="dark"]) .header {
+    --header-bg: #18181b;
 }
 
 .title {
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    color: #666;
+    color: var(--foreground-secondary, #666);
     letter-spacing: 0.05em;
 }
 
@@ -31,7 +36,7 @@
     height: 24px;
     border: none;
     background: transparent;
-    color: #666;
+    color: var(--foreground-secondary, #666);
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.15s;
@@ -64,12 +69,21 @@
 }
 
 .treeRow:hover {
-    background: #f0f0f0;
+    background: var(--hover-bg, #f0f0f0);
+}
+
+:global([data-theme="dark"]) .treeRow:hover {
+    --hover-bg: #27272a;
 }
 
 .treeRow.active {
-    background: #e8f0fe;
-    color: #1a73e8;
+    background: var(--active-bg, #e8f0fe);
+    color: var(--active-color, #1a73e8);
+}
+
+:global([data-theme="dark"]) .treeRow.active {
+    --active-bg: #1e3a5f;
+    --active-color: #60a5fa;
 }
 
 .treeRow.dragOver {
@@ -139,13 +153,17 @@
 .contextMenu {
     position: fixed;
     z-index: 1000;
-    background: white;
-    border: 1px solid #e0e0e0;
+    background: var(--dropdown-bg, white);
+    border: 1px solid var(--border, #e0e0e0);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     min-width: 160px;
     padding: 4px;
     animation: fadeIn 0.1s ease;
+}
+
+:global([data-theme="dark"]) .contextMenu {
+    --dropdown-bg: #18181b;
 }
 
 @keyframes fadeIn {
@@ -169,7 +187,7 @@
     border: none;
     background: transparent;
     font-size: 12px;
-    color: #333;
+    color: var(--foreground, #333);
     cursor: pointer;
     border-radius: 4px;
     text-align: left;
@@ -177,7 +195,11 @@
 }
 
 .contextMenu button:hover {
-    background: #f5f5f5;
+    background: var(--hover-bg, #f5f5f5);
+}
+
+:global([data-theme="dark"]) .contextMenu button:hover {
+    --hover-bg: #27272a;
 }
 
 .contextMenu button.danger {
@@ -190,7 +212,7 @@
 
 .separator {
     height: 1px;
-    background: #eee;
+    background: var(--border, #eee);
     margin: 4px 0;
 }
 
@@ -209,9 +231,10 @@
 }
 
 .editDialog {
-    background: white;
+    background: var(--background, white);
     border-radius: 8px;
     padding: 16px;
+    border: 1px solid var(--border);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
     display: flex;
     gap: 8px;
@@ -221,15 +244,21 @@
 .editDialog input {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border, #ddd);
+    background: var(--input-bg, #fff);
+    color: var(--foreground);
     border-radius: 6px;
     font-size: 13px;
     outline: none;
     transition: border-color 0.2s;
 }
 
+:global([data-theme="dark"]) .editDialog input {
+    --input-bg: #27272a;
+}
+
 .editDialog input:focus {
-    border-color: #3366ff;
+    border-color: var(--primary, #3366ff);
 }
 
 .editActions {
@@ -270,14 +299,17 @@
 /* Submenu for element types */
 .submenu {
     position: absolute;
-    left: 100%;
-    top: 0;
-    background: white;
-    border: 1px solid #e0e0e0;
+    z-index: 1001;
+    background: var(--dropdown-bg, white);
+    border: 1px solid var(--border, #e0e0e0);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     min-width: 180px;
     padding: 4px;
+}
+
+:global([data-theme="dark"]) .submenu {
+    --dropdown-bg: #18181b;
 }
 
 .submenu button {

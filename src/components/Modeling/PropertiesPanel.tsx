@@ -141,7 +141,7 @@ const PropertiesPanel = () => {
     // Nothing selected and no active view?
     if (!repoElement && !repoView && !repoRelation && !selectedNode && !selectedEdge) {
         return (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--foreground-secondary, #888)' }}>
                 <Type size={32} style={{ opacity: 0.3, marginBottom: '12px' }} />
                 <p style={{ fontSize: '13px', margin: 0 }}>Select an element or relationship to view and edit its properties</p>
             </div>
@@ -195,8 +195,8 @@ const PropertiesPanel = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 16px',
-                    borderBottom: '1px solid #eee',
-                    background: '#f8f9fa'
+                    borderBottom: '1px solid var(--border, #eee)',
+                    background: 'var(--header-bg, #f8f9fa)'
                 }}>
                     <div>
                         <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{displayType}</h4>
@@ -222,17 +222,18 @@ const PropertiesPanel = () => {
                 </div>
 
                 {/* Tab Switcher */}
-                <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border, #eee)' }}>
                     <button
                         onClick={() => setActiveSection('properties')}
                         style={{
                             flex: 1,
                             padding: '10px',
                             border: 'none',
-                            background: activeSection === 'properties' ? '#fff' : '#f8f9fa',
-                            borderBottom: activeSection === 'properties' ? '2px solid #3366ff' : '2px solid transparent',
+                            background: activeSection === 'properties' ? 'var(--background, #fff)' : 'var(--header-bg, #f8f9fa)',
+                            borderBottom: activeSection === 'properties' ? '2px solid var(--primary, #3366ff)' : '2px solid transparent',
                             fontSize: '12px',
                             fontWeight: activeSection === 'properties' ? 600 : 400,
+                            color: 'var(--foreground)',
                             cursor: 'pointer'
                         }}
                     >
@@ -245,10 +246,11 @@ const PropertiesPanel = () => {
                                 flex: 1,
                                 padding: '10px',
                                 border: 'none',
-                                background: activeSection === 'style' ? '#fff' : '#f8f9fa',
-                                borderBottom: activeSection === 'style' ? '2px solid #3366ff' : '2px solid transparent',
+                                background: activeSection === 'style' ? 'var(--background, #fff)' : 'var(--header-bg, #f8f9fa)',
+                                borderBottom: activeSection === 'style' ? '2px solid var(--primary, #3366ff)' : '2px solid transparent',
                                 fontSize: '12px',
                                 fontWeight: activeSection === 'style' ? 600 : 400,
+                                color: 'var(--foreground)',
                                 cursor: 'pointer'
                             }}
                         >
@@ -280,7 +282,9 @@ const PropertiesPanel = () => {
                                     style={{
                                         width: '100%',
                                         padding: '8px 10px',
-                                        border: '1px solid #ddd',
+                                        border: '1px solid var(--border, #ddd)',
+                                        background: 'var(--input-bg, #fff)',
+                                        color: 'var(--foreground)',
                                         borderRadius: '6px',
                                         fontSize: '13px'
                                     }}
@@ -300,7 +304,9 @@ const PropertiesPanel = () => {
                                     style={{
                                         width: '100%',
                                         padding: '8px 10px',
-                                        border: '1px solid #ddd',
+                                        border: '1px solid var(--border, #ddd)',
+                                        background: 'var(--input-bg, #fff)',
+                                        color: 'var(--foreground)',
                                         borderRadius: '6px',
                                         fontSize: '12px',
                                         minHeight: '80px',
@@ -323,7 +329,9 @@ const PropertiesPanel = () => {
                                         style={{
                                             width: '100%',
                                             padding: '8px 10px',
-                                            border: '1px solid #ddd',
+                                            border: '1px solid var(--border, #ddd)',
+                                            background: 'var(--input-bg, #fff)',
+                                            color: 'var(--foreground)',
                                             borderRadius: '6px',
                                             fontSize: '12px',
                                             minHeight: '100px',
@@ -336,12 +344,11 @@ const PropertiesPanel = () => {
                             {/* Metadata Section (RO) - Only for Repository Objects */}
                             {repoObject && (
                                 <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #eee' }}>
-                                    <h5 style={{ fontSize: '11px', fontWeight: 600, color: '#666', marginBottom: '12px', textTransform: 'uppercase' }}>
+                                    <h5 style={{ fontSize: '11px', fontWeight: 600, color: 'var(--foreground-secondary, #666)', marginBottom: '12px', textTransform: 'uppercase' }}>
                                         Metadata (Read Only)
                                     </h5>
 
                                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 16px', fontSize: '11px' }}>
-                                        <span style={{ color: '#888' }}>ID:</span>
                                         <code style={{ fontFamily: 'monospace', color: '#444' }}>{repoObject.id}</code>
 
                                         {/* For view, type is not really stored in type field usually, or handled above */}

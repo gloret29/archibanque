@@ -51,7 +51,7 @@ export default function ArchimateEdge({
     const relationType = (data?.type as RelationshipType) || 'association';
     const meta = ARCHIMATE_RELATIONS[relationType] || ARCHIMATE_RELATIONS['association'];
 
-    const edgeColor = theme === 'dark' ? '#e4e4e7' : '#18181b';
+    const edgeColor = 'var(--foreground, #18181b)';
 
     const edgeStyle: React.CSSProperties = {
         ...style,
@@ -77,14 +77,14 @@ export default function ArchimateEdge({
                     style={{
                         position: 'absolute',
                         transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                        background: theme === 'dark' ? '#27272a' : '#fff',
-                        color: theme === 'dark' ? '#e4e4e7' : '#000',
+                        background: 'var(--background, #fff)',
+                        color: 'var(--foreground, #000)',
                         padding: '2px 5px',
                         borderRadius: '5px',
                         fontSize: '10px',
                         fontWeight: 700,
                         pointerEvents: 'all',
-                        border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ccc',
+                        border: '1px solid var(--border, #ccc)',
                     }}
                     className="nodrag nopan"
                 >

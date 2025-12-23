@@ -167,8 +167,8 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                         top: '100%',
                         left: 0,
                         marginTop: '4px',
-                        background: theme === 'dark' ? '#18181b' : 'white',
-                        border: theme === 'dark' ? '1px solid #3f3f46' : '1px solid #e0e0e0',
+                        background: 'var(--dropdown-bg, white)',
+                        border: '1px solid var(--border, #e0e0e0)',
                         borderRadius: '8px',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                         minWidth: '250px',
@@ -188,16 +188,17 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     gap: '10px',
                                     width: '100%',
                                     padding: '10px 14px',
-                                    background: pkg.id === currentPackageId ? (theme === 'dark' ? '#1e3a8a' : '#edf2ff') : 'transparent',
+                                    background: pkg.id === currentPackageId ? 'var(--user-menu-item-active, #edf2ff)' : 'transparent',
                                     border: 'none',
                                     cursor: 'pointer',
                                     fontSize: '13px',
                                     textAlign: 'left',
-                                    transition: 'background 0.2s'
+                                    transition: 'background 0.2s',
+                                    color: 'var(--foreground)'
                                 }}
                                 onMouseEnter={(e) => {
                                     if (pkg.id !== currentPackageId) {
-                                        e.currentTarget.style.background = theme === 'dark' ? '#27272a' : '#f5f5f5';
+                                        e.currentTarget.style.background = 'var(--user-menu-item-hover, #f5f5f5)';
                                     }
                                 }}
                                 onMouseLeave={(e) => {
@@ -206,13 +207,13 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     }
                                 }}
                             >
-                                <Package size={16} style={{ color: pkg.id === currentPackageId ? '#60a5fa' : (theme === 'dark' ? '#a1a1aa' : '#999') }} />
+                                <Package size={16} style={{ color: pkg.id === currentPackageId ? '#60a5fa' : 'var(--foreground-secondary, #999)' }} />
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: pkg.id === currentPackageId ? 600 : 400, color: pkg.id === currentPackageId ? '#60a5fa' : (theme === 'dark' ? '#e4e4e7' : '#333') }}>
+                                    <div style={{ fontWeight: pkg.id === currentPackageId ? 600 : 400, color: pkg.id === currentPackageId ? '#60a5fa' : 'inherit' }}>
                                         {pkg.name}
                                     </div>
                                     {pkg.description && (
-                                        <div style={{ fontSize: '11px', color: theme === 'dark' ? '#71717a' : '#888', marginTop: '2px' }}>
+                                        <div style={{ fontSize: '11px', color: 'var(--foreground-secondary, #888)', marginTop: '2px' }}>
                                             {pkg.description}
                                         </div>
                                     )}
@@ -222,7 +223,7 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                     </div>
 
                     {/* Create New button */}
-                    <div style={{ borderTop: theme === 'dark' ? '1px solid #3f3f46' : '1px solid #eee', padding: '8px' }}>
+                    <div style={{ borderTop: '1px solid var(--border, #eee)', padding: '8px' }}>
                         {!isCreateOpen ? (
                             <button
                                 onClick={() => setIsCreateOpen(true)}
@@ -232,12 +233,12 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     gap: '8px',
                                     width: '100%',
                                     padding: '8px 10px',
-                                    background: theme === 'dark' ? '#27272a' : '#f8f9fa',
-                                    border: theme === 'dark' ? '1px dashed #52525b' : '1px dashed #ccc',
+                                    background: 'var(--header-bg, #f8f9fa)',
+                                    border: '1px dashed var(--border, #ccc)',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
                                     fontSize: '12px',
-                                    color: theme === 'dark' ? '#a1a1aa' : '#666',
+                                    color: 'var(--foreground-secondary, #666)',
                                     transition: 'all 0.2s'
                                 }}
                             >
@@ -253,9 +254,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     onChange={(e) => setNewName(e.target.value)}
                                     style={{
                                         padding: '8px 10px',
-                                        border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ddd',
-                                        background: theme === 'dark' ? '#3f3f46' : '#fff',
-                                        color: theme === 'dark' ? '#e4e4e7' : '#000',
+                                        border: '1px solid var(--border, #ddd)',
+                                        background: 'var(--input-bg, #fff)',
+                                        color: 'var(--foreground)',
                                         borderRadius: '4px',
                                         fontSize: '12px'
                                     }}
@@ -268,9 +269,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                     onChange={(e) => setNewDescription(e.target.value)}
                                     style={{
                                         padding: '8px 10px',
-                                        border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ddd',
-                                        background: theme === 'dark' ? '#3f3f46' : '#fff',
-                                        color: theme === 'dark' ? '#e4e4e7' : '#000',
+                                        border: '1px solid var(--border, #ddd)',
+                                        background: 'var(--input-bg, #fff)',
+                                        color: 'var(--foreground)',
                                         borderRadius: '4px',
                                         fontSize: '12px'
                                     }}
@@ -281,9 +282,9 @@ const PackageSelector = ({ className }: PackageSelectorProps) => {
                                         style={{
                                             flex: 1,
                                             padding: '6px',
-                                            background: theme === 'dark' ? '#3f3f46' : '#f5f5f5',
-                                            border: theme === 'dark' ? '1px solid #52525b' : '1px solid #ddd',
-                                            color: theme === 'dark' ? '#e4e4e7' : '#000',
+                                            background: 'var(--header-bg, #f5f5f5)',
+                                            border: '1px solid var(--border, #ddd)',
+                                            color: 'var(--foreground)',
                                             borderRadius: '4px',
                                             fontSize: '11px',
                                             cursor: 'pointer'

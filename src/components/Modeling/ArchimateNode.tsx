@@ -36,8 +36,10 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
         return luminance > 0.5;
     };
 
-    const bgColor = nodeData.colorOverride || meta.color;
-    const textColor = isLightColor(bgColor) ? '#1a1a1a' : '#ffffff';
+    const bgColor = nodeData.colorOverride || `var(--archimate-${meta.layer})`;
+    const textColor = nodeData.colorOverride
+        ? (isLightColor(nodeData.colorOverride) ? '#1a1a1a' : '#ffffff')
+        : `var(--archimate-${meta.layer}-text)`;
     const isGroup = typeKey === 'group';
 
     // Get style properties with defaults
@@ -71,13 +73,13 @@ const ArchimateNode = ({ data, selected }: NodeProps) => {
                 handleStyle={{
                     width: '10px',
                     height: '10px',
-                    background: 'white',
-                    border: '2px solid #3366ff',
+                    background: 'var(--background, white)',
+                    border: '2px solid var(--primary, #3366ff)',
                     borderRadius: '3px'
                 }}
                 lineStyle={{
                     borderWidth: '1px',
-                    borderColor: '#3366ff'
+                    borderColor: 'var(--primary, #3366ff)'
                 }}
             />
 

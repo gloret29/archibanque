@@ -113,7 +113,7 @@ const ModelerTabs = () => {
                                     {lockStatus === 'own' ? (
                                         <Unlock size={12} style={{ color: '#22c55e' }} />
                                     ) : (
-                                        <LockOpen size={12} style={{ color: '#666' }} />
+                                        <LockOpen size={12} style={{ color: 'var(--foreground-secondary, #666)' }} />
                                     )}
                                 </button>
                             )}

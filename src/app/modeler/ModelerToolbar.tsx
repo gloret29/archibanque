@@ -74,7 +74,7 @@ const ModelerToolbar = () => {
             <div className={styles.toolbar} style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                 {renderButton(<Save size={16} />, "Save", undefined, true)}
                 {renderButton(<RefreshCw size={16} />, "Sync", undefined, true)}
-                <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
+                <div style={{ width: '1px', height: '24px', background: 'var(--border, #ddd)', margin: '0 8px' }} />
                 {renderButton(<Undo2 size={16} />, "Undo", undefined, true)}
                 {renderButton(<Redo2 size={16} />, "Redo", undefined, true)}
             </div>
@@ -92,12 +92,12 @@ const ModelerToolbar = () => {
                 () => saveToServer()
             )}
 
-            <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--border, #ddd)', margin: '0 8px' }} />
 
             {renderButton(<MousePointer2 size={16} />, "Select")}
             {renderButton(<Type size={16} />, "Label")}
 
-            <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--border, #ddd)', margin: '0 8px' }} />
 
             {renderButton(
                 <Undo2 size={16} />,
@@ -114,13 +114,13 @@ const ModelerToolbar = () => {
                 `Redo (${futureStates.length})`
             )}
 
-            <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--border, #ddd)', margin: '0 8px' }} />
 
             {renderButton(<Grid size={16} />, "Grid")}
             {renderButton(<Search size={16} />, "Find")}
             {renderButton(<GitBranch size={16} />, "Infer", () => inferRelations(), false, "Derived Relations (A->B->C => A->C)")}
 
-            <div style={{ width: '1px', height: '24px', background: '#ddd', margin: '0 8px' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--border, #ddd)', margin: '0 8px' }} />
 
             {renderButton(
                 isExporting ? <Download size={16} className="animate-spin" /> : <Download size={16} />,
