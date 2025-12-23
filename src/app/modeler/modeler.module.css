@@ -82,7 +82,7 @@
     letter-spacing: 0.05em;
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme="dark"]) .modelerContainer {
     --foreground-secondary: #a1a1aa;
 }
 
