@@ -40,6 +40,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Modeler page
     'modeler.status.saving': 'Enregistrement...',
     'modeler.status.saved': 'Enregistré',
+    'modeler.expertMode': 'Mode Expert',
     // Admin page
     'admin.title': 'Administration',
     'admin.subtitle': 'Configuration du Système',
@@ -82,6 +83,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Modeler page
     'modeler.status.saving': 'Saving...',
     'modeler.status.saved': 'Saved',
+    'modeler.expertMode': 'Expert Mode',
     // Admin page
     'admin.title': 'Administration',
     'admin.subtitle': 'System Configuration',

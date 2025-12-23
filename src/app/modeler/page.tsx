@@ -17,6 +17,7 @@ const UserMenuWrapper = dynamic(() => import('@/components/UI/UserMenuWrapper').
 import styles from './modeler.module.css';
 import { useEditorStore } from '@/store/useEditorStore';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { CloudCheck, CloudUpload, Loader2 } from 'lucide-react';
 
 export default function ModelerPage() {
@@ -25,6 +26,7 @@ export default function ModelerPage() {
 
     // Initialize Auto-save
     const { isSaving } = useAutoSave(2000);
+    const { t } = useLanguage();
 
     // Handle hydration
     useEffect(() => {
@@ -87,17 +89,17 @@ export default function ModelerPage() {
                         {isSaving ? (
                             <>
                                 <Loader2 size={16} className="animate-spin" />
-                                <span>Saving...</span>
+                                <span>{t('modeler.status.saving')}</span>
                             </>
                         ) : (
                             <>
                                 <CloudCheck size={18} />
-                                <span>Saved</span>
+                                <span>{t('modeler.status.saved')}</span>
                             </>
                         )}
                     </div>
                     <div className={styles.userProfile}>
-                        <span style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>Expert Mode</span>
+                        <span style={{ fontSize: '12px', color: 'var(--foreground-secondary, #666)', marginRight: '8px' }}>{t('modeler.expertMode')}</span>
                         <UserMenuWrapper />
                     </div>
                 </div>
